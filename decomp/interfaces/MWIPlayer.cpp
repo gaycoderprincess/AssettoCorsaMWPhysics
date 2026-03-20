@@ -16,10 +16,7 @@ public:
 
 	virtual bool CanDoGameBreaker() {
 		IVehicle *ivehicle;
-		if (pGameFlow->nRaceState != RACE_STATE_RACING || !mCOMObject->QueryInterface(&ivehicle)) {
-			return false;
-		}
-		if (pCar->nIsRagdolled) {
+		if (!mCOMObject->QueryInterface(&ivehicle)) {
 			return false;
 		}
 		float speed_mph = MPS2MPH(ivehicle->GetSpeedometer());
@@ -51,7 +48,6 @@ public:
 	}
 	virtual bool CanRechargeNOS() { return mInGameBreaker == 0; }
 	virtual void ResetGameBreaker(bool full) {
-		fOverrideTimescale = 1.0;
 		mGameBreakerCharge = full ? 1.0f : 0.0f;
 		SetGameBreaker(false);
 	}

@@ -25,15 +25,16 @@ public:
 		//pCar->vCenterOfMass[2] = cog->z;
 	}
 	virtual UMath::Vector3* GetCenterOfGravity() {
-		static UMath::Vector3 tmp;
-		tmp.x = pCar->vCenterOfMass[0];
-		tmp.y = pCar->vCenterOfMass[1];
-		tmp.z = pCar->vCenterOfMass[2];
+		static UMath::Vector3 tmp = {0,0,0};
+		// todo? i dont think this exists?
+		//tmp.x = pCar->vCenterOfMass[0];
+		//tmp.y = pCar->vCenterOfMass[1];
+		//tmp.z = pCar->vCenterOfMass[2];
 		return &tmp;
 	}
 
 	virtual bool IsInGroundContact() {
-		static UMath::Vector3 normal;
+		/*static UMath::Vector3 normal;
 		normal = {0,1,0};
 
 		auto origin = pCar->GetMatrix()->p;
@@ -46,23 +47,20 @@ public:
 		if (CheckLineOfSight(&prop, pGameFlow->pHost->pUnkForLOS, &origin, &dir, &out)) {
 			return out.fHitDistance > 2.5;
 		}
-		return false;
+		return false;*/
+		return true; // todo for jump stabilizer!
 	}
 	virtual UMath::Vector3* GetGroundNormal() {
 		static UMath::Vector3 normal;
 		normal = {0,1,0};
 
-		auto origin = pCar->GetMatrix()->p;
-		origin.y += 2;
+		UMath::Vector3 origin;
+		pCar->body->getPosition(&origin, 0.0);
 		auto dir = NyaVec3(0,-1,0);
 
-		tLineOfSightIn prop;
-		prop.fMaxDistance = 10000;
-		tLineOfSightOut out;
-		if (CheckLineOfSight(&prop, pGameFlow->pHost->pUnkForLOS, &origin, &dir, &out)) {
-			normal.x = out.vHitNormal.x;
-			normal.y = out.vHitNormal.y;
-			normal.z = out.vHitNormal.z;
+		RayCastResult result;
+		if (GetTrack()->rayCast((vec3f*)&origin, (vec3f*)&dir, &result, 10000)) {
+			normal = result.normal;
 		}
 		return &normal;
 	}
@@ -76,21 +74,26 @@ public:
 		}
 
 		UMath::Vector3 dim;
-		dim.x = std::max(std::abs(pCar->vCollisionFullMin.x), std::abs(pCar->vCollisionFullMax.x));
-		dim.y = std::max(std::abs(pCar->vCollisionFullMin.y), std::abs(pCar->vCollisionFullMax.y));
-		dim.z = std::max(std::abs(pCar->vCollisionFullMin.z), std::abs(pCar->vCollisionFullMax.z));
+		dim.x = std::max(std::abs(pCar->bounds.min.x), std::abs(pCar->bounds.max.x));
+		dim.y = std::max(std::abs(pCar->bounds.min.y), std::abs(pCar->bounds.max.y));
+		dim.z = std::max(std::abs(pCar->bounds.min.z), std::abs(pCar->bounds.max.z));
 
 		static UMath::Vector3 tmp;
-		tmp = CalculateInertiaTensor(vTensorScale, pCar->fMass, dim);
+		tmp = CalculateInertiaTensor(vTensorScale, pCar->body->getMass(), dim);
 		return &tmp;
 	}
 	virtual void Damp(float amount) {
-		UMath::Vector3& linearVel = *(UMath::Vector3*)pCar->GetVelocity();
-		UMath::Vector3& angularVel = *(UMath::Vector3*)pCar->GetAngVelocity();
+		UMath::Vector3 linearVel;
+		UMath::Vector3 angularVel;
+		pCar->body->getVelocity(&linearVel);
+		pCar->body->getAngularVelocity(&angularVel);
 
 		float scale = 1.0f - amount;
 		UMath::Scale(linearVel, scale, linearVel);
 		UMath::Scale(angularVel, scale, angularVel);
+
+		pCar->body->setVelocity(&linearVel);
+		pCar->body->setAngularVelocity(&angularVel);
 	}
 	virtual bool HasHadCollision() { return false; }
 };

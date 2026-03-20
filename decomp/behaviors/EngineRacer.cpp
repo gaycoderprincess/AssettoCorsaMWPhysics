@@ -86,7 +86,7 @@ void EngineRacer::OnBehaviorChange() {
 
 void EngineRacer::Sabotage(float time) {
 	if ((mSabotage <= 0.0f) && (time > FLOAT_EPSILON) && !IsBlown()) {
-		mSabotage = Sim::GetTime() + time;
+		mSabotage = SimSystem::GetTime() + time;
 	}
 }
 
@@ -697,21 +697,21 @@ static const float Tweak_EngineDamageFrequency = 12.0f;
 static const float Tweak_EngineDamageAmplitude = 0.5f;
 static const float Tweak_EngineCounterClutch = 0.0f;
 
-int nNOSState = 0;
 void EngineRacer::OnTaskSimulate(float dT) {
 	IInput *iinput = mIInput;
 	if (iinput == NULL || mSuspension == NULL) {
 		return;
 	}
 
-	if (nLastRaceState > pGameFlow->nRaceState) {
-		ChargeNOS(1.0);
-		if (auto ply = GetOwner()->GetPlayer()) {
-			ply->ResetGameBreaker(true);
-		}
-		Reset();
-	}
-	nLastRaceState = pGameFlow->nRaceState;
+	// todo?
+	//if (nLastRaceState > pGameFlow->nRaceState) {
+	//	ChargeNOS(1.0);
+	//	if (auto ply = GetOwner()->GetPlayer()) {
+	//		ply->ResetGameBreaker(true);
+	//	}
+	//	Reset();
+	//}
+	//nLastRaceState = pGameFlow->nRaceState;
 
 	if (mSuspension->GetNumWheels() != 4) {
 		return;
@@ -724,10 +724,6 @@ void EngineRacer::OnTaskSimulate(float dT) {
 	DoECU();
 	DoInduction(tunings, dT);
 	DoShifting(dT);
-
-	if (GetVehicle()->GetDriverClass() == DRIVER_HUMAN) {
-		nNOSState = iinput->GetControlNOS();
-	}
 
 	float max_rpm = UseRevLimiter() ? mMWInfo->RED_LINE : mMWInfo->MAX_RPM;
 	float max_w = RPM2RPS(max_rpm);
@@ -890,7 +886,7 @@ void EngineRacer::OnTaskSimulate(float dT) {
 
 	// used for when the player's car breaks down in the prologue
 	if (mSabotage > 0.f) {
-		float count_down = mSabotage - Sim::GetTime();
+		float count_down = mSabotage - SimSystem::GetTime();
 		if (count_down <= 0.f) {
 			mSabotage = 0.f;
 			Blow();

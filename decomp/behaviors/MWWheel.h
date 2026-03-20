@@ -51,7 +51,7 @@ public:
 	}
 
 	void UpdateSurface(int surface);
-	bool InitPosition(ICollisionBody* cb, IRigidBody *rb, double maxcompression);
+	bool InitPosition(ICollisionBody* cb, IRigidBodyMW *rb, double maxcompression);
 	bool UpdatePosition(const UMath::Vector3 &body_av, const UMath::Vector3 &body_lv,
 							   const UMath::Matrix4 &body_matrix, const UMath::Vector3 &cog,
 							   float dT, float wheel_radius, bool usecache, float vehicle_height);

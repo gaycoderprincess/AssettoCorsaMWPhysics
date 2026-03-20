@@ -2,7 +2,7 @@ void WheelMW::UpdateSurface(int surface) {
 	mSurface = surface;
 }
 
-bool WheelMW::InitPosition(ICollisionBody* cb, IRigidBody *rb, double maxcompression) {
+bool WheelMW::InitPosition(ICollisionBody* cb, IRigidBodyMW *rb, double maxcompression) {
 	WHEEL_FUNCTION_LOG("Wheel::InitPosition");
 	UMath::Matrix4 mat;
 	rb->GetMatrix4(&mat);

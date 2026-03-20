@@ -405,7 +405,7 @@ void SuspensionRacerMW::CreateTires() {
 	float fWheelY = -0.05;
 
 	for (int i = 0; i < 4; i++) {
-		UMath::Vector3 v = pCar->aTires[i].GetMatrix()->p;
+		UMath::Vector3 v = pCar->tyres[i].localWheelRotation.p; // todo is this correct?
 		v.y = fWheelY;
 		GetWheel(i).SetLocalArm(v);
 	}
@@ -462,10 +462,11 @@ void SuspensionRacerMW::OnTaskSimulate(float dT) {
 		return;
 	}
 
-	if (nLastRaceState > pGameFlow->nRaceState) {
-		Reset();
-	}
-	nLastRaceState = pGameFlow->nRaceState;
+	// todo?
+	//if (nLastRaceState > pGameFlow->nRaceState) {
+	//	Reset();
+	//}
+	//nLastRaceState = pGameFlow->nRaceState;
 
 	float ride_extra = 0.0f;
 	const Physics::Tunings *tunings = GetVehicleMWTunings(GetVehicle());
@@ -531,7 +532,7 @@ void SuspensionRacerMW::OnTaskSimulate(float dT) {
 
 	DoTireHeat(state);
 	DoAerobatics(state);
-	//DoSleep(state); // this is broken in flatout
+	DoSleep(state); // this is broken in flatout
 	ChassisMW::OnTaskSimulate(dT);
 }
 
@@ -630,7 +631,7 @@ float SuspensionRacerMW::DoHumanSteering(State &state) {
 		newsteer = UMath::Lerp(newsteer, state.steer_input * Tweak_GameBreakerMaxSteer, mGameBreaker);
 	}
 
-	mSteering.InputAverage.Record(mSteering.LastInput, Sim::GetTime());
+	mSteering.InputAverage.Record(mSteering.LastInput, SimSystem::GetTime());
 	return DEG2ANGLE(newsteer);
 }
 
@@ -693,7 +694,7 @@ float SuspensionRacerMW::CalculateSteeringSpeed(State &state) {
 	// using a keyboard will always give you the fastest steering possible
 	float steer_input_speed = (state.steer_input - mSteering.LastInput) / state.time;
 
-	mSteering.InputSpeedCoeffAverage.Record(SteeringInputSpeedCoeffTable.GetValue(std::abs(steer_input_speed)), Sim::GetTime());
+	mSteering.InputSpeedCoeffAverage.Record(SteeringInputSpeedCoeffTable.GetValue(std::abs(steer_input_speed)), SimSystem::GetTime());
 
 	// steering speed scales with vehicle forward speed
 	float steer_speed = 180.0f;
@@ -726,8 +727,8 @@ void SuspensionRacerMW::DoSteering(State &state, UMath::Vector3 &right, UMath::V
 	}
 
 	ComputeAckerman(truesteer, state, &l4, &r4);
-	right = Vector4To3(r4);
-	left = Vector4To3(l4);
+	right = UMath::Vector4To3(r4);
+	left = UMath::Vector4To3(l4);
 	mSteering.Wheels[0] = l4.w;
 	mSteering.Wheels[1] = r4.w;
 	DoWallSteer(state);
@@ -1248,7 +1249,7 @@ void SuspensionRacerMW::DoWheelForces(State &state) {
 		ride_extra = tunings->Value[Physics::Tunings::RIDEHEIGHT];
 	}
 
-	float time = Sim::GetTime();
+	float time = SimSystem::GetTime();
 	float shock_specs[2];
 	float spring_specs[2];
 	float sway_specs[2];

@@ -6,24 +6,14 @@ public:
 
 	Car* pCar;
 
-	virtual float GetControlGas() { return pCar->fGasPedal; }
-	virtual float GetControlBrake() { return pCar->fBrakePedal; }
-	virtual float GetControlHandBrake() { return pCar->fHandbrake; }
-	virtual float GetControlSteering() {
-		if (pCar->pPlayer->nPlayerType == PLAYERTYPE_AI || pGameFlow->nRaceState > RACE_STATE_RACING) return pCar->fSteerAngle;
-
-		auto ply = pCar->pPlayer;
-		if (ply->nIsUsingKeyboard) {
-			float steeringInput = 0;
-			if (ply->nSteeringKeyboardLeft) steeringInput = -1;
-			if (ply->nSteeringKeyboardRight) steeringInput += 1;
-			return steeringInput;
-		}
-		else {
-			auto xinput = (XInputController*)ply->pController;
-			return xinput->fLeftStickX;
-		}
+	virtual float GetControlGas() { return pCar->controls.gas; }
+	virtual float GetControlBrake() { return pCar->controls.brake; }
+	virtual float GetControlHandBrake() { return pCar->controls.handBrake; }
+	virtual float GetControlSteering() { return pCar->controls.steer; }
+	virtual bool GetControlNOS() {
+		// todo!
+		//return pCar->fNitroButton > 0.0;
+		return false;
 	}
-	virtual bool GetControlNOS() { return pCar->fNitroButton > 0.0; }
 	virtual bool IsAutomaticShift() { return true; }
 };

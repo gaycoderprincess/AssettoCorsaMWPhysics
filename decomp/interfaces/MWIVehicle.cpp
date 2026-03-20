@@ -17,12 +17,15 @@ public:
 	virtual int GetDriverClass() { return DRIVER_HUMAN; }
 	virtual float GetSpeedometer() { return mCOMObject->Find<ITransmission>()->GetSpeedometer(); }
 	virtual float GetSpeed() { // this is so weird and useless
-		UMath::Vector3 vel = *pCar->GetVelocity();
+		UMath::Vector3 vel;
+		pCar->body->getVelocity(&vel);
 		ConvertWorldToLocal(pCar, vel, false);
 		return vel.z >= 0.0 ? GetAbsoluteSpeed() : -GetAbsoluteSpeed();
 	}
 	virtual float GetAbsoluteSpeed() {
-		return pCar->GetVelocity()->length();
+		UMath::Vector3 vel;
+		pCar->body->getVelocity(&vel);
+		return vel.length();
 	}
 	virtual bool IsStaging() { return false; } // todo!
 	virtual float GetPerfectLaunch() { return mPerfectLaunch.Time > 0.0 ? mPerfectLaunch.Amount : 0.0; }
