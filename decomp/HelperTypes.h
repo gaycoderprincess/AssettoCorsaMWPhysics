@@ -339,7 +339,7 @@ public:
 			dest->z = result.normal.z;
 			dest->w = -(dist - fYOffset); // todo is this correct?
 			fSurface = result.surfaceDef->collisionCategory;
-			WriteLog(std::format("hit dist {:.2f} pos {:.2f} {:.2f} {:.2f} normal {:.2f} {:.2f} {:.2f}", dist, result.pos.x, result.pos.y, result.pos.z, dest->x, dest->y, dest->z).c_str());
+			//WriteLog(std::format("hit dist {:.2f} pos {:.2f} {:.2f} {:.2f} normal {:.2f} {:.2f} {:.2f}", dist, result.pos.x, result.pos.y, result.pos.z, dest->x, dest->y, dest->z).c_str());
 			return true;
 		}
 		return false;

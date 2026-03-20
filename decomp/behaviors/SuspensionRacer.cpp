@@ -395,6 +395,7 @@ void SuspensionRacerMW::CreateTires() {
 	}
 	UMath::Vector3 dimension;
 	mRB->GetDimension(&dimension);
+	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
 	float wheelbase = mMWAttributes->WHEEL_BASE;
 	float axle_width_f = mMWAttributes->TRACK_WIDTH.At(0) - mMWAttributes->SECTION_WIDTH.At(0) * 0.001f;
@@ -404,13 +405,16 @@ void SuspensionRacerMW::CreateTires() {
 	//float fWheelY = -dimension.y;
 	float fWheelY = -0.05;
 
-	for (int i = 0; i < 4; i++) {
-		UMath::Vector3 v = pCar->tyres[i].localWheelRotation.p; // todo is this correct?
-		v.y = fWheelY;
-		GetWheel(i).SetLocalArm(v);
-	}
+	// todo get wheel pos from the actual game
+	//for (int i = 0; i < 4; i++) {
+	//	UMath::Vector3 v = pCar->tyres[i].localWheelRotation.p;
+	//	WriteLog(std::format("tire {} initial pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z).c_str());
+	//	v.y = fWheelY;
+	//	WriteLog(std::format("tire {} y-corrected pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z).c_str());
+	//	GetWheel(i).SetLocalArm(v);
+	//}
 
-	/*
+
 	UMath::Vector3 fl(-axle_width_f * 0.5f, fWheelY, front_axle);
 	UMath::Vector3 fr(axle_width_f * 0.5f, fWheelY, front_axle);
 	UMath::Vector3 rl(-axle_width_r * 0.5f, fWheelY, front_axle - wheelbase);
@@ -419,7 +423,7 @@ void SuspensionRacerMW::CreateTires() {
 	GetWheel(0).SetLocalArm(fl);
 	GetWheel(1).SetLocalArm(fr);
 	GetWheel(2).SetLocalArm(rl);
-	GetWheel(3).SetLocalArm(rr);*/
+	GetWheel(3).SetLocalArm(rr);
 }
 
 void SuspensionRacerMW::OnBehaviorChange() {
@@ -1407,6 +1411,8 @@ void SuspensionRacerMW::DoWheelForces(State &state) {
 		}
 		UMath::ScaleAdd(UMath::Vector4To3(state.matrix.y), counter_yaw - yaw, total_torque, total_torque);
 		mRB->Resolve(&total_force, &total_torque);
+		WriteLog(std::format("total_force {:.2f} {:.2f} {:.2f}", total_force.x, total_force.y, total_force.z).c_str());
+		WriteLog(std::format("total_torque {:.2f} {:.2f} {:.2f}", total_torque.x, total_torque.y, total_torque.z).c_str());
 	}
 
 	if (maxDelta > 0.0f) {

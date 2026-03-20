@@ -48,10 +48,18 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 #include "decomp/behaviors/SuspensionRacer.cpp"
 #include "decomp/behaviors/EngineRacer.cpp"
 
+#include "nya_commontimer.cpp"
+
 EngineRacer* pMWEngine;
 SuspensionRacerMW* pMWSuspension;
-void MWCarUpdate(Car* pThis, float dT) {
+CNyaTimer gRealTimer;
+void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	if (pThis != pMyPlugin->car) return;
+
+	gRealTimer.Process();
+
+	pThis->isControlsLocked = false;
+	pThis->pollControls(dT);
 
 	SimSystem::fSimTime += dT;
 	fGlobalDeltaTime = dT;
