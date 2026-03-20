@@ -48,13 +48,44 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 #include "decomp/behaviors/SuspensionRacer.cpp"
 #include "decomp/behaviors/EngineRacer.cpp"
 
+EngineRacer* pMWEngine;
+SuspensionRacerMW* pMWSuspension;
 void MWCarUpdate(Car* pThis, float dT) {
+	if (pThis != pMyPlugin->car) return;
+
 	SimSystem::fSimTime += dT;
 	fGlobalDeltaTime = dT;
+
+	pMWEngine->OnTaskSimulate(dT);
+	pMWSuspension->OnTaskSimulate(dT);
+
+	// todo tire states, rpm, gear!
+}
+
+void SwitchToMWPhysics() {
+	if (pMWEngine || pMWSuspension) return;
+
+	auto ply = pMyPlugin->car;
+
+	aPlayerInterfaces[0].aInterfaces.clear();
+	aPlayerInterfaces[0].pCar = ply;
+	aPlayerInterfaces[0].Add(new IVehicle(ply));
+	aPlayerInterfaces[0].Add(new IRigidBodyMW(ply));
+	aPlayerInterfaces[0].Add(new ICollisionBody(ply));
+	aPlayerInterfaces[0].Add(new IInput(ply));
+	aPlayerInterfaces[0].Add(new IPlayer(ply));
+	aPlayerInterfaces[0].Add(new IHumanAI());
+
+	auto engine = new EngineRacer(ply);
+	auto susp = new SuspensionRacerMW(ply);
+	engine->OnBehaviorChange();
+	susp->OnBehaviorChange();
+	pMWEngine = engine;
+	pMWSuspension = susp;
 }
 
 void OnPluginStartup() {
-	auto car = pMyPlugin->car;
+	SwitchToMWPhysics();
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
 }
 
@@ -64,6 +95,13 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 			if (NyaHookLib::GetEntryPoint() != 0x15AE310) {
 				MessageBoxA(nullptr, "Unsupported game version! Make sure you're using the latest x64 Steam release (.exe size of 22890776 bytes)", "nya?!~", MB_ICONERROR);
 				return TRUE;
+			}
+
+			if (std::filesystem::exists("AssettoCorsaMWPhysics_gcp.toml")) {
+				auto config = toml::parse_file("AssettoCorsaMWPhysics_gcp.toml");
+				bSpeedbreakerEnabled = config["speedbreaker"].value_or(bSpeedbreakerEnabled);
+				bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
+				fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
 			}
 
 			//MessageBoxA(nullptr, std::format("Base address {:X}", NyaHookLib::mEXEBase).c_str(), "nya?!~", 0);
