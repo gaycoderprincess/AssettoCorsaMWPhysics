@@ -300,17 +300,9 @@ namespace Physics {
 	};
 }
 
-class WCollisionTri {
-public:
-	UMath::Vector3 fPt0;
-	UMath::Vector3 fPt1;
-	unsigned int fFlags;
-	UMath::Vector3 fPt2;
-};
-
 class WWorldPos {
 public:
-	WCollisionTri fFace;
+	UMath::Vector3 fHitPosition;
 	float fYOffset;
 	int fSurface;
 
@@ -334,6 +326,7 @@ public:
 			if (result.normal.y < 0) {
 				result.normal *= -1;
 			}
+			fHitPosition = result.pos;
 			dest->x = result.normal.x;
 			dest->y = result.normal.y;
 			dest->z = result.normal.z;

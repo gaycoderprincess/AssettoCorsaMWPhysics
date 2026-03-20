@@ -11,6 +11,7 @@
 
 void OnPluginStartup();
 #include "util.h"
+#include "inputs.h"
 
 bool bRevLimiter = true;
 bool bSpeedbreakerEnabled = true;
@@ -84,19 +85,71 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0xD0440, 0xC3); // disable car reset
 	}
 
-	//for (int i = 0; i < 4; i++) {
-	//	auto tire = pThis->tyres[i];
-	//	UMath::Matrix4 out;
-	//	tire->hub->getHubWorldMatrix()
+	//for (int i = 0; i < pThis->suspensions.size(); i++) {
+	//	pThis->suspensions[i]->step(dT);
 	//}
 
+	for (int i = 0; i < 4; i++) {
+		auto mwTire = pMWSuspension->mTires[GetMWWheelID(i)];
+		auto tire = &pThis->tyres[i];
+		UMath::Matrix4 carMatrix;
+		tire->car->body->getWorldMatrix(&carMatrix, 0.0);
+
+		UMath::Matrix4 steerAngle;
+		steerAngle.SetIdentity();
+		steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-pMWSuspension->GetWheelSteer(i))));
+		tire->worldRotation = carMatrix * steerAngle;
+
+		tire->localWheelRotation.Rotate(NyaVec3(-pMWSuspension->GetWheelAngularVelocity(i) * dT, 0, 0));
+
+		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
+
+		//tire->worldPosition = *pMWSuspension->GetWheelPos(i);
+		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
+		tire->contactNormal = UMath::Vector4To3(mwTire->mNormal);
+		tire->status.angularVelocity = mwTire->GetAngularVelocity();
+		tire->status.distToGround = pMWSuspension->GetWheelRoadHeight(i);
+		tire->status.load = mwTire->GetLoad();
+		tire->status.isLocked = mwTire->IsBrakeLocked();
+		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
+
+		if (pThis->rigidAxle) {
+			pThis->rigidAxle->stop(0.0);
+		}
+	}
+
 	// todo tire states, rpm, gear!
+
+	RefreshInputs();
+}
+
+UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result) {
+	// todo add deltatime * velocity (0.003) this is one frame behind
+	auto car = pMyPlugin->car;
+	for (int i = 0; i < 4; i++) {
+		if (car->tyres[i].hub == susp) {
+			car->body->getWorldMatrix(result, 0.0);
+			pMWSuspension->GetWheelCenterPos(&result->p, GetMWWheelID(i));
+			UMath::Vector3 velocity;
+			car->body->getVelocity(&velocity);
+			result->p += velocity * 0.003;
+			return result;
+		}
+	}
+	result->SetIdentity();
+	return result;
 }
 
 void SwitchToMWPhysics() {
 	if (pMWEngine || pMWSuspension) return;
 
 	auto ply = pMyPlugin->car;
+	//for (int i = 0; i < 4; i++) {
+	//	ply->tyres[i].hub = new ACMWSuspension();
+	//}
+	//for (int i = 0; i < ply->suspensions.size(); i++) {
+	//	ply->suspensions[i] = new ACMWSuspension();
+	//}
 
 	aPlayerInterfaces[0].aInterfaces.clear();
 	aPlayerInterfaces[0].pCar = ply;
@@ -117,7 +170,16 @@ void SwitchToMWPhysics() {
 
 void OnPluginStartup() {
 	SwitchToMWPhysics();
+
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FF878, &MWSuspensionGetMatrix);
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionGetMatrix);
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionGetMatrix);
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionGetMatrix);
+
+	// remove suspension attach calls
+	//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2C4100, 0xC3);
+	//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2C0FB0, 0xC3);
 }
 
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
