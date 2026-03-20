@@ -118,13 +118,12 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		tire->roadVelocityX = mwTire->GetLateralSpeed();
 		tire->roadVelocityY = mwTire->GetRoadSpeed();
 
-		// todo tire skidmarks and stuff
+		// todo tire skidmarks don't work still
+	}
 
-		if (pThis->rigidAxle) {
-			pThis->rigidAxle->stop(0.0);
-			pThis->rigidAxle->release();
-			pThis->rigidAxle = nullptr;
-		}
+	if (pThis->rigidAxle) {
+		pThis->rigidAxle->release();
+		pThis->rigidAxle = nullptr;
 	}
 
 	pThis->drivetrain.currentGear = pMWEngine->GetGear();
@@ -234,7 +233,7 @@ void OnPluginStartup() {
 	ReplaceSuspensionVTable(0x5001A8);
 	NyaHookLib::Patch(0x4FF878, &MWSuspensionGetMatrix_DeleteBody); // Suspension
 	NyaHookLib::Patch(0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
-	//NyaHookLib::Patch(0x4FFE98, &MWSuspensionGetMatrix_DeleteBody); // SuspensionAxle
+	//NyaHookLib::Patch(0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
 	NyaHookLib::Patch(0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
 
 	// remove suspension attach calls

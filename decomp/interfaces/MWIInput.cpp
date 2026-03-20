@@ -6,26 +6,32 @@ public:
 
 	Car* pCar;
 
-	virtual float GetControlGas() { return IsKeyPressed(VK_UP); }
-	virtual float GetControlBrake() { return IsKeyPressed(VK_DOWN); }
-	virtual float GetControlHandBrake() { return IsKeyPressed(VK_SPACE); }
+	virtual float GetControlGas() {
+		if (IsKeyPressed(VK_UP)) return 1.0;
+		return GetPadKeyState(NYA_PAD_KEY_RT, -1) / 255.0;
+	}
+	virtual float GetControlBrake() {
+		if (IsKeyPressed(VK_DOWN)) return 1.0;
+		return GetPadKeyState(NYA_PAD_KEY_LT, -1) / 255.0;
+	}
+	virtual float GetControlHandBrake() {
+		if (IsKeyPressed(VK_SPACE) || IsPadKeyPressed(NYA_PAD_KEY_A, -1)) return 1.0;
+		return 0.0;
+	}
 	virtual float GetControlSteering() {
 		float f = 0;
 		if (IsKeyPressed(VK_LEFT)) f += 1.0;
 		if (IsKeyPressed(VK_RIGHT)) f -= 1.0;
+		f -= GetPadKeyState(NYA_PAD_KEY_LSTICK_X, -1) / 32768.0;
 		return f;
 	}
-	virtual float GetControlNOS() {
-		return IsKeyPressed(VK_MENU);
+	virtual bool GetControlNOS() {
+		return false; // todo there's no nos display, this'd be confusing
+		//return IsKeyPressed(VK_MENU) || IsPadKeyPressed(NYA_PAD_KEY_B, -1);
 	}
 	//virtual float GetControlGas() { return pCar->controls.gas; }
 	//virtual float GetControlBrake() { return pCar->controls.brake; }
 	//virtual float GetControlHandBrake() { return pCar->controls.handBrake; }
 	//virtual float GetControlSteering() { return -pCar->controls.steer; }
-	//virtual bool GetControlNOS() {
-	//	// todo!
-	//	//return pCar->fNitroButton > 0.0;
-	//	return false;
-	//}
 	virtual bool IsAutomaticShift() { return true; }
 };

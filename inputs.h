@@ -128,7 +128,7 @@ struct tNyaPadState {
 tNyaPadState gPadState[XUSER_MAX_COUNT];
 tNyaPadState gPadStateLast[XUSER_MAX_COUNT];
 
-int GetPadKeyState(tNyaPadState* pads, int key, int padId, bool padKeyAsButton) {
+int GetPadKeyState(tNyaPadState* pads, int key, int padId, bool padKeyAsButton = false) {
 	if (key <= NYA_PAD_KEY_NONE || key >= NUM_NYA_PAD_KEYS) return 0;
 	if (padId < -1 || padId >= XUSER_MAX_COUNT) return 0;
 
@@ -142,11 +142,11 @@ int GetPadKeyState(tNyaPadState* pads, int key, int padId, bool padKeyAsButton) 
 	return value;
 }
 
-int GetPadKeyState(int key, int padId, bool padKeyAsButton) {
+int GetPadKeyState(int key, int padId, bool padKeyAsButton = false) {
 	return GetPadKeyState(gPadState, key, padId, padKeyAsButton);
 }
 
-int GetPadLastKeyState(int key, int padId, bool padKeyAsButton) {
+int GetPadLastKeyState(int key, int padId, bool padKeyAsButton = false) {
 	return GetPadKeyState(gPadStateLast, key, padId, padKeyAsButton);
 }
 
