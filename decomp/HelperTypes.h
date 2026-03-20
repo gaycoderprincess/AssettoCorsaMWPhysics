@@ -304,7 +304,7 @@ class WWorldPos {
 public:
 	UMath::Vector3 fHitPosition;
 	float fYOffset;
-	int fSurface;
+	SurfaceDef* fSurface;
 
 	WWorldPos() {
 		memset(this,0,sizeof(*this));
@@ -331,7 +331,7 @@ public:
 			dest->y = result.normal.y;
 			dest->z = result.normal.z;
 			dest->w = -(dist - fYOffset); // todo is this correct?
-			fSurface = result.surfaceDef->collisionCategory;
+			fSurface = result.surfaceDef;
 			//WriteLog(std::format("hit dist {:.2f} pos {:.2f} {:.2f} {:.2f} normal {:.2f} {:.2f} {:.2f}", dist, result.pos.x, result.pos.y, result.pos.z, dest->x, dest->y, dest->z).c_str());
 			return true;
 		}

@@ -81,9 +81,9 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	pMWEngine->OnTaskSimulate(dT);
 	pMWSuspension->OnTaskSimulate(dT);
 
-	if (pThis->controls.gas > 0.0f) {
-		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0xD0440, 0xC3); // disable car reset
-	}
+	//if (pThis->controls.gas > 0.0f) {
+	//	NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0xD0440, 0xC3); // disable car reset
+	//}
 
 	//for (int i = 0; i < pThis->suspensions.size(); i++) {
 	//	pThis->suspensions[i]->step(dT);
@@ -117,6 +117,7 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		tire->totalSlideVelocity = tire->slidingVelocityX + tire->slidingVelocityY;
 		tire->roadVelocityX = mwTire->GetLateralSpeed();
 		tire->roadVelocityY = mwTire->GetRoadSpeed();
+		tire->surfaceDef = mwTire->mWorldPos.fSurface;
 
 		// todo tire skidmarks don't work still
 	}
@@ -189,14 +190,26 @@ UMath::Vector3* MWSuspensionGetPointVelocity(ISuspension* susp, UMath::Vector3* 
 	return result;
 }
 
+UMath::Vector3* MWSuspensionGetVelocity(ISuspension* susp, UMath::Vector3* result) {
+	*result = {0,0,0};
+	return result;
+}
+
 void MWSuspensionAddLocalForceAndTorque(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* torque, const UMath::Vector3* driveTorque) {}
+void MWSuspensionAttach(ISuspension* susp) {}
+void MWSuspensionStop(ISuspension* susp) {}
+float MWSuspensionGetMass(ISuspension* susp) { return 1.0; }
 
 void ReplaceSuspensionVTable(uintptr_t getHubWorldMatrix_addr) {
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr, &MWSuspensionGetMatrix); // getHubWorldMatrix
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+8, &MWSuspensionGetPointVelocity); // getPointVelocity
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x18, &MWSuspensionGetPointVelocity); // getHubAngularVelocity
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xA0, &MWSuspensionGetPointVelocity); // getVelocity
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xC0, &MWSuspensionAddLocalForceAndTorque); // addLocalForceAndTorque
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x8, &MWSuspensionGetPointVelocity); // getPointVelocity
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x18, &MWSuspensionGetVelocity); // addTorque
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x30, &MWSuspensionGetVelocity); // getHubAngularVelocity
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x38, &MWSuspensionAttach); // attach
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x88, &MWSuspensionGetMass); // getMass
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x90, &MWSuspensionStop); // stop
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x98, &MWSuspensionGetVelocity); // getVelocity
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xB8, &MWSuspensionAddLocalForceAndTorque); // addLocalForceAndTorque
 }
 
 UMath::Matrix4* MWSuspensionGetMatrix_DeleteBody(Suspension* susp, UMath::Matrix4* result) {
@@ -231,10 +244,10 @@ void OnPluginStartup() {
 	ReplaceSuspensionVTable(0x4FFC88);
 	ReplaceSuspensionVTable(0x4FFE98);
 	ReplaceSuspensionVTable(0x5001A8);
-	NyaHookLib::Patch(0x4FF878, &MWSuspensionGetMatrix_DeleteBody); // Suspension
-	NyaHookLib::Patch(0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
-	//NyaHookLib::Patch(0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
-	NyaHookLib::Patch(0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FF878, &MWSuspensionGetMatrix_DeleteBody); // Suspension
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
+	//NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
 
 	// remove suspension attach calls
 	//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2C4100, 0xC3);

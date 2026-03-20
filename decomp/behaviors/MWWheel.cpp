@@ -32,6 +32,6 @@ bool WheelMW::UpdatePosition(const UMath::Vector3 &body_av, const UMath::Vector3
 	mWorldPos.SetTolerance(UMath::Min(tolerance, prev));
 
 	bool result = mWorldPos.Update(&mPosition, &mNormal);
-	UpdateSurface(mWorldPos.fSurface);
+	UpdateSurface(mWorldPos.fSurface ? mWorldPos.fSurface->collisionCategory : 0);
 	return result;
 }
