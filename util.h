@@ -1,0 +1,71 @@
+//#define FUNCTION_LOG(name) WriteLog(std::format("{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)));
+#define WHEEL_FUNCTION_LOG(name) WriteLog(std::format("Wheel::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)));
+#define CHASSIS_FUNCTION_LOG(name) WriteLog(std::format("Chassis::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)));
+#define SUSPENSIONSIMPLE_FUNCTION_LOG(name) WriteLog(std::format("SuspensionSimple::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)));
+#define SUSPENSIONRACER_FUNCTION_LOG(name) WriteLog(std::format("SuspensionRacer::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)));
+#define ENGINERACER_FUNCTION_LOG(name) WriteLog(std::format("EngineRacer::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)));
+//#define ICHASSIS_FUNCTION_LOG(name) WriteLog(std::format("IChassis::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+//#define ITIPTRONIC_FUNCTION_LOG(name) WriteLog(std::format("ITiptronic::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+//#define IRACEENGINE_FUNCTION_LOG(name) WriteLog(std::format("IRaceEngine::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+//#define IENGINEDAMAGE_FUNCTION_LOG(name) WriteLog(std::format("IEngineDamage::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+//#define IINDUCTABLE_FUNCTION_LOG(name) WriteLog(std::format("IInductable::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+//#define ITRANSMISSION_FUNCTION_LOG(name) WriteLog(std::format("ITransmission::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+//#define IENGINE_FUNCTION_LOG(name) WriteLog(std::format("IEngine::{} called from {:X}", name, (uintptr_t)__builtin_return_address(0)))
+#define ICHASSIS_FUNCTION_LOG(name) {}
+#define ITIPTRONIC_FUNCTION_LOG(name) {}
+#define IRACEENGINE_FUNCTION_LOG(name) {}
+#define IENGINEDAMAGE_FUNCTION_LOG(name) {}
+#define IINDUCTABLE_FUNCTION_LOG(name) {}
+#define ITRANSMISSION_FUNCTION_LOG(name) {}
+#define IENGINE_FUNCTION_LOG(name) {}
+
+void WriteLog(const std::string& str) {
+	static auto file = std::ofstream("AssettoCorsaMWPhysics_gcp.log");
+
+	file << str;
+	file << "\n";
+	file.flush();
+}
+
+auto GetStringWide(const std::string& string) {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.from_bytes(string);
+}
+
+auto GetStringNarrow(const std::wstring& string) {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.to_bytes(string);
+}
+
+extern "C" __declspec(dllexport) bool __fastcall acpGetName(wchar_t* out) { wcscpy_s(out, 256, L"AssettoCorsaMWPhysics"); return true; }
+extern "C" __declspec(dllexport) bool __fastcall acpShutdown() { return true; }
+extern "C" __declspec(dllexport) bool __fastcall acpOnGui(void*) { return false; }
+extern "C" __declspec(dllexport) bool __fastcall acpGetControls(void*) { return false; }
+extern "C" __declspec(dllexport) bool __fastcall acpUpdate(void*, float dT) { return true; }
+
+ACPlugin* pMyPlugin = nullptr;
+extern "C" __declspec(dllexport) bool __fastcall acpInit(ACPlugin* plugin) {
+	pMyPlugin = plugin;
+	WriteLog(std::format("acpInit {:X}", (uintptr_t)pMyPlugin));
+	WriteLog(std::format("carAvatar {:X}", (uintptr_t)pMyPlugin->carAvatar));
+	WriteLog(std::format("car {:X}", (uintptr_t)pMyPlugin->car));
+	WriteLog(std::format("sim {:X}", (uintptr_t)pMyPlugin->sim));
+	WriteLog(std::format("car configName {}", GetStringNarrow(pMyPlugin->car->configName.c_str())));
+	WriteLog(std::format("car unixName {}", GetStringNarrow(pMyPlugin->car->unixName.c_str())));
+	WriteLog(std::format("car screenName {}", GetStringNarrow(pMyPlugin->car->screenName.c_str())));
+	OnPluginStartup();
+	return true;
+}
+
+// todo this isn't exactly the best way
+auto GetTrack() {
+	return pMyPlugin->car->splineLocator.track;
+}
+
+namespace SimSystem {
+	double fSimTime = 0;
+
+	double GetTime() {
+		return fSimTime;
+	}
+}

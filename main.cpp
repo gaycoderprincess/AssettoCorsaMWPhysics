@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <format>
 #include <codecvt>
+#include <filesystem>
 #include "toml++/toml.hpp"
 #include "nya_commonhooklib.h"
 
@@ -8,53 +9,53 @@
 
 #include "ac.h"
 
-void WriteLog(const std::string& str) {
-	static auto file = std::ofstream("AssettoCorsaMWPhysics_gcp.log");
+void OnPluginStartup();
+#include "util.h"
 
-	file << str;
-	file << "\n";
-	file.flush();
-}
+bool bRevLimiter = true;
+bool bSpeedbreakerEnabled = true;
+float fUpgradeLevel = 1.0;
+double fGlobalDeltaTime = 1.0 / 60.0;
 
-auto GetStringWide(const std::string& string) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	return converter.from_bytes(string);
-}
+#include "decomp/ConversionUtil.hpp"
+#include "decomp/UMathExtras.h"
+#include "decomp/HelperTypes.h"
 
-auto GetStringNarrow(const std::wstring& string) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	return converter.to_bytes(string);
-}
+#include "MWCarTuning.h"
+#include "decomp/interfaces/MWInterface.h"
+#include "decomp/interfaces/MWIChassis.h"
+#include "decomp/interfaces/MWIRaceEngine.h"
+#include "decomp/interfaces/MWITiptronic.h"
+#include "decomp/interfaces/MWIEngineDamage.h"
+//#include "decomp/interfaces/MWIInductable.cpp"
+#include "decomp/interfaces/MWITransmission.h"
+#include "decomp/interfaces/MWIEngine.h"
+#include "decomp/interfaces/MWIVehicle.cpp"
+#include "decomp/interfaces/MWIPlayer.cpp"
+#include "decomp/interfaces/MWICollisionBody.cpp"
+#include "decomp/interfaces/MWIRigidBody.cpp"
+#include "decomp/interfaces/MWIInput.cpp"
+#include "decomp/interfaces/MWISpikeable.cpp"
+#include "decomp/interfaces/MWICheater.cpp"
+#include "decomp/interfaces/MWIHumanAI.cpp"
 
-ACPlugin* pMyPlugin = nullptr;
+#include "decomp/behaviors/MWWheel.h"
+#include "decomp/behaviors/MWChassisBase.h"
+#include "decomp/behaviors/SuspensionRacer.h"
+#include "decomp/behaviors/EngineRacer.h"
+#include "decomp/behaviors/MWWheel.cpp"
+#include "decomp/behaviors/MWChassisBase.cpp"
+#include "decomp/behaviors/SuspensionRacer.cpp"
+#include "decomp/behaviors/EngineRacer.cpp"
 
 void MWCarUpdate(Car* pThis, float dT) {
-
+	SimSystem::fSimTime += dT;
+	fGlobalDeltaTime = dT;
 }
 
-extern "C" __declspec(dllexport) bool __fastcall acpGetName(wchar_t* out) { wcscpy_s(out, 256, L"AssettoCorsaMWPhysics"); return true; }
-extern "C" __declspec(dllexport) bool __fastcall acpShutdown() { return true; }
-extern "C" __declspec(dllexport) bool __fastcall acpOnGui(void*) { return false; }
-extern "C" __declspec(dllexport) bool __fastcall acpGetControls(void*) { return false; }
-
-extern "C" __declspec(dllexport) bool __fastcall acpInit(ACPlugin* plugin) {
-	pMyPlugin = plugin;
-	WriteLog(std::format("acpInit {:X}", (uintptr_t)pMyPlugin));
-	WriteLog(std::format("carAvatar {:X}", (uintptr_t)pMyPlugin->carAvatar));
-	WriteLog(std::format("car {:X}", (uintptr_t)pMyPlugin->car));
-	WriteLog(std::format("sim {:X}", (uintptr_t)pMyPlugin->sim));
-	WriteLog(std::format("car configName {}", GetStringNarrow(pMyPlugin->car->configName.c_str())));
-	WriteLog(std::format("car unixName {}", GetStringNarrow(pMyPlugin->car->unixName.c_str())));
-	WriteLog(std::format("car screenName {}", GetStringNarrow(pMyPlugin->car->screenName.c_str())));
-	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
-	return true;
-}
-
-extern "C" __declspec(dllexport) bool __fastcall acpUpdate(void*, float dT) {
+void OnPluginStartup() {
 	auto car = pMyPlugin->car;
-
-
-	return true;
+	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
 }
 
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
