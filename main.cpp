@@ -50,11 +50,24 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 
 #include "nya_commontimer.cpp"
 
+/*
+dT 0.06667
+oom 0.00138
+mass 727.00000
+force -161.71716 87390.30469 -488.61813
+src -0.00893 -4.47674 -0.01546
+add -0.01483 8.01378 -0.04481
+total_force -161.72 87390.30 -488.62
+total_torque 9032.70 84.98 -5453.57
+*/
+
 EngineRacer* pMWEngine;
 SuspensionRacerMW* pMWSuspension;
 CNyaTimer gRealTimer;
 void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	if (pThis != pMyPlugin->car) return;
+
+	pThis->ksPhysics->core->id->dWorldSetGravity(0.0, -9.81, 0.0);
 
 	gRealTimer.Process();
 
@@ -66,6 +79,16 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 
 	pMWEngine->OnTaskSimulate(dT);
 	pMWSuspension->OnTaskSimulate(dT);
+
+	if (pThis->controls.gas > 0.0f) {
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0xD0440, 0xC3); // disable car reset
+	}
+
+	//for (int i = 0; i < 4; i++) {
+	//	auto tire = pThis->tyres[i];
+	//	UMath::Matrix4 out;
+	//	tire->hub->getHubWorldMatrix()
+	//}
 
 	// todo tire states, rpm, gear!
 }

@@ -9,7 +9,7 @@ public:
 	virtual float GetControlGas() { return pCar->controls.gas; }
 	virtual float GetControlBrake() { return pCar->controls.brake; }
 	virtual float GetControlHandBrake() { return pCar->controls.handBrake; }
-	virtual float GetControlSteering() { return pCar->controls.steer; }
+	virtual float GetControlSteering() { return -pCar->controls.steer; }
 	virtual bool GetControlNOS() {
 		// todo!
 		//return pCar->fNitroButton > 0.0;

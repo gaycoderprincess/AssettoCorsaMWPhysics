@@ -403,7 +403,7 @@ void SuspensionRacerMW::CreateTires() {
 	float front_axle = mMWAttributes->FRONT_AXLE;
 
 	//float fWheelY = -dimension.y;
-	float fWheelY = -0.05;
+	float fWheelY = -0.2;
 
 	// todo get wheel pos from the actual game
 	//for (int i = 0; i < 4; i++) {
@@ -424,6 +424,8 @@ void SuspensionRacerMW::CreateTires() {
 	GetWheel(1).SetLocalArm(fr);
 	GetWheel(2).SetLocalArm(rl);
 	GetWheel(3).SetLocalArm(rr);
+
+	WriteLog(std::format("tire pos {:.2f} {:.2f} {:.2f}", fl.x, fl.y, fl.z).c_str());
 }
 
 void SuspensionRacerMW::OnBehaviorChange() {
@@ -536,7 +538,7 @@ void SuspensionRacerMW::OnTaskSimulate(float dT) {
 
 	DoTireHeat(state);
 	DoAerobatics(state);
-	DoSleep(state); // this is broken in flatout
+	//DoSleep(state); // this is broken in ac
 	ChassisMW::OnTaskSimulate(dT);
 }
 
@@ -1411,8 +1413,6 @@ void SuspensionRacerMW::DoWheelForces(State &state) {
 		}
 		UMath::ScaleAdd(UMath::Vector4To3(state.matrix.y), counter_yaw - yaw, total_torque, total_torque);
 		mRB->Resolve(&total_force, &total_torque);
-		WriteLog(std::format("total_force {:.2f} {:.2f} {:.2f}", total_force.x, total_force.y, total_force.z).c_str());
-		WriteLog(std::format("total_torque {:.2f} {:.2f} {:.2f}", total_torque.x, total_torque.y, total_torque.z).c_str());
 	}
 
 	if (maxDelta > 0.0f) {

@@ -270,7 +270,8 @@ void ChassisMW::ComputeState(float dT, ChassisMW::State &state) {
 	mRB->GetDimension(&state.dimension);
 
 	mRB->GetMatrix4(&state.matrix);
-	state.matrix.p = UMath::Vector4Make(*mRB->GetPosition(), 1.0f);
+	state.matrix.p = *mRB->GetPosition();
+	state.matrix.pw = 1.0;
 
 	state.local_vel = *mRB->GetLinearVelocity();
 	state.linear_vel = state.local_vel;

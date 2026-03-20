@@ -329,7 +329,7 @@ public:
 		auto dir = NyaVec3(0,-1,0);
 
 		RayCastResult result;
-		if (GetTrack()->rayCast(&origin, &dir, &result, 10000)) {
+		if (GetTrack()->rayCast(&origin, &dir, &result, 1000)) {
 			auto dist = (origin - result.pos).length();
 			if (result.normal.y < 0) {
 				result.normal *= -1;
