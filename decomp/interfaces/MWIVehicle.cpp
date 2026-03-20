@@ -5,13 +5,13 @@ public:
 	static inline const char* _IIDName = "IVehicle";
 
 	Car* pCar;
+	std::string carName;
 
 	virtual const char* GetVehicleName() {
-		static std::string str;
-		auto carId = GetCarDataID_slow(pCar->pPlayer->nCarId);
-		if (carId >= 200 && carId < 300) carId -= 200; // fo2 cars
-		str = std::format("car_{}", carId);
-		return str.c_str();
+		if (carName.empty()) {
+			carName = GetStringNarrow(pCar->unixName.c_str());
+		}
+		return carName.c_str();
 	}
 	virtual int GetDriverStyle() { return STYLE_RACING; }
 	virtual int GetDriverClass() { return DRIVER_HUMAN; }
@@ -21,10 +21,12 @@ public:
 		ConvertWorldToLocal(pCar, vel, false);
 		return vel.z >= 0.0 ? GetAbsoluteSpeed() : -GetAbsoluteSpeed();
 	}
-	virtual float GetAbsoluteSpeed() { return pCar->GetVelocity()->length(); }
-	virtual bool IsStaging() { return pGameFlow->nRaceState <= RACE_STATE_COUNTDOWN; }
+	virtual float GetAbsoluteSpeed() {
+		return pCar->GetVelocity()->length();
+	}
+	virtual bool IsStaging() { return false; } // todo!
 	virtual float GetPerfectLaunch() { return mPerfectLaunch.Time > 0.0 ? mPerfectLaunch.Amount : 0.0; }
-	virtual bool IsDestroyed() { return pCar->nIsWrecked; }
+	virtual bool IsDestroyed() { return false; } // todo!
 
 	struct LaunchState {
 		float Time = 0;

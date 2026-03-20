@@ -365,10 +365,7 @@ void GetLerpedCarTuning(MWCarTuning& tmp, const std::string& model, float brake,
 }
 
 void GetLerpedCarTuning(MWCarTuning& out, const std::string& model) {
-	float f = pGameFlow->PreRace.fUpgradeLevel;
-	if (pGameFlow->PreRace.nMode == GM_CAREER) {
-		f = 1.0;
-	}
+	auto f = fUpgradeLevel;
 	return GetLerpedCarTuning(out, model, f, f, f, f, f, f, f);
 }
 

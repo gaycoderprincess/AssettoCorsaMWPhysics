@@ -26,26 +26,9 @@ namespace UMath {
 		float x, y;
 	};
 
-	class Vector3 : public NyaVec3 {
-	public:
-		using NyaVec3::NyaVec3;
-
-		Vector3(const NyaVec3& v) : NyaVec3(v) {}
-	};
-
-	class Vector4 : public NyaVec4 {
-	public:
-		using NyaVec4::NyaVec4;
-
-		Vector4(const NyaVec4& v) : NyaVec4(v) {}
-	};
-
-	class Matrix4 : public NyaMat4x4 {
-	public:
-		using NyaMat4x4::NyaMat4x4;
-
-		Matrix4(const NyaMat4x4& m) : NyaMat4x4(m) {}
-	};
+	typedef NyaVec3 Vector3;
+	typedef NyaVec4 Vector4;
+	typedef NyaMat4x4 Matrix4;
 
 	inline void Transpose(UMath::Matrix4* m, UMath::Matrix4 &result) {
 		for (int i = 0; i < 4; ++i) {

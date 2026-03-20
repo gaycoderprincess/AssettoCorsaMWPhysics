@@ -328,20 +328,17 @@ public:
 		origin.y += fYOffset;
 		auto dir = NyaVec3(0,-1,0);
 
-		tLineOfSightIn prop;
-		prop.bIgnoreBackfaces = false;
-		prop.bGetClosestHit = true;
-		prop.fMaxDistance = 10000;
-		tLineOfSightOut out;
-		if (CheckLineOfSight(&prop, pGameFlow->pHost->pUnkForLOS, &origin, &dir, &out)) {
-			if (out.vHitNormal.y < 0) {
-				out.vHitNormal *= -1;
+		RayCastResult result;
+		if (GetTrack()->rayCast((vec3f*)&pos, (vec3f*)&dir, &result, 10000)) {
+			auto dist = (origin - result.pos).length();
+			if (result.normal.y < 0) {
+				result.normal *= -1;
 			}
-			dest->x = out.vHitNormal.x;
-			dest->y = out.vHitNormal.y;
-			dest->z = out.vHitNormal.z;
-			dest->w = -(out.fHitDistance - fYOffset); // todo is this correct?
-			fSurface = out.nSurfaceId;
+			dest->x = result.normal.x;
+			dest->y = result.normal.y;
+			dest->z = result.normal.z;
+			dest->w = -(dist - fYOffset); // todo is this correct?
+			fSurface = result.surfaceDef->collisionCategory;
 			return true;
 		}
 		return false;
@@ -401,19 +398,21 @@ enum DriverClass {
 };
 
 void ConvertWorldToLocal(Car* pCar, UMath::Vector3 &val, bool translate) {
-	UMath::Vector4 invorient;
+	UMath::Matrix4 invorient;
 
 	if (translate) {
-		UMath::Sub(val, pCar->GetMatrix()->p, val);
+		UMath::Vector3 pos;
+		pCar->body->getPosition(&pos, 0.0);
+		UMath::Sub(val, pos, val);
 	}
-	UMath::Transpose(*pCar->GetQuaternion(), invorient);
-	UMath::Rotate(&val, &invorient, &val);
-}
 
-namespace Sim {
-	float GetTime() {
-		return pPlayerHost->nRaceTime / 1000.0;
-	}
+	// todo does this work?
+	UMath::Matrix4 mat;
+	pCar->body->getWorldMatrix(&mat, 0.0);
+	UMath::Transpose(&mat, invorient);
+	//UMath::Transpose(*pCar->GetQuaternion(), invorient);
+
+	UMath::Rotate(val, invorient, val);
 }
 
 class SimSurface {
@@ -425,6 +424,7 @@ public:
 
 SimSurface* GetSimSurface(int surfaceType) {
 	static SimSurface tmp;
-	tmp.LATERAL_GRIP = tmp.DRIVE_GRIP = tmp.ROLLING_RESISTANCE = UMath::Clamp(1.0f / pEnvironment->aSurfaces[surfaceType].fBodyFriction, 0.5f, 1.0f);
+	// todo!
+	//tmp.LATERAL_GRIP = tmp.DRIVE_GRIP = tmp.ROLLING_RESISTANCE = UMath::Clamp(1.0f / pEnvironment->aSurfaces[surfaceType].fBodyFriction, 0.5f, 1.0f);
 	return &tmp;
 }
