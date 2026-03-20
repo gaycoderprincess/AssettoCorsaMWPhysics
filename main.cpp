@@ -118,12 +118,24 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		tire->roadVelocityX = mwTire->GetLateralSpeed();
 		tire->roadVelocityY = mwTire->GetRoadSpeed();
 
+		// todo tire skidmarks and stuff
+
 		if (pThis->rigidAxle) {
 			pThis->rigidAxle->stop(0.0);
+			pThis->rigidAxle->release();
+			pThis->rigidAxle = nullptr;
 		}
 	}
 
-	// todo tire states, rpm, gear!
+	pThis->drivetrain.currentGear = pMWEngine->GetGear();
+	pThis->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
+	pThis->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pThis)->Find<IVehicle>()->GetAbsoluteSpeed();
+	pThis->drivetrain.acEngine.lastInput.rpm = pMWEngine->GetRPM();
+
+	pThis->drivetrain.engine.velocity = (pMWEngine->GetRPM() * 6.28318029705) / 60.0;
+
+	auto avatar = pMyPlugin->carAvatar;
+	avatar->physicsState.engineRPM = pMWEngine->GetRPM();
 
 	RefreshInputs();
 }
