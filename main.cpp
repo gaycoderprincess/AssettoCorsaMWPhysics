@@ -137,6 +137,13 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	auto avatar = pMyPlugin->carAvatar;
 	avatar->physicsState.engineRPM = pMWEngine->GetRPM();
 
+	// vanilla components
+	pThis->performanceMeter.step(dT);
+	pThis->lapInvalidator.step(dT);
+	pThis->penaltyManager.step(dT);
+	pThis->transponder.step(dT);
+	pThis->fuelLapEvaluator.step(dT);
+
 	RefreshInputs();
 }
 
