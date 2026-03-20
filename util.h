@@ -20,7 +20,7 @@
 #define IENGINE_FUNCTION_LOG(name) {}
 
 void WriteLog(const std::string& str) {
-	static auto file = std::ofstream("AssettoCorsaMWPhysics_gcp.log");
+	static auto file = std::ofstream("plugins/AssettoCorsaMWPhysics_gcp.log");
 
 	file << str;
 	file << "\n";

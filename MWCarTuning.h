@@ -100,7 +100,7 @@ MWCarTuning* LoadCarTuningFromFile(std::string configCarName) {
 	}
 
 	// default to custom setups, then mw, then carbon
-	auto fileName = std::format("CarDataDump/{}.conf", configCarName);
+	auto fileName = std::format("plugins/CarDataDump/{}.conf", configCarName);
 	if (!std::filesystem::exists(fileName)) return nullptr;
 	auto config = toml::parse_file(fileName);
 

@@ -329,7 +329,7 @@ public:
 		auto dir = NyaVec3(0,-1,0);
 
 		RayCastResult result;
-		if (GetTrack()->rayCast((vec3f*)&pos, (vec3f*)&dir, &result, 10000)) {
+		if (GetTrack()->rayCast(&origin, &dir, &result, 10000)) {
 			auto dist = (origin - result.pos).length();
 			if (result.normal.y < 0) {
 				result.normal *= -1;
@@ -339,6 +339,7 @@ public:
 			dest->z = result.normal.z;
 			dest->w = -(dist - fYOffset); // todo is this correct?
 			fSurface = result.surfaceDef->collisionCategory;
+			WriteLog(std::format("hit dist {:.2f} pos {:.2f} {:.2f} {:.2f} normal {:.2f} {:.2f} {:.2f}", dist, result.pos.x, result.pos.y, result.pos.z, dest->x, dest->y, dest->z).c_str());
 			return true;
 		}
 		return false;

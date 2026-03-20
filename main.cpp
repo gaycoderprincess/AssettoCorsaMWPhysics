@@ -104,6 +104,8 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 				fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
 			}
 
+			WriteLog("Mod initialized");
+
 			//MessageBoxA(nullptr, std::format("Base address {:X}", NyaHookLib::mEXEBase).c_str(), "nya?!~", 0);
 		} break;
 		default:
