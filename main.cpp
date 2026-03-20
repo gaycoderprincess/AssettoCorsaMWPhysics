@@ -112,6 +112,11 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		tire->status.load = mwTire->GetLoad();
 		tire->status.isLocked = mwTire->IsBrakeLocked();
 		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
+		tire->slidingVelocityX = mwTire->GetLateralSpeed();
+		tire->slidingVelocityY = mwTire->GetRoadSpeed() * (1.0 - mwTire->GetTraction());
+		tire->totalSlideVelocity = tire->slidingVelocityX + tire->slidingVelocityY;
+		tire->roadVelocityX = mwTire->GetLateralSpeed();
+		tire->roadVelocityY = mwTire->GetRoadSpeed();
 
 		if (pThis->rigidAxle) {
 			pThis->rigidAxle->stop(0.0);
@@ -121,23 +126,6 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	// todo tire states, rpm, gear!
 
 	RefreshInputs();
-}
-
-UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result) {
-	// todo add deltatime * velocity (0.003) this is one frame behind
-	auto car = pMyPlugin->car;
-	for (int i = 0; i < 4; i++) {
-		if (car->tyres[i].hub == susp) {
-			car->body->getWorldMatrix(result, 0.0);
-			pMWSuspension->GetWheelCenterPos(&result->p, GetMWWheelID(i));
-			UMath::Vector3 velocity;
-			car->body->getVelocity(&velocity);
-			result->p += velocity * 0.003;
-			return result;
-		}
-	}
-	result->SetIdentity();
-	return result;
 }
 
 void SwitchToMWPhysics() {
@@ -168,14 +156,74 @@ void SwitchToMWPhysics() {
 	pMWSuspension = susp;
 }
 
+UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result) {
+	// todo add deltatime * velocity (0.003) this is one frame behind
+	auto car = pMyPlugin->car;
+	for (int i = 0; i < 4; i++) {
+		if (car->tyres[i].hub == susp) {
+			car->body->getWorldMatrix(result, 0.0);
+			pMWSuspension->GetWheelCenterPos(&result->p, GetMWWheelID(i));
+			UMath::Vector3 velocity;
+			car->body->getVelocity(&velocity);
+			result->p += velocity * 0.003;
+			return result;
+		}
+	}
+	result->SetIdentity();
+	return result;
+}
+
+UMath::Vector3* MWSuspensionGetPointVelocity(ISuspension* susp, UMath::Vector3* result, const UMath::Vector3* p) {
+	*result = {0,0,0};
+	return result;
+}
+
+void MWSuspensionAddLocalForceAndTorque(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* torque, const UMath::Vector3* driveTorque) {}
+
+void ReplaceSuspensionVTable(uintptr_t getHubWorldMatrix_addr) {
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr, &MWSuspensionGetMatrix); // getHubWorldMatrix
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+8, &MWSuspensionGetPointVelocity); // getPointVelocity
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x18, &MWSuspensionGetPointVelocity); // getHubAngularVelocity
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xA0, &MWSuspensionGetPointVelocity); // getVelocity
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xC0, &MWSuspensionAddLocalForceAndTorque); // addLocalForceAndTorque
+}
+
+UMath::Matrix4* MWSuspensionGetMatrix_DeleteBody(Suspension* susp, UMath::Matrix4* result) {
+	if (susp->hub) {
+		susp->hub->release();
+		susp->hub = nullptr;
+	}
+	return MWSuspensionGetMatrix(susp, result);
+}
+
+UMath::Matrix4* MWSuspensionStrutGetMatrix_DeleteBody(SuspensionStrut* susp, UMath::Matrix4* result) {
+	if (susp->hub) {
+		susp->hub->release();
+		susp->hub = nullptr;
+	}
+	return MWSuspensionGetMatrix(susp, result);
+}
+
+UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Matrix4* result) {
+	if (susp->hub) {
+		susp->hub->release();
+		susp->hub = nullptr;
+	}
+	return MWSuspensionGetMatrix(susp, result);
+}
+
 void OnPluginStartup() {
 	SwitchToMWPhysics();
 
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FF878, &MWSuspensionGetMatrix);
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionGetMatrix);
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionGetMatrix);
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionGetMatrix);
+	ReplaceSuspensionVTable(0x4FF878);
+	ReplaceSuspensionVTable(0x4FFC88);
+	ReplaceSuspensionVTable(0x4FFE98);
+	ReplaceSuspensionVTable(0x5001A8);
+	NyaHookLib::Patch(0x4FF878, &MWSuspensionGetMatrix_DeleteBody); // Suspension
+	NyaHookLib::Patch(0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
+	//NyaHookLib::Patch(0x4FFE98, &MWSuspensionGetMatrix_DeleteBody); // SuspensionAxle
+	NyaHookLib::Patch(0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
 
 	// remove suspension attach calls
 	//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2C4100, 0xC3);
