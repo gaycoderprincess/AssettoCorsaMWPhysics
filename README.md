@@ -14,7 +14,7 @@ Massive thanks to everyone involved with [dbalatoni13's MW reverse engineering p
 
 - Full 1:1 port of Most Wanted's engine, gearbox, suspension and tire physics as well as the aerodynamics such as drag and air stabilization
 - The mod is based on actual code rather than tweaks of random values, ensuring the handling is as accurate as possible
-- Nitrous has been added, bound to the ALT key on the keyboard and B on an Xbox controller
+- Nitrous has been added, bound to the ALT key on the keyboard and B on an Xbox controller, the NOS gauge replaces the fuel gauge.
 
 ## Useful info
 
