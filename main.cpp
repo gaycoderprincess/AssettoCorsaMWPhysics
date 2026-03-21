@@ -7,6 +7,9 @@
 
 #include "nya_commonmath.h"
 
+#include "nya_commonaudio.cpp"
+#include "nya_commontimer.cpp"
+
 #include "ac.h"
 
 void OnPluginStartup();
@@ -15,6 +18,7 @@ void OnPluginStartup();
 
 bool bRevLimiter = true;
 bool bSpeedbreakerEnabled = true;
+bool bNitrousEnabled = true;
 float fUpgradeLevel = 1.0;
 double fGlobalDeltaTime = 1.0 / 60.0;
 
@@ -48,8 +52,6 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 #include "decomp/behaviors/MWChassisBase.cpp"
 #include "decomp/behaviors/SuspensionRacer.cpp"
 #include "decomp/behaviors/EngineRacer.cpp"
-
-#include "nya_commontimer.cpp"
 
 EngineRacer* pMWEngine;
 SuspensionRacerMW* pMWSuspension;
@@ -124,12 +126,30 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	pThis->drivetrain.engine.oldVelocity = pThis->drivetrain.engine.velocity;
 	pThis->drivetrain.engine.velocity = (pMWEngine->GetRPM() * 6.28318029705) / 60.0;
 
+	// reusing the fuel gauge as nitrous
+	if (bNitrousEnabled) {
+		pThis->fuel = pMWEngine->GetNOSCapacity() * pThis->maxFuel;
+
+		// getting below 1/8th of the bar causes a fuel warning popup
+		pThis->fuel *= 0.875;
+		pThis->fuel += 0.125 * pThis->maxFuel;
+	}
+
 	pThis->controls.gas = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
 	pThis->controls.brake = GetPlayerInterface(pThis)->Find<IInput>()->GetControlBrake();
 	pThis->controls.handBrake = GetPlayerInterface(pThis)->Find<IInput>()->GetControlHandBrake();
 
-	auto avatar = pMyPlugin->carAvatar;
-	avatar->physicsState.engineRPM = pMWEngine->GetRPM();
+	static bool bNOSLast = false;
+	if (bNOSLast != pMWEngine->IsNOSEngaged()) {
+		static auto audio = NyaAudio::LoadFile("plugins/nitro_on.wav");
+		if (audio && pMWEngine->IsNOSEngaged()) {
+			NyaAudio::Stop(audio);
+			NyaAudio::SkipTo(audio, 0, false);
+			NyaAudio::SetVolume(audio, 1.0);
+			NyaAudio::Play(audio);
+		}
+	}
+	bNOSLast = pMWEngine->IsNOSEngaged();
 
 	// vanilla components
 	pThis->performanceMeter.step(dT);
@@ -245,6 +265,14 @@ UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Ma
 }
 
 void OnPluginStartup() {
+	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
+		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
+		//bSpeedbreakerEnabled = config["speedbreaker"].value_or(bSpeedbreakerEnabled);
+		bNitrousEnabled = config["nitrous"].value_or(bNitrousEnabled);
+		bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
+		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
+	}
+
 	SwitchToMWPhysics();
 
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
@@ -260,6 +288,10 @@ void OnPluginStartup() {
 	// remove suspension attach calls
 	//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2C4100, 0xC3);
 	//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2C0FB0, 0xC3);
+
+	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);
+
+	WriteLog("Mod initialized");
 }
 
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
@@ -269,15 +301,6 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 				MessageBoxA(nullptr, "Unsupported game version! Make sure you're using the latest x64 Steam release (.exe size of 22890776 bytes)", "nya?!~", MB_ICONERROR);
 				return TRUE;
 			}
-
-			if (std::filesystem::exists("AssettoCorsaMWPhysics_gcp.toml")) {
-				auto config = toml::parse_file("AssettoCorsaMWPhysics_gcp.toml");
-				bSpeedbreakerEnabled = config["speedbreaker"].value_or(bSpeedbreakerEnabled);
-				bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
-				fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
-			}
-
-			WriteLog("Mod initialized");
 
 			//MessageBoxA(nullptr, std::format("Base address {:X}", NyaHookLib::mEXEBase).c_str(), "nya?!~", 0);
 		} break;

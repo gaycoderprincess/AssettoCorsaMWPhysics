@@ -399,7 +399,7 @@ void SuspensionRacerMW::CreateTires() {
 	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
 	//float fWheelY = -dimension.y;
-	float fWheelY = -0.05;
+	float fWheelY = 0.1;
 
 	for (int i = 0; i < 4; i++) {
 		auto acTire = &pCar->tyres[GetMWWheelID(i)];
@@ -408,7 +408,7 @@ void SuspensionRacerMW::CreateTires() {
 		hub->getHubWorldMatrix(&hubMatrix);
 		auto v = hubMatrix.p;
 		WriteLog(std::format("tire {} initial pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
-		v.y = -acTire->data.radius + fWheelY;
+		v.y += -acTire->data.radius + fWheelY;
 		WriteLog(std::format("tire {} y-corrected pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
 		GetWheel(i).SetLocalArm(v);
 	}

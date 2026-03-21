@@ -26,8 +26,8 @@ public:
 		return f;
 	}
 	virtual bool GetControlNOS() {
-		return false; // todo there's no nos display, this'd be confusing
-		//return IsKeyPressed(VK_MENU) || IsPadKeyPressed(NYA_PAD_KEY_B, -1);
+		if (!bNitrousEnabled) return false;
+		return IsKeyPressed(VK_MENU) || IsPadKeyPressed(NYA_PAD_KEY_B, -1);
 	}
 	//virtual float GetControlGas() { return pCar->controls.gas; }
 	//virtual float GetControlBrake() { return pCar->controls.brake; }

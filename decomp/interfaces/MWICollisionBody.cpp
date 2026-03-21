@@ -65,6 +65,7 @@ public:
 			vTensorScale.x = tune.TENSOR_SCALE[0];
 			vTensorScale.y = tune.TENSOR_SCALE[1];
 			vTensorScale.z = tune.TENSOR_SCALE[2];
+			WriteLog(std::format("car mass {:.2f}", pCar->body->getMass()));
 		}
 
 		UMath::Vector3 dim;
