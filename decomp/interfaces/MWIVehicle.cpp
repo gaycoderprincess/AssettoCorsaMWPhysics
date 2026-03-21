@@ -29,7 +29,7 @@ public:
 	}
 	virtual bool IsStaging() { return false; } // todo!
 	virtual float GetPerfectLaunch() { return mPerfectLaunch.Time > 0.0 ? mPerfectLaunch.Amount : 0.0; }
-	virtual bool IsDestroyed() { return false; } // todo!
+	virtual bool IsDestroyed() { return pCar->drivetrain.acEngine.lifeLeft <= 0.0; }
 
 	struct LaunchState {
 		float Time = 0;

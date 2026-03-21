@@ -20,6 +20,8 @@ bool bRevLimiter = true;
 bool bSpeedbreakerEnabled = true;
 bool bNitrousEnabled = true;
 float fUpgradeLevel = 1.0;
+float fTireOffset = 0.1;
+
 double fGlobalDeltaTime = 1.0 / 60.0;
 
 #include "decomp/ConversionUtil.hpp"
@@ -122,9 +124,14 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	pThis->drivetrain.currentGear = pMWEngine->GetGear();
 	pThis->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
 	pThis->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pThis)->Find<IVehicle>()->GetAbsoluteSpeed();
-	pThis->drivetrain.acEngine.lastInput.rpm = pMWEngine->GetRPM();
+
+	auto rpm = pMWEngine->GetRPM();
+	rpm /= pMWEngine->GetMaxRPM();
+	rpm *= pThis->drivetrain.acEngine.data.limiter;
+
+	pThis->drivetrain.acEngine.lastInput.rpm = rpm;
 	pThis->drivetrain.engine.oldVelocity = pThis->drivetrain.engine.velocity;
-	pThis->drivetrain.engine.velocity = (pMWEngine->GetRPM() * 6.28318029705) / 60.0;
+	pThis->drivetrain.engine.velocity = (rpm * 6.28318029705) / 60.0;
 
 	// reusing the fuel gauge as nitrous
 	if (bNitrousEnabled) {
@@ -188,6 +195,9 @@ void SwitchToMWPhysics() {
 	susp->OnBehaviorChange();
 	pMWEngine = engine;
 	pMWSuspension = susp;
+
+	WriteLog(std::format("MW max RPM {}", pMWEngine->GetMaxRPM()));
+	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.data.limiter));
 }
 
 UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result) {
@@ -272,6 +282,7 @@ void OnPluginStartup() {
 		bNitrousEnabled = config["nitrous"].value_or(bNitrousEnabled);
 		bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
 		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
+		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
 	}
 
 	SwitchToMWPhysics();
