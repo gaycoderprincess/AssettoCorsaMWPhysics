@@ -15,7 +15,7 @@
 void OnPluginStartup();
 
 bool bRevLimiter = true;
-bool bSpeedbreakerEnabled = true;
+//bool bSpeedbreakerEnabled = true;
 bool bNitrousEnabled = true;
 bool bCSPHacks = false;
 float fUpgradeLevel = 1.0;
@@ -72,7 +72,11 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 		// todo
 	}
 
+	pThis->drivetrain.acEngine.fuelPressure = 1.0;
+
 	// todo penalty code here
+	pThis->penaltyTime = 0.0;
+	pThis->penaltyTimeAccumulator = 0.0;
 
 	pThis->finalSteerAngleSignal = DEG2RAD(pMWSuspension->mSteering.Previous);
 	pThis->body->getVelocity(&pThis->lastVelocity);
