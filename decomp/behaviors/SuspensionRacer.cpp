@@ -392,32 +392,34 @@ void SuspensionRacerMW::CreateTires() {
 		bool is_front = IsFront(i);
 		float diameter = Physics::Info::WheelDiameter(mMWAttributes, is_front);
 		mTires[i] = new Tire(diameter * 0.5f, i, mMWAttributes);
+		//mTires[i] = new Tire(pCar->tyres[GetMWWheelID(i)].data.radius, i, mMWAttributes);
 	}
 	UMath::Vector3 dimension;
 	mRB->GetDimension(&dimension);
 	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
-	float wheelbase = mMWAttributes->WHEEL_BASE;
-	float axle_width_f = mMWAttributes->TRACK_WIDTH.At(0) - mMWAttributes->SECTION_WIDTH.At(0) * 0.001f;
-	float axle_width_r = mMWAttributes->TRACK_WIDTH.At(1) - mMWAttributes->SECTION_WIDTH.At(1) * 0.001f;
-	float front_axle = mMWAttributes->FRONT_AXLE;
-
 	//float fWheelY = -dimension.y;
-	float fWheelY = -0.25;
+	float fWheelY = -0.05;
 
 	for (int i = 0; i < 4; i++) {
-		ISuspension* hub = pCar->tyres[GetMWWheelID(i)].hub;
+		auto acTire = &pCar->tyres[GetMWWheelID(i)];
+		ISuspension* hub = acTire->hub;
 		UMath::Matrix4 hubMatrix;
 		hub->getHubWorldMatrix(&hubMatrix);
 		auto v = hubMatrix.p;
 		WriteLog(std::format("tire {} initial pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
-		v.y = fWheelY;
+		v.y = -acTire->data.radius + fWheelY;
 		WriteLog(std::format("tire {} y-corrected pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
 		GetWheel(i).SetLocalArm(v);
 	}
 
 
-	/*UMath::Vector3 fl(-axle_width_f * 0.5f, fWheelY, front_axle);
+	/*float wheelbase = mMWAttributes->WHEEL_BASE;
+	float axle_width_f = mMWAttributes->TRACK_WIDTH.At(0) - mMWAttributes->SECTION_WIDTH.At(0) * 0.001f;
+	float axle_width_r = mMWAttributes->TRACK_WIDTH.At(1) - mMWAttributes->SECTION_WIDTH.At(1) * 0.001f;
+	float front_axle = mMWAttributes->FRONT_AXLE;
+
+	UMath::Vector3 fl(-axle_width_f * 0.5f, fWheelY, front_axle);
 	UMath::Vector3 fr(axle_width_f * 0.5f, fWheelY, front_axle);
 	UMath::Vector3 rl(-axle_width_r * 0.5f, fWheelY, front_axle - wheelbase);
 	UMath::Vector3 rr(axle_width_r * 0.5f, fWheelY, front_axle - wheelbase);

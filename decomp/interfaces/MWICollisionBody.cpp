@@ -6,6 +6,7 @@ public:
 
 	Car* pCar;
 	UMath::Vector3 vTensorScale = {0.0, 0.0, 0.0};
+	UMath::Vector3 vCenterOfGravity = {0.0, 0.0, 0.0};
 
 	// todo
 	virtual UMath::Vector3* GetForce() {
@@ -20,17 +21,10 @@ public:
 	}
 
 	virtual void SetCenterOfGravity(UMath::Vector3* cog) {
-		//pCar->vCenterOfMass[0] = cog->x;
-		//pCar->vCenterOfMass[1] = cog->y;
-		//pCar->vCenterOfMass[2] = cog->z;
+		vCenterOfGravity = *cog;
 	}
 	virtual UMath::Vector3* GetCenterOfGravity() {
-		static UMath::Vector3 tmp = {0,0,0};
-		// todo? i dont think this exists?
-		//tmp.x = pCar->vCenterOfMass[0];
-		//tmp.y = pCar->vCenterOfMass[1];
-		//tmp.z = pCar->vCenterOfMass[2];
-		return &tmp;
+		return &vCenterOfGravity;
 	}
 
 	virtual bool IsInGroundContact() {

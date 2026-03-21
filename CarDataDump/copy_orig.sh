@@ -20,6 +20,8 @@ cp orig_mw_full/corvette.conf ks_corvette_c7.conf
 cp orig_mw_full/corvette_top.conf ks_corvette_c7_top.conf
 cp orig_mw_full/corvettec6r.conf ks_corvette_c7r.conf
 cp orig_mw_full/corvettec6r_top.conf ks_corvette_c7r_top.conf
+cp orig_mw_full/fordgt.conf ks_ford_gt40.conf
+cp orig_mw_full/fordgt_top.conf ks_ford_gt40_top.conf
 cp orig_mw_full/mustanggt.conf ks_ford_mustang_2015.conf
 cp orig_mw_full/mustanggt_top.conf ks_ford_mustang_2015_top.conf
 cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl.conf

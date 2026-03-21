@@ -71,13 +71,6 @@ public:
 		GetMatrix4(&bodyMatrix);
 		auto mInvWorldTensor = GetInverseWorldTensor(*mCOMObject->Find<ICollisionBody>()->GetInertiaTensor(), bodyMatrix);
 
-		UMath::Vector3 mCOG = *mCOMObject->Find<ICollisionBody>()->GetCenterOfGravity();
-
-		NyaVec3 v22;
-		v22.x = ((bodyMatrix.x.x * mCOG.x) + (bodyMatrix.z.x * mCOG.z) + (bodyMatrix.y.x * mCOG.y));
-		v22.y = ((bodyMatrix.x.y * mCOG.x) + (bodyMatrix.z.y * mCOG.z) + (bodyMatrix.y.y * mCOG.y));
-		v22.z = ((bodyMatrix.x.z * mCOG.x) + (bodyMatrix.z.z * mCOG.z) + (bodyMatrix.y.z * mCOG.y));
-
 		auto vel = *GetLinearVelocity();
 		vel += (force * oom * dT);
 		SetLinearVelocity(&vel);

@@ -51,24 +51,11 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 
 #include "nya_commontimer.cpp"
 
-/*
-dT 0.06667
-oom 0.00138
-mass 727.00000
-force -161.71716 87390.30469 -488.61813
-src -0.00893 -4.47674 -0.01546
-add -0.01483 8.01378 -0.04481
-total_force -161.72 87390.30 -488.62
-total_torque 9032.70 84.98 -5453.57
-*/
-
 EngineRacer* pMWEngine;
 SuspensionRacerMW* pMWSuspension;
 CNyaTimer gRealTimer;
 void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	if (pThis != pMyPlugin->car) return;
-
-	pThis->ksPhysics->core->id->dWorldSetGravity(0.0, -9.81, 0.0);
 
 	gRealTimer.Process();
 
@@ -90,17 +77,18 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	//}
 
 	for (int i = 0; i < 4; i++) {
-		auto mwTire = pMWSuspension->mTires[GetMWWheelID(i)];
+		int mwTireId = GetMWWheelID(i);
+		auto mwTire = pMWSuspension->mTires[mwTireId];
 		auto tire = &pThis->tyres[i];
 		UMath::Matrix4 carMatrix;
 		tire->car->body->getWorldMatrix(&carMatrix, 0.0);
 
 		UMath::Matrix4 steerAngle;
 		steerAngle.SetIdentity();
-		steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-pMWSuspension->GetWheelSteer(i))));
+		steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-pMWSuspension->GetWheelSteer(mwTireId))));
 		tire->worldRotation = carMatrix * steerAngle;
 
-		tire->localWheelRotation.Rotate(NyaVec3(-pMWSuspension->GetWheelAngularVelocity(i) * dT, 0, 0));
+		tire->localWheelRotation.Rotate(NyaVec3(-pMWSuspension->GetWheelAngularVelocity(mwTireId) * dT, 0, 0));
 
 		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
 
@@ -108,30 +96,32 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
 		tire->contactNormal = UMath::Vector4To3(mwTire->mNormal);
 		tire->status.angularVelocity = mwTire->GetAngularVelocity();
-		tire->status.distToGround = pMWSuspension->GetWheelRoadHeight(i);
+		tire->status.distToGround = pMWSuspension->GetWheelRoadHeight(mwTireId);
 		tire->status.load = mwTire->GetLoad();
 		tire->status.isLocked = mwTire->IsBrakeLocked();
 		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
+		tire->status.slipRatio = 1.0 - mwTire->GetTraction();
 		tire->slidingVelocityX = mwTire->GetLateralSpeed();
-		tire->slidingVelocityY = mwTire->GetRoadSpeed() * (1.0 - mwTire->GetTraction());
-		tire->totalSlideVelocity = tire->slidingVelocityX + tire->slidingVelocityY;
+		tire->slidingVelocityY = mwTire->GetRoadSpeed() * tire->status.slipAngleRAD;
+		tire->totalSlideVelocity = std::abs(tire->slidingVelocityX) + std::abs(tire->slidingVelocityY);
 		tire->roadVelocityX = mwTire->GetLateralSpeed();
 		tire->roadVelocityY = mwTire->GetRoadSpeed();
 		tire->surfaceDef = mwTire->mWorldPos.fSurface;
-
-		// todo tire skidmarks don't work still
+		tire->driven = pMWSuspension->IsDriveWheel(mwTireId);
+		tire->status.normalizedSlideX = tire->slidingVelocityX / tire->totalSlideVelocity;
+		tire->status.normalizedSlideY = tire->slidingVelocityY / tire->totalSlideVelocity;
 	}
 
-	if (pThis->rigidAxle) {
-		pThis->rigidAxle->release();
-		pThis->rigidAxle = nullptr;
-	}
+	//if (pThis->rigidAxle) {
+	//	pThis->rigidAxle->release();
+	//	pThis->rigidAxle = nullptr;
+	//}
 
 	pThis->drivetrain.currentGear = pMWEngine->GetGear();
 	pThis->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
 	pThis->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pThis)->Find<IVehicle>()->GetAbsoluteSpeed();
 	pThis->drivetrain.acEngine.lastInput.rpm = pMWEngine->GetRPM();
-
+	pThis->drivetrain.engine.oldVelocity = pThis->drivetrain.engine.velocity;
 	pThis->drivetrain.engine.velocity = (pMWEngine->GetRPM() * 6.28318029705) / 60.0;
 
 	auto avatar = pMyPlugin->carAvatar;
