@@ -131,8 +131,9 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		pThis->fuel = pMWEngine->GetNOSCapacity() * pThis->maxFuel;
 
 		// getting below 1/8th of the bar causes a fuel warning popup
-		pThis->fuel *= 0.875;
-		pThis->fuel += 0.125 * pThis->maxFuel;
+		//pThis->fuel *= 0.875;
+		//pThis->fuel += 0.125 * pThis->maxFuel;
+		pThis->fuel = std::max(pThis->fuel, 0.01);
 	}
 
 	pThis->controls.gas = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
