@@ -37,13 +37,18 @@ auto GetStringNarrow(const std::wstring& string) {
 	return converter.to_bytes(string);
 }
 
+ACPlugin* pMyPlugin = nullptr;
+void __fastcall MWCarUpdate(Car* pThis, float dT);
+
 extern "C" __declspec(dllexport) bool __fastcall acpGetName(wchar_t* out) { wcscpy_s(out, 256, L"AssettoCorsaMWPhysics"); return true; }
 extern "C" __declspec(dllexport) bool __fastcall acpShutdown() { return true; }
 extern "C" __declspec(dllexport) bool __fastcall acpOnGui(void*) { return false; }
 extern "C" __declspec(dllexport) bool __fastcall acpGetControls(void*) { return false; }
-extern "C" __declspec(dllexport) bool __fastcall acpUpdate(void*, float dT) { return true; }
+extern "C" __declspec(dllexport) bool __fastcall acpUpdate(ACCarState*, float dT) {
+	MWCarUpdate(pMyPlugin->car, dT);
+	return true;
+}
 
-ACPlugin* pMyPlugin = nullptr;
 extern "C" __declspec(dllexport) bool __fastcall acpInit(ACPlugin* plugin) {
 	pMyPlugin = plugin;
 	WriteLog(std::format("acpInit {:X}", (uintptr_t)pMyPlugin));
