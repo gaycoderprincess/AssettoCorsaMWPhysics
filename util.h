@@ -45,7 +45,9 @@ extern "C" __declspec(dllexport) bool __fastcall acpShutdown() { return true; }
 extern "C" __declspec(dllexport) bool __fastcall acpOnGui(void*) { return false; }
 extern "C" __declspec(dllexport) bool __fastcall acpGetControls(void*) { return false; }
 extern "C" __declspec(dllexport) bool __fastcall acpUpdate(ACCarState*, float dT) {
-	MWCarUpdate(pMyPlugin->car, dT);
+	if (bCSPHacks) {
+		MWCarUpdate(pMyPlugin->car, dT);
+	}
 	return true;
 }
 
