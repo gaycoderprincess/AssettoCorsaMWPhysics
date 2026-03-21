@@ -60,6 +60,7 @@ SuspensionRacerMW* pMWSuspension;
 CNyaTimer gRealTimer;
 void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	if (pThis != pMyPlugin->car) return;
+	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
 	gRealTimer.Process();
 
@@ -201,7 +202,6 @@ void SwitchToMWPhysics() {
 }
 
 UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result) {
-	// todo add deltatime * velocity (0.003) this is one frame behind
 	auto car = pMyPlugin->car;
 	for (int i = 0; i < 4; i++) {
 		if (car->tyres[i].hub == susp) {
@@ -209,7 +209,7 @@ UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result)
 			pMWSuspension->GetWheelCenterPos(&result->p, GetMWWheelID(i));
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
-			result->p += velocity * 0.003;
+			result->p += velocity * 0.003; // this doesn't seem to work in csp
 			return result;
 		}
 	}
@@ -303,6 +303,10 @@ void OnPluginStartup() {
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
 	//NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
+
+	// csp hacks
+	NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2764D0, 0xC3); // disable Car::stepComponents
+	NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x283800, 0xC3); // disable Tyre::step
 
 	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);
 
