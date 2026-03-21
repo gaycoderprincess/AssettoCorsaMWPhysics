@@ -124,6 +124,10 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 	pThis->drivetrain.engine.oldVelocity = pThis->drivetrain.engine.velocity;
 	pThis->drivetrain.engine.velocity = (pMWEngine->GetRPM() * 6.28318029705) / 60.0;
 
+	pThis->controls.gas = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
+	pThis->controls.brake = GetPlayerInterface(pThis)->Find<IInput>()->GetControlBrake();
+	pThis->controls.handBrake = GetPlayerInterface(pThis)->Find<IInput>()->GetControlHandBrake();
+
 	auto avatar = pMyPlugin->carAvatar;
 	avatar->physicsState.engineRPM = pMWEngine->GetRPM();
 
@@ -213,6 +217,7 @@ UMath::Matrix4* MWSuspensionGetMatrix_DeleteBody(Suspension* susp, UMath::Matrix
 	if (susp->hub) {
 		susp->hub->release();
 		susp->hub = nullptr;
+		WriteLog("ISuspension type: Suspension");
 	}
 	return MWSuspensionGetMatrix(susp, result);
 }
@@ -221,6 +226,11 @@ UMath::Matrix4* MWSuspensionStrutGetMatrix_DeleteBody(SuspensionStrut* susp, UMa
 	if (susp->hub) {
 		susp->hub->release();
 		susp->hub = nullptr;
+		WriteLog("ISuspension type: SuspensionStrut");
+	}
+	if (susp->strutBody) {
+		susp->strutBody->release();
+		susp->strutBody = nullptr;
 	}
 	return MWSuspensionGetMatrix(susp, result);
 }
@@ -229,6 +239,7 @@ UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Ma
 	if (susp->hub) {
 		susp->hub->release();
 		susp->hub = nullptr;
+		WriteLog("ISuspension type: SuspensionML");
 	}
 	return MWSuspensionGetMatrix(susp, result);
 }

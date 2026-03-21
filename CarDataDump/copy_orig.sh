@@ -70,3 +70,7 @@ cp orig_mw_full/elise.conf lotus_elise_sc_s2.conf
 cp orig_mw_full/elise_top.conf lotus_elise_sc_s2_top.conf
 cp orig_cb_full/zonda.conf pagani_zonda_r.conf
 cp orig_cb_full/zonda_top.conf pagani_zonda_r_top.conf
+cp orig_mw_full/gti.conf golf_mk5_stock.conf
+cp orig_mw_full/gti_top.conf golf_mk5_stock_top.conf
+cp orig_mw_full/gti.conf golf_mk5_tuned.conf
+cp orig_mw_full/gti_top.conf golf_mk5_tuned_top.conf
