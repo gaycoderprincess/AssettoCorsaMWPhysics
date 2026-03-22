@@ -190,6 +190,8 @@ void SwitchToMWPhysics(Car* ply) {
 		}
 	}
 
+	WriteLog(std::format("Assigning car {:X} to player ID {}", (uintptr_t)ply, playerId));
+
 	if (playerId < 0) return;
 
 	aPlayerInterfaces[playerId].aInterfaces.clear();
@@ -217,26 +219,27 @@ void SwitchToMWPhysics(Car* ply) {
 	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.data.limiter));
 }
 
-CNyaTimer gRealTimer;
+std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
-	gRealTimer.Process();
-
 	ACCarPrePhysics(pCar, dT);
 
-	SimSystem::fSimTime += dT;
+	if (pCar == pMyPlugin->car) {
+		SimSystem::fSimTime += dT;
+	}
 	fGlobalDeltaTime = dT;
 
 	EngineRacer* pEngine = GetCarMWEngine(pCar);
 	SuspensionRacerMW* pSuspension = GetCarMWSuspension(pCar);
-	if (!pEngine || !pSuspension) {
-		SwitchToMWPhysics(pCar);
-		pEngine = GetCarMWEngine(pCar);
-		pSuspension = GetCarMWSuspension(pCar);
-	}
+	if (!pEngine || !pSuspension) return;
 
-	DoShifting(pCar);
+	mCarUpdateMutex.lock();
+
+	auto humanai = GetPlayerInterface(pCar)->Find<IHumanAI>();
+	if (humanai) {
+		DoShifting(pCar);
+	}
 
 	pEngine->OnTaskSimulate(dT);
 	pSuspension->OnTaskSimulate(dT);
@@ -283,10 +286,15 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		pCar->rigidAxle = nullptr;
 	}
 
+	auto iinput = GetPlayerInterface(pCar)->Find<IInput>();
+	pCar->controls.gas = iinput->GetControlGas();
+	pCar->controls.brake = iinput->GetControlBrake();
+	pCar->controls.handBrake = iinput->GetControlHandBrake();
+
 	pCar->drivetrain.currentGear = pEngine->GetGear();
 	pCar->drivetrain.isGearGrinding = pEngine->IsGearChanging();
 	pCar->drivetrain.acEngine.status.turboBoost = pEngine->mInductionBoost; // todo is this correct?
-	pCar->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pCar)->Find<IInput>()->GetControlGas();
+	pCar->drivetrain.acEngine.lastInput.gasInput = iinput->GetControlGas();
 	pCar->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pCar)->Find<IVehicle>()->GetAbsoluteSpeed();
 
 	auto rpm = pEngine->GetRPM();
@@ -311,32 +319,45 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		pCar->fuel -= rpm * dT * pCar->drivetrain.acEngine.gasUsage * turboConsumption * pCar->fuelConsumptionK * 0.001 * pCar->ksPhysics->fuelConsumptionRate;
 	}
 
-	pCar->controls.gas = GetPlayerInterface(pCar)->Find<IInput>()->GetControlGas();
-	pCar->controls.brake = GetPlayerInterface(pCar)->Find<IInput>()->GetControlBrake();
-	pCar->controls.handBrake = GetPlayerInterface(pCar)->Find<IInput>()->GetControlHandBrake();
-
-	static bool bNOSLast = false;
-	if (bNOSLast != pEngine->IsNOSEngaged()) {
-		static auto audio = NyaAudio::LoadFile("plugins/nitro_on.wav");
-		if (audio && pEngine->IsNOSEngaged()) {
-			NyaAudio::Stop(audio);
-			NyaAudio::SkipTo(audio, 0, false);
-			NyaAudio::SetVolume(audio, 1.0);
-			NyaAudio::Play(audio);
+	if (humanai) {
+		static bool bNOSLast = false;
+		if (bNOSLast != pEngine->IsNOSEngaged()) {
+			static auto audio = NyaAudio::LoadFile("plugins/nitro_on.wav");
+			if (audio && pEngine->IsNOSEngaged()) {
+				NyaAudio::Stop(audio);
+				NyaAudio::SkipTo(audio, 0, false);
+				NyaAudio::SetVolume(audio, 1.0);
+				NyaAudio::Play(audio);
+			}
 		}
+		static auto audio = NyaAudio::LoadFile("plugins/nitro_loop.wav");
+		if (audio) {
+			if (pEngine->IsNOSEngaged()) {
+				if (NyaAudio::IsFinishedPlaying(audio)) {
+					NyaAudio::SkipTo(audio, 0, false);
+					NyaAudio::SetVolume(audio, 1.0);
+					NyaAudio::Play(audio);
+				}
+			}
+			else {
+				NyaAudio::Stop(audio);
+			}
+		}
+		bNOSLast = pEngine->IsNOSEngaged();
+
+		RefreshInputs();
 	}
-	bNOSLast = pEngine->IsNOSEngaged();
 
 	ACCarPostPhysics(pCar, dT);
 
-	RefreshInputs();
+	mCarUpdateMutex.unlock();
 }
 
 UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix4* result) {
 	auto mwSusp = GetCarMWSuspension(car);
 	if (!mwSusp) {
-		SwitchToMWPhysics(car);
-		mwSusp = GetCarMWSuspension(car);
+		result->SetIdentity();
+		return result;
 	}
 	for (int i = 0; i < 4; i++) {
 		if (car->tyres[i].hub == susp) {
@@ -432,6 +453,11 @@ void OnPluginStartup() {
 	}
 
 	SwitchToMWPhysics(pMyPlugin->car);
+	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
+		auto car = pMyPlugin->sim->cars[i]->physics;
+		if (car == pMyPlugin->car) continue;
+		SwitchToMWPhysics(car);
+	}
 
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
 	//NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x26308C, &MWCarUpdate);
