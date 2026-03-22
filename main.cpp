@@ -475,6 +475,7 @@ void OnPluginStartup() {
 		bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
 		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
 		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
+		bCSPHacks = config["csp_compatibility_hack"].value_or(bCSPHacks);
 	}
 
 	SwitchToMWPhysics(pMyPlugin->car);
@@ -484,10 +485,9 @@ void OnPluginStartup() {
 		SwitchToMWPhysics(car);
 	}
 
-	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
-	//NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x26308C, &MWCarUpdate);
-	//NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x2648F9, &MWCarUpdate);
-	//NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x264B0E, &MWCarUpdate);
+	if (!bCSPHacks) {
+		NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
+	}
 	ReplaceSuspensionVTable(0x4FF878);
 	ReplaceSuspensionVTable(0x4FFC88);
 	ReplaceSuspensionVTable(0x4FFE98);
