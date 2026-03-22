@@ -191,7 +191,7 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 
 		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
 
-		//tire->worldPosition = *pMWSuspension->GetWheelPos(i);
+		pMWSuspension->GetWheelCenterPos(&tire->worldPosition, mwTireId);
 		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
 		tire->contactNormal = UMath::Vector4To3(mwTire->mNormal);
 		tire->status.angularVelocity = mwTire->GetAngularVelocity();
@@ -219,7 +219,7 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 
 	pThis->drivetrain.currentGear = pMWEngine->GetGear();
 	pThis->drivetrain.isGearGrinding = pMWEngine->IsGearChanging();
-	pThis->drivetrain.acEngine.status.turboBoost = pMWEngine->GetInductionPSI(); // todo is this correct?
+	pThis->drivetrain.acEngine.status.turboBoost = pMWEngine->mInductionBoost; // todo is this correct?
 	pThis->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
 	pThis->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pThis)->Find<IVehicle>()->GetAbsoluteSpeed();
 
@@ -239,6 +239,10 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		//pThis->fuel *= 0.875;
 		//pThis->fuel += 0.125 * pThis->maxFuel;
 		pThis->fuel = std::max(pThis->fuel, 0.01);
+	}
+	else {
+		auto turboConsumption = pMWEngine->mInductionBoost + 1.0;
+		pThis->fuel -= rpm * dT * pThis->drivetrain.acEngine.gasUsage * turboConsumption * pThis->fuelConsumptionK * 0.001 * pThis->ksPhysics->fuelConsumptionRate;
 	}
 
 	pThis->controls.gas = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
