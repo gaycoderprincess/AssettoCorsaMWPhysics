@@ -399,7 +399,7 @@ void SuspensionRacerMW::CreateTires() {
 	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
 	//float fWheelY = -dimension.y;
-	float fWheelY = 0.1;
+	float fWheelY = fTireOffset;
 
 	for (int i = 0; i < 4; i++) {
 		auto acTire = &pCar->tyres[GetMWWheelID(i)];
