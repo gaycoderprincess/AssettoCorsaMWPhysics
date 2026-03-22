@@ -74,7 +74,7 @@ struct MWCarTuning {
 	// pvehicle
 	float TENSOR_SCALE[3];
 
-	// extra tires stuff for flatout
+	// extra tires stuff for ac
 	AxlePair ASPECT_RATIO;
 	AxlePair RIM_SIZE;
 	AxlePair SECTION_WIDTH;
