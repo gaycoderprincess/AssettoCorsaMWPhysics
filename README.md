@@ -22,10 +22,6 @@ Massive thanks to everyone involved with [dbalatoni13's MW reverse engineering p
 - Only cars that have configs in the `CarDataDump` folder work in-game! Copy a car from the `orig_mw_full` or `orig_cb_full` subfolders and rename it to your desired car's name to make it work!
 - This mod is NOT compatible with CSP!!! A hack can be enabled in the config to make it kinda work, but it requires some CSP settings to be disabled, and is still INSANELY broken
 
-## Known issues
-
-- Manual transmission doesn't work yet
-
 ## Building
 
 Building is done on an Arch Linux system with CLion and vcpkg being used for the build process. 
