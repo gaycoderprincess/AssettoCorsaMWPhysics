@@ -15,7 +15,7 @@
 void OnPluginStartup();
 
 bool bRevLimiter = true;
-//bool bSpeedbreakerEnabled = true;
+bool bSpeedbreakerEnabled = false;
 bool bNitrousEnabled = true;
 bool bCSPHacks = false;
 float fUpgradeLevel = 1.0;
@@ -219,6 +219,48 @@ void SwitchToMWPhysics(Car* ply) {
 	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.data.limiter));
 }
 
+float fOverrideTimescale = 1.0;
+void DoGameBreaker(float real_time_delta, IPlayer* player) {
+	player->DoGameBreaker(real_time_delta * fOverrideTimescale, real_time_delta);
+
+	float speed = 1.0;
+	float target = 1.0;
+	if (player->InGameBreaker()) {
+		target = 0.25;
+		speed = 2.0;
+	}
+	else {
+		target = 1.0;
+		speed = 0.5;
+	}
+
+	if (target == fOverrideTimescale) return;
+
+	auto modify = speed * real_time_delta;
+	if (fOverrideTimescale < target) {
+		fOverrideTimescale += modify;
+		if (fOverrideTimescale > target) fOverrideTimescale = target;
+	}
+	else if (fOverrideTimescale > target) {
+		fOverrideTimescale -= modify;
+		if (fOverrideTimescale > target) fOverrideTimescale = target;
+	}
+}
+
+void SpeedbreakerLoop() {
+	if (!bSpeedbreakerEnabled) return;
+
+	static CNyaTimer gRealTimer;
+	gRealTimer.Process();
+
+	if (auto pPlayer = GetPlayerInterface(pMyPlugin->car)->GetPlayer()) {
+		if (IsKeyJustPressed('X') || IsPadKeyJustPressed(NYA_PAD_KEY_X, -1)) {
+			pPlayer->ToggleGameBreaker();
+		}
+		DoGameBreaker(gRealTimer.fDeltaTime, pPlayer);
+	}
+}
+
 std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
@@ -227,6 +269,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 
 	if (pCar == pMyPlugin->car) {
 		SimSystem::fSimTime += dT;
+		SpeedbreakerLoop();
 	}
 	fGlobalDeltaTime = dT;
 
@@ -304,6 +347,11 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pCar->rigidAxle) {
 		pCar->rigidAxle->release();
 		pCar->rigidAxle = nullptr;
+	}
+
+	if (pCar->fuelTankBody) {
+		pCar->fuelTankBody->release();
+		pCar->fuelTankBody = nullptr;
 	}
 
 	auto iinput = GetPlayerInterface(pCar)->Find<IInput>();
@@ -385,7 +433,7 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 			mwSusp->GetWheelCenterPos(&result->p, GetMWWheelID(i));
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
-			result->p += velocity * 0.003; // this doesn't seem to work in csp
+			result->p += velocity * 0.003;
 			return result;
 		}
 	}
@@ -477,10 +525,14 @@ float GetOptimalBrakeHooked() {
 	return 1.0;
 }
 
+void MWTimeUpdate(PhysicsEngine* pThis, float dt, double currentTime, double gt) {
+	pThis->step(dt * fOverrideTimescale, currentTime, gt);
+}
+
 void OnPluginStartup() {
 	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
 		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
-		//bSpeedbreakerEnabled = config["speedbreaker"].value_or(bSpeedbreakerEnabled);
+		bSpeedbreakerEnabled = config["speedbreaker"].value_or(bSpeedbreakerEnabled);
 		bNitrousEnabled = config["nitrous"].value_or(bNitrousEnabled);
 		bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
 		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
@@ -488,11 +540,20 @@ void OnPluginStartup() {
 		bCSPHacks = config["csp_compatibility_hack"].value_or(bCSPHacks);
 	}
 
+	if (pMyPlugin->sim->client) {
+		bSpeedbreakerEnabled = false;
+	}
+
 	SwitchToMWPhysics(pMyPlugin->car);
 	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
 		auto car = pMyPlugin->sim->cars[i]->physics;
 		if (car == pMyPlugin->car) continue;
 		SwitchToMWPhysics(car);
+	}
+
+	if (bSpeedbreakerEnabled) {
+		NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1232DF, &MWTimeUpdate);
+		NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1236BF, &MWTimeUpdate);
 	}
 
 	if (!bCSPHacks) {
