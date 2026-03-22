@@ -30,25 +30,25 @@ public:
 	}
 	virtual float GetControlGas() {
 		if (AreControlsBlocked()) return 0.0;
-		if (ShouldPlayerUseOriginalControls()) return GetOriginalControlGas();
+		if (ShouldUseOriginalControls()) return GetOriginalControlGas();
 		if (IsKeyPressed(VK_UP)) return 1.0;
 		return GetPadKeyState(NYA_PAD_KEY_RT, -1) / 255.0;
 	}
 	virtual float GetControlBrake() {
 		if (AreControlsBlocked()) return 0.0;
-		if (ShouldPlayerUseOriginalControls()) return GetOriginalControlBrake();
+		if (ShouldUseOriginalControls()) return GetOriginalControlBrake();
 		if (IsKeyPressed(VK_DOWN)) return 1.0;
 		return GetPadKeyState(NYA_PAD_KEY_LT, -1) / 255.0;
 	}
 	virtual float GetControlHandBrake() {
 		if (AreControlsBlocked()) return 1.0;
-		if (ShouldPlayerUseOriginalControls()) return GetOriginalControlHandBrake();
+		if (ShouldUseOriginalControls()) return GetOriginalControlHandBrake();
 		if (IsKeyPressed(VK_SPACE) || IsPadKeyPressed(NYA_PAD_KEY_A, -1)) return 1.0;
 		return 0.0;
 	}
 	virtual float GetControlSteering() {
 		if (AreControlsBlocked()) return 0.0;
-		if (ShouldPlayerUseOriginalControls()) return GetOriginalControlSteering();
+		if (ShouldUseOriginalControls()) return GetOriginalControlSteering();
 
 		float f = 0;
 		if (IsKeyPressed(VK_LEFT)) f += 1.0;
