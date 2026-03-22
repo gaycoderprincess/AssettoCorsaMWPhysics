@@ -462,6 +462,11 @@ UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Ma
 	return MWSuspensionGetMatrix(susp->car, susp, result);
 }
 
+// fixes brakes with keyboard controls, fixes ai brakes
+float GetOptimalBrakeHooked() {
+	return 1.0;
+}
+
 void OnPluginStartup() {
 	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
 		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
@@ -491,6 +496,7 @@ void OnPluginStartup() {
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
+	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x27C320, &GetOptimalBrakeHooked);
 
 	if (bCSPHacks) {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x276AE0, 0xC3); // disable Car::updateAirPressure
