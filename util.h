@@ -53,12 +53,12 @@ extern "C" __declspec(dllexport) bool __fastcall acpUpdate(ACCarState*, float dT
 
 extern "C" __declspec(dllexport) bool __fastcall acpInit(ACPlugin* plugin) {
 	pMyPlugin = plugin;
-	WriteLog(std::format("acpInit {:X}", (uintptr_t)pMyPlugin));
-	WriteLog(std::format("carAvatar {:X}", (uintptr_t)pMyPlugin->carAvatar));
-	WriteLog(std::format("car {:X}", (uintptr_t)pMyPlugin->car));
-	WriteLog(std::format("sim {:X}", (uintptr_t)pMyPlugin->sim));
-	WriteLog(std::format("car unixName {}", GetStringNarrow(pMyPlugin->car->unixName.c_str())));
-	WriteLog(std::format("car screenName {}", GetStringNarrow(pMyPlugin->car->screenName.c_str())));
+	WriteLog(std::format("acpInit {:X}", (uintptr_t)plugin));
+	WriteLog(std::format("carAvatar {:X}", (uintptr_t)plugin->carAvatar));
+	WriteLog(std::format("car {:X}", (uintptr_t)plugin->car));
+	WriteLog(std::format("sim {:X}", (uintptr_t)plugin->sim));
+	WriteLog(std::format("car unixName {}", GetStringNarrow(plugin->car->unixName.c_str())));
+	WriteLog(std::format("car screenName {}", GetStringNarrow(plugin->car->screenName.c_str())));
 	OnPluginStartup();
 	return true;
 }

@@ -57,9 +57,25 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 #include "decomp/behaviors/SuspensionRacer.cpp"
 #include "decomp/behaviors/EngineRacer.cpp"
 
-EngineRacer* pMWEngine;
-SuspensionRacerMW* pMWSuspension;
+std::vector<EngineRacer*> aEngines;
+std::vector<SuspensionRacerMW*> aSuspensions;
+EngineRacer* GetCarMWEngine(Car* pCar) {
+	for (auto& engine : aEngines) {
+		if (engine->pCar == pCar) return engine;
+	}
+	return nullptr;
+}
+
+SuspensionRacerMW* GetCarMWSuspension(Car* pCar) {
+	for (auto& susp : aSuspensions) {
+		if (susp->pCar == pCar) return susp;
+	}
+	return nullptr;
+}
+
 void ACCarPrePhysics(Car* pThis, float dT) {
+	if (bCSPHacks) return;
+
 	pThis->pollControls(dT);
 
 	auto lastLights = pThis->controlsProvider->getAction(DriverActions::eHeadlightsSwitch);
@@ -78,14 +94,16 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 	pThis->penaltyTime = 0.0;
 	pThis->penaltyTimeAccumulator = 0.0;
 
-	pThis->finalSteerAngleSignal = DEG2RAD(pMWSuspension->mSteering.Previous);
+	pThis->finalSteerAngleSignal = DEG2RAD(GetCarMWSuspension(pThis)->mSteering.Previous);
 	pThis->body->getVelocity(&pThis->lastVelocity);
 }
 
 void ACCarPostPhysics(Car* pThis, float dT) {
+	if (bCSPHacks) return;
+
 	// vanilla components
 	pThis->colliderManager.step(dT);
-	pThis->setupManager.step(dT);
+	//pThis->setupManager.step(dT); // crash in PhysicsCore::reseatDistanceJointLocal
 	if (!pThis->physicsGUID) {
 		pThis->telemetry.step(dT);
 		pThis->driftMode.step(dT);
@@ -105,6 +123,9 @@ void ACCarPostPhysics(Car* pThis, float dT) {
 
 void DoShifting(Car* pCar) {
 	auto iinput = GetPlayerInterface(pCar)->Find<IInput>();
+	if (!GetPlayerInterface(pCar)->Find<IHumanAI>()) return; // ai uses automatic shift
+
+	auto pMWEngine = GetCarMWEngine(pCar);
 
 	if (pCar->controls.requestedGearIndex != -1) {
 		auto nextGear = pCar->controls.requestedGearIndex;
@@ -158,44 +179,89 @@ void DoShifting(Car* pCar) {
 	bLastDown = currentDown;
 }
 
+void SwitchToMWPhysics(Car* ply) {
+	if (GetCarMWEngine(ply) || GetCarMWSuspension(ply)) return;
+
+	int playerId = -1;
+	for (auto& data : aPlayerInterfaces) {
+		if (data.pCar == nullptr) {
+			playerId = &data - &aPlayerInterfaces[0];
+			break;
+		}
+	}
+
+	if (playerId < 0) return;
+
+	aPlayerInterfaces[playerId].aInterfaces.clear();
+	aPlayerInterfaces[playerId].pCar = ply;
+	aPlayerInterfaces[playerId].Add(new IVehicle(ply));
+	aPlayerInterfaces[playerId].Add(new IRigidBodyMW(ply));
+	aPlayerInterfaces[playerId].Add(new ICollisionBody(ply));
+	if (playerId == 0) {
+		aPlayerInterfaces[playerId].Add(new IInput(ply));
+		aPlayerInterfaces[playerId].Add(new IPlayer(ply));
+		aPlayerInterfaces[playerId].Add(new IHumanAI());
+	}
+	else {
+		aPlayerInterfaces[playerId].Add(new IInputAI(ply));
+	}
+
+	auto engine = new EngineRacer(ply);
+	auto susp = new SuspensionRacerMW(ply);
+	engine->OnBehaviorChange();
+	susp->OnBehaviorChange();
+	aEngines.push_back(engine);
+	aSuspensions.push_back(susp);
+
+	WriteLog(std::format("MW max RPM {}", engine->GetMaxRPM()));
+	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.data.limiter));
+}
+
 CNyaTimer gRealTimer;
-void __fastcall MWCarUpdate(Car* pThis, float dT) {
-	if (pThis != pMyPlugin->car) return;
+void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
 	gRealTimer.Process();
 
-	ACCarPrePhysics(pThis, dT);
+	ACCarPrePhysics(pCar, dT);
 
 	SimSystem::fSimTime += dT;
 	fGlobalDeltaTime = dT;
 
-	DoShifting(pThis);
+	EngineRacer* pEngine = GetCarMWEngine(pCar);
+	SuspensionRacerMW* pSuspension = GetCarMWSuspension(pCar);
+	if (!pEngine || !pSuspension) {
+		SwitchToMWPhysics(pCar);
+		pEngine = GetCarMWEngine(pCar);
+		pSuspension = GetCarMWSuspension(pCar);
+	}
 
-	pMWEngine->OnTaskSimulate(dT);
-	pMWSuspension->OnTaskSimulate(dT);
+	DoShifting(pCar);
+
+	pEngine->OnTaskSimulate(dT);
+	pSuspension->OnTaskSimulate(dT);
 
 	for (int i = 0; i < 4; i++) {
 		int mwTireId = GetMWWheelID(i);
-		auto mwTire = pMWSuspension->mTires[mwTireId];
-		auto tire = &pThis->tyres[i];
+		auto mwTire = pSuspension->mTires[mwTireId];
+		auto tire = &pCar->tyres[i];
 		UMath::Matrix4 carMatrix;
 		tire->car->body->getWorldMatrix(&carMatrix, 0.0);
 
 		UMath::Matrix4 steerAngle;
 		steerAngle.SetIdentity();
-		steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-pMWSuspension->GetWheelSteer(mwTireId))));
+		steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-pSuspension->GetWheelSteer(mwTireId))));
 		tire->worldRotation = carMatrix * steerAngle;
 
-		tire->localWheelRotation.Rotate(NyaVec3(-pMWSuspension->GetWheelAngularVelocity(mwTireId) * dT, 0, 0));
+		tire->localWheelRotation.Rotate(NyaVec3(-pSuspension->GetWheelAngularVelocity(mwTireId) * dT, 0, 0));
 
 		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
 
-		pMWSuspension->GetWheelCenterPos(&tire->worldPosition, mwTireId);
+		pSuspension->GetWheelCenterPos(&tire->worldPosition, mwTireId);
 		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
 		tire->contactNormal = UMath::Vector4To3(mwTire->mNormal);
 		tire->status.angularVelocity = mwTire->GetAngularVelocity();
-		tire->status.distToGround = pMWSuspension->GetWheelRoadHeight(mwTireId);
+		tire->status.distToGround = pSuspension->GetWheelRoadHeight(mwTireId);
 		tire->status.load = mwTire->GetLoad(); // todo this is 0.0-1.0
 		tire->status.isLocked = mwTire->IsBrakeLocked();
 		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
@@ -207,102 +273,75 @@ void __fastcall MWCarUpdate(Car* pThis, float dT) {
 		tire->roadVelocityX = mwTire->GetLateralSpeed();
 		tire->roadVelocityY = mwTire->GetRoadSpeed();
 		tire->surfaceDef = mwTire->mWorldPos.fSurface;
-		tire->driven = pMWSuspension->IsDriveWheel(mwTireId);
+		tire->driven = pSuspension->IsDriveWheel(mwTireId);
 		tire->status.normalizedSlideX = tire->slidingVelocityX / tire->totalSlideVelocity;
 		tire->status.normalizedSlideY = tire->slidingVelocityY / tire->totalSlideVelocity;
 	}
 
-	if (pThis->rigidAxle) {
-		pThis->rigidAxle->release();
-		pThis->rigidAxle = nullptr;
+	if (pCar->rigidAxle) {
+		pCar->rigidAxle->release();
+		pCar->rigidAxle = nullptr;
 	}
 
-	pThis->drivetrain.currentGear = pMWEngine->GetGear();
-	pThis->drivetrain.isGearGrinding = pMWEngine->IsGearChanging();
-	pThis->drivetrain.acEngine.status.turboBoost = pMWEngine->mInductionBoost; // todo is this correct?
-	pThis->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
-	pThis->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pThis)->Find<IVehicle>()->GetAbsoluteSpeed();
+	pCar->drivetrain.currentGear = pEngine->GetGear();
+	pCar->drivetrain.isGearGrinding = pEngine->IsGearChanging();
+	pCar->drivetrain.acEngine.status.turboBoost = pEngine->mInductionBoost; // todo is this correct?
+	pCar->drivetrain.acEngine.lastInput.gasInput = GetPlayerInterface(pCar)->Find<IInput>()->GetControlGas();
+	pCar->drivetrain.acEngine.lastInput.carSpeed = GetPlayerInterface(pCar)->Find<IVehicle>()->GetAbsoluteSpeed();
 
-	auto rpm = pMWEngine->GetRPM();
-	rpm /= pMWEngine->GetMaxRPM();
-	rpm *= pThis->drivetrain.acEngine.data.limiter;
+	auto rpm = pEngine->GetRPM();
+	rpm /= pEngine->GetMaxRPM();
+	rpm *= pCar->drivetrain.acEngine.data.limiter;
 
-	pThis->drivetrain.acEngine.lastInput.rpm = rpm;
-	pThis->drivetrain.engine.oldVelocity = pThis->drivetrain.engine.velocity;
-	pThis->drivetrain.engine.velocity = (rpm * 6.28318029705) / 60.0;
+	pCar->drivetrain.acEngine.lastInput.rpm = rpm;
+	pCar->drivetrain.engine.oldVelocity = pCar->drivetrain.engine.velocity;
+	pCar->drivetrain.engine.velocity = (rpm * 6.28318029705) / 60.0;
 
 	// reusing the fuel gauge as nitrous
 	if (bNitrousEnabled) {
-		pThis->fuel = pMWEngine->GetNOSCapacity() * pThis->maxFuel;
+		pCar->fuel = pEngine->GetNOSCapacity() * pCar->maxFuel;
 
 		// getting below 1/8th of the bar causes a fuel warning popup
-		//pThis->fuel *= 0.875;
-		//pThis->fuel += 0.125 * pThis->maxFuel;
-		pThis->fuel = std::max(pThis->fuel, 0.01);
+		//pCar->fuel *= 0.875;
+		//pCar->fuel += 0.125 * pCar->maxFuel;
+		pCar->fuel = std::max(pCar->fuel, 0.01);
 	}
 	else {
-		auto turboConsumption = pMWEngine->mInductionBoost + 1.0;
-		pThis->fuel -= rpm * dT * pThis->drivetrain.acEngine.gasUsage * turboConsumption * pThis->fuelConsumptionK * 0.001 * pThis->ksPhysics->fuelConsumptionRate;
+		auto turboConsumption = pEngine->mInductionBoost + 1.0;
+		pCar->fuel -= rpm * dT * pCar->drivetrain.acEngine.gasUsage * turboConsumption * pCar->fuelConsumptionK * 0.001 * pCar->ksPhysics->fuelConsumptionRate;
 	}
 
-	pThis->controls.gas = GetPlayerInterface(pThis)->Find<IInput>()->GetControlGas();
-	pThis->controls.brake = GetPlayerInterface(pThis)->Find<IInput>()->GetControlBrake();
-	pThis->controls.handBrake = GetPlayerInterface(pThis)->Find<IInput>()->GetControlHandBrake();
+	pCar->controls.gas = GetPlayerInterface(pCar)->Find<IInput>()->GetControlGas();
+	pCar->controls.brake = GetPlayerInterface(pCar)->Find<IInput>()->GetControlBrake();
+	pCar->controls.handBrake = GetPlayerInterface(pCar)->Find<IInput>()->GetControlHandBrake();
 
 	static bool bNOSLast = false;
-	if (bNOSLast != pMWEngine->IsNOSEngaged()) {
+	if (bNOSLast != pEngine->IsNOSEngaged()) {
 		static auto audio = NyaAudio::LoadFile("plugins/nitro_on.wav");
-		if (audio && pMWEngine->IsNOSEngaged()) {
+		if (audio && pEngine->IsNOSEngaged()) {
 			NyaAudio::Stop(audio);
 			NyaAudio::SkipTo(audio, 0, false);
 			NyaAudio::SetVolume(audio, 1.0);
 			NyaAudio::Play(audio);
 		}
 	}
-	bNOSLast = pMWEngine->IsNOSEngaged();
+	bNOSLast = pEngine->IsNOSEngaged();
 
-	ACCarPostPhysics(pThis, dT);
+	ACCarPostPhysics(pCar, dT);
 
 	RefreshInputs();
 }
 
-void SwitchToMWPhysics() {
-	if (pMWEngine || pMWSuspension) return;
-
-	auto ply = pMyPlugin->car;
-	//for (int i = 0; i < 4; i++) {
-	//	ply->tyres[i].hub = new ACMWSuspension();
-	//}
-	//for (int i = 0; i < ply->suspensions.size(); i++) {
-	//	ply->suspensions[i] = new ACMWSuspension();
-	//}
-
-	aPlayerInterfaces[0].aInterfaces.clear();
-	aPlayerInterfaces[0].pCar = ply;
-	aPlayerInterfaces[0].Add(new IVehicle(ply));
-	aPlayerInterfaces[0].Add(new IRigidBodyMW(ply));
-	aPlayerInterfaces[0].Add(new ICollisionBody(ply));
-	aPlayerInterfaces[0].Add(new IInput(ply));
-	aPlayerInterfaces[0].Add(new IPlayer(ply));
-	aPlayerInterfaces[0].Add(new IHumanAI());
-
-	auto engine = new EngineRacer(ply);
-	auto susp = new SuspensionRacerMW(ply);
-	engine->OnBehaviorChange();
-	susp->OnBehaviorChange();
-	pMWEngine = engine;
-	pMWSuspension = susp;
-
-	WriteLog(std::format("MW max RPM {}", pMWEngine->GetMaxRPM()));
-	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.data.limiter));
-}
-
-UMath::Matrix4* MWSuspensionGetMatrix(ISuspension* susp, UMath::Matrix4* result) {
-	auto car = pMyPlugin->car;
+UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix4* result) {
+	auto mwSusp = GetCarMWSuspension(car);
+	if (!mwSusp) {
+		SwitchToMWPhysics(car);
+		mwSusp = GetCarMWSuspension(car);
+	}
 	for (int i = 0; i < 4; i++) {
 		if (car->tyres[i].hub == susp) {
 			car->body->getWorldMatrix(result, 0.0);
-			pMWSuspension->GetWheelCenterPos(&result->p, GetMWWheelID(i));
+			mwSusp->GetWheelCenterPos(&result->p, GetMWWheelID(i));
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
 			result->p += velocity * 0.003; // this doesn't seem to work in csp
@@ -331,7 +370,6 @@ float MWSuspensionGetMass(ISuspension* susp) { return 1.0; }
 void MWSuspensionAddForceAtPos(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* pos, int64_t driven, bool addToSteerTorque) {}
 
 void ReplaceSuspensionVTable(uintptr_t getHubWorldMatrix_addr) {
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr, &MWSuspensionGetMatrix); // getHubWorldMatrix
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x8, &MWSuspensionGetPointVelocity); // getPointVelocity
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x10, &MWSuspensionAddForceAtPos); // addForceAtPos
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x18, &MWSuspensionGetVelocity); // addTorque
@@ -350,7 +388,7 @@ UMath::Matrix4* MWSuspensionGetMatrix_DeleteBody(Suspension* susp, UMath::Matrix
 		susp->hub = nullptr;
 		WriteLog("ISuspension type: Suspension");
 	}
-	return MWSuspensionGetMatrix(susp, result);
+	return MWSuspensionGetMatrix(susp->car, susp, result);
 }
 
 UMath::Matrix4* MWSuspensionStrutGetMatrix_DeleteBody(SuspensionStrut* susp, UMath::Matrix4* result) {
@@ -363,7 +401,15 @@ UMath::Matrix4* MWSuspensionStrutGetMatrix_DeleteBody(SuspensionStrut* susp, UMa
 		susp->strutBody->release();
 		susp->strutBody = nullptr;
 	}
-	return MWSuspensionGetMatrix(susp, result);
+	return MWSuspensionGetMatrix(susp->car, susp, result);
+}
+
+UMath::Matrix4* MWSuspensionAxleGetMatrix_DeleteBody(SuspensionAxle* susp, UMath::Matrix4* result) {
+	if (susp->axle) {
+		susp->axle = nullptr;
+		WriteLog("ISuspension type: SuspensionAxle");
+	}
+	return MWSuspensionGetMatrix(susp->car, susp, result);
 }
 
 UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Matrix4* result) {
@@ -372,7 +418,7 @@ UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Ma
 		susp->hub = nullptr;
 		WriteLog("ISuspension type: SuspensionML");
 	}
-	return MWSuspensionGetMatrix(susp, result);
+	return MWSuspensionGetMatrix(susp->car, susp, result);
 }
 
 void OnPluginStartup() {
@@ -385,7 +431,7 @@ void OnPluginStartup() {
 		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
 	}
 
-	SwitchToMWPhysics();
+	SwitchToMWPhysics(pMyPlugin->car);
 
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
 	//NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x26308C, &MWCarUpdate);
@@ -397,12 +443,33 @@ void OnPluginStartup() {
 	ReplaceSuspensionVTable(0x5001A8);
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FF878, &MWSuspensionGetMatrix_DeleteBody); // Suspension
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
-	//NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
+	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
 
 	if (bCSPHacks) {
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x276AE0, 0xC3); // disable Car::updateAirPressure
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B9590, 0xC3); // disable Autoclutch::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2769F0, 0xC3); // disable Car::stepThermalObjects
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2764D0, 0xC3); // disable Car::stepComponents
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28E640, 0xC3); // disable BrakeSystem::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BB460, 0xC3); // disable EDL::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x283800, 0xC3); // disable Tyre::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B3960, 0xC3); // disable HeaveSpring::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B4E60, 0xC3); // disable DRS::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B7150, 0xC3); // disable AeroMap::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B7E10, 0xC3); // disable Kers::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2930E0, 0xC3); // disable ERS::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B81B0, 0xC3); // disable SteeringSystem::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B9EF0, 0xC3); // disable AutoBlip::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BA7F0, 0xC3); // disable AutoShifter::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BAB50, 0xC3); // disable GearChanger::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x26B130, 0xC3); // disable Drivetrain::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BB640, 0xC3); // disable AntirollBar::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28F610, 0xC3); // disable ABS::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x290200, 0xC3); // disable TractionControl::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BB910, 0xC3); // disable SpeedLimiter::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28D090, 0xC3); // disable SetupManager::step
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BFA50, 0xC3); // disable StabilityControl::step
 	}
 
 	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);

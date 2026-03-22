@@ -44,3 +44,31 @@ public:
 	//virtual float GetControlSteering() { return -pCar->controls.steer; }
 	virtual bool IsAutomaticShift() { return pCar->autoShift.isActive; }
 };
+
+class IInputAI : public IInput {
+public:
+	IInputAI(Car* car) : IInput(car) {}
+
+	virtual float GetControlGas() {
+		if (AreControlsBlocked()) return 0.0;
+		return pCar->controls.gas;
+	}
+	virtual float GetControlBrake() {
+		if (AreControlsBlocked()) return 0.0;
+		return pCar->controls.brake;
+	}
+	virtual float GetControlHandBrake() {
+		if (AreControlsBlocked()) return 1.0;
+		return pCar->controls.handBrake;
+	}
+	virtual float GetControlSteering() {
+		if (AreControlsBlocked()) return 0.0;
+		return -pCar->controls.steer;
+	}
+	virtual bool GetControlNOS() {
+		if (!bNitrousEnabled) return false;
+		if (AreControlsBlocked()) return false;
+		return false;
+	}
+	virtual bool IsAutomaticShift() { return true; } // ai uses automatic shift
+};

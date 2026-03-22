@@ -49,7 +49,7 @@ public:
 		return Find<IPlayer>();
 	}
 };
-MWInterfaceList aPlayerInterfaces[32] = {};
+MWInterfaceList aPlayerInterfaces[1024] = {};
 
 MWInterfaceList* GetPlayerInterface(Car* car) {
 	for (auto& ply : aPlayerInterfaces) {
