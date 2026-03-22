@@ -27,7 +27,7 @@ public:
 		pCar->body->getVelocity(&vel);
 		return vel.length();
 	}
-	virtual bool IsStaging() { return false; } // todo!
+	virtual bool IsStaging() { return !pCar->ksPhysics->hasSessionStarted(0.0); }
 	virtual float GetPerfectLaunch() { return mPerfectLaunch.Time > 0.0 ? mPerfectLaunch.Amount : 0.0; }
 	virtual bool IsDestroyed() { return pCar->drivetrain.acEngine.lifeLeft <= 0.0; }
 

@@ -236,11 +236,31 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 
 	mCarUpdateMutex.lock();
 
+	pCar->steerLock = 180.0;
+
 	auto humanai = GetPlayerInterface(pCar)->Find<IHumanAI>();
 	if (humanai) {
 		DoShifting(pCar);
 	}
 
+	auto ivehicle = GetPlayerInterface(pCar)->Find<IVehicle>();
+
+	// hack to fix start positions
+	if (ivehicle->IsStaging() && pCar->hasGridPosition && !pCar->isInPits()) {
+		UMath::Vector3 p;
+		pCar->body->getPosition(&p, 0.0);
+		p.x = pCar->gridPosition.x;
+		p.z = pCar->gridPosition.z;
+		pCar->body->setPosition(&p);
+
+		UMath::Vector3 vel;
+		pCar->body->getVelocity(&vel);
+		vel.x = 0.0;
+		vel.z = 0.0;
+		pCar->body->setVelocity(&vel);
+	}
+
+	ivehicle->OnTaskSimulate(dT);
 	pEngine->OnTaskSimulate(dT);
 	pSuspension->OnTaskSimulate(dT);
 
