@@ -406,7 +406,17 @@ UMath::Vector3* MWSuspensionGetVelocity(ISuspension* susp, UMath::Vector3* resul
 void MWSuspensionAddLocalForceAndTorque(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* torque, const UMath::Vector3* driveTorque) {}
 void MWSuspensionAttach(ISuspension* susp) {}
 void MWSuspensionStop(ISuspension* susp) {}
-void MWSuspensionStep(ISuspension* susp, float dt) {}
+void MWSuspensionStep(ISuspension* susp, float dt) {
+	if (!bCSPHacks) return;
+
+	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
+		auto car = pMyPlugin->sim->cars[i]->physics;
+		if (car->suspensions[0] == susp) {
+			MWCarUpdate(car, dt);
+			break;
+		}
+	}
+}
 float MWSuspensionGetMass(ISuspension* susp) { return 1.0; }
 void MWSuspensionAddForceAtPos(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* pos, int64_t driven, bool addToSteerTorque) {}
 
@@ -502,7 +512,7 @@ void OnPluginStartup() {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x276AE0, 0xC3); // disable Car::updateAirPressure
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B9590, 0xC3); // disable Autoclutch::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2769F0, 0xC3); // disable Car::stepThermalObjects
-		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2764D0, 0xC3); // disable Car::stepComponents
+		//NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2764D0, 0xC3); // disable Car::stepComponents
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28E640, 0xC3); // disable BrakeSystem::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BB460, 0xC3); // disable EDL::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x283800, 0xC3); // disable Tyre::step

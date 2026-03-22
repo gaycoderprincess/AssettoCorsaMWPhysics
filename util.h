@@ -44,13 +44,7 @@ extern "C" __declspec(dllexport) bool __fastcall acpGetName(wchar_t* out) { wcsc
 extern "C" __declspec(dllexport) bool __fastcall acpShutdown() { return true; }
 extern "C" __declspec(dllexport) bool __fastcall acpOnGui(void*) { return false; }
 extern "C" __declspec(dllexport) bool __fastcall acpGetControls(void*) { return false; }
-extern "C" __declspec(dllexport) bool __fastcall acpUpdate(ACCarState*, float dT) {
-	if (bCSPHacks) {
-		MWCarUpdate(pMyPlugin->car, dT);
-	}
-	return true;
-}
-
+extern "C" __declspec(dllexport) bool __fastcall acpUpdate(ACCarState*, float dT) { return true; }
 extern "C" __declspec(dllexport) bool __fastcall acpInit(ACPlugin* plugin) {
 	pMyPlugin = plugin;
 	WriteLog(std::format("acpInit {:X}", (uintptr_t)plugin));
