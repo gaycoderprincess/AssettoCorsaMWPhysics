@@ -545,6 +545,20 @@ void MWTimeUpdate(PhysicsEngine* pThis, float dt, double currentTime, double gt)
 	pThis->step(dt * fOverrideTimescale, currentTime, gt);
 }
 
+void CarResetHooked(Car* pCar) {
+	pCar->reset();
+	if (auto engine = GetCarMWEngine(pCar)) {
+		engine->ChargeNOS(1.0);
+		if (auto ply = engine->GetOwner()->GetPlayer()) {
+			ply->ResetGameBreaker(true);
+		}
+		engine->Reset();
+	}
+	if (auto susp = GetCarMWSuspension(pCar)) {
+		susp->Reset();
+	}
+}
+
 void OnPluginStartup() {
 	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
 		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
@@ -585,6 +599,16 @@ void OnPluginStartup() {
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
 	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x27C320, &GetOptimalBrakeHooked);
+
+	NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x26FE7D, &CarResetHooked);
+
+	// remove fuelTankBody references
+	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x270188, 0x90, 0x27019D - 0x270188); // Car::forceRotation
+	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x2701F1, 0x90, 0x270206 - 0x2701F1); // Car::forceRotation
+
+	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x26FEAC, 0x90, 0x26FEB6 - 0x26FEAC); // Car::forcePosition
+	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x26FECF, 0x90, 0x26FEDF - 0x26FECF); // Car::forcePosition
+	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x26FFE6, 0x90, 0x26FFFB - 0x26FFE6); // Car::forcePosition
 
 	if (bCSPHacks) {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x276AE0, 0xC3); // disable Car::updateAirPressure

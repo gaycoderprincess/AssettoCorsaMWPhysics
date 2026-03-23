@@ -701,16 +701,6 @@ void EngineRacer::OnTaskSimulate(float dT) {
 		return;
 	}
 
-	// todo?
-	//if (nLastRaceState > pGameFlow->nRaceState) {
-	//	ChargeNOS(1.0);
-	//	if (auto ply = GetOwner()->GetPlayer()) {
-	//		ply->ResetGameBreaker(true);
-	//	}
-	//	Reset();
-	//}
-	//nLastRaceState = pGameFlow->nRaceState;
-
 	if (mSuspension->GetNumWheels() != 4) {
 		return;
 	}
