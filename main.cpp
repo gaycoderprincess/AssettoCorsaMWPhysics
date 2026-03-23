@@ -330,6 +330,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->localWheelRotation.Rotate(NyaVec3(-pSuspension->GetWheelAngularVelocity(mwTireId) * dT, 0, 0));
 
 		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
+		tire->worldRotation.p = {0,0,0};
 
 		pSuspension->GetWheelCenterPos(&tire->worldPosition, mwTireId);
 		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
@@ -437,6 +438,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix4* result) {
 	auto mwSusp = GetCarMWSuspension(car);
 	if (!mwSusp) {
+		WriteLog("MWSuspensionGetMatrix: failed to find SuspensionRacer!");
 		result->SetIdentity();
 		return result;
 	}
@@ -450,6 +452,7 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 			return result;
 		}
 	}
+	WriteLog("MWSuspensionGetMatrix: failed to find tire!");
 	result->SetIdentity();
 	return result;
 }
