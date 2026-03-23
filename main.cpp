@@ -96,7 +96,14 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 	pThis->penaltyTimeAccumulator = 0.0;
 
 	pThis->finalSteerAngleSignal = DEG2RAD(GetCarMWSuspension(pThis)->mSteering.Previous);
-	pThis->body->getVelocity(&pThis->lastVelocity);
+
+	UMath::Vector3 worldVel;
+	pThis->body->getVelocity(&worldVel);
+
+	auto absAcc = (worldVel - pThis->lastVelocity) * (1.0 / dT) * 0.10197838;
+	pThis->body->worldToLocalNormal(&pThis->accG, &absAcc);
+
+	pThis->lastVelocity = worldVel;
 }
 
 void ACCarPostPhysics(Car* pThis, float dT) {
