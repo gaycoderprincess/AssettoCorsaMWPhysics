@@ -20,6 +20,7 @@ bool bNitrousEnabled = true;
 bool bCSPHacks = false;
 float fUpgradeLevel = 1.0;
 float fTireOffset = 0.1;
+float fSteeringWheelLock = 360.0;
 
 #include "util.h"
 #include "inputs.h"
@@ -279,7 +280,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 
 	mCarUpdateMutex.lock();
 
-	pCar->steerLock = 180.0;
+	pCar->steerLock = fSteeringWheelLock;
 
 	auto humanai = GetPlayerInterface(pCar)->Find<IHumanAI>();
 	if (humanai) {
@@ -343,6 +344,8 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->status.normalizedSlideX = tire->slidingVelocityX / tire->totalSlideVelocity;
 		tire->status.normalizedSlideY = tire->slidingVelocityY / tire->totalSlideVelocity;
 	}
+
+	pCar->onTyresStepCompleted();
 
 	if (pCar->rigidAxle) {
 		pCar->rigidAxle->release();
@@ -537,6 +540,7 @@ void OnPluginStartup() {
 		bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
 		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
 		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
+		fSteeringWheelLock = config["steering_wheel_lock"].value_or(fSteeringWheelLock);
 		bCSPHacks = config["csp_compatibility_hack"].value_or(bCSPHacks);
 	}
 

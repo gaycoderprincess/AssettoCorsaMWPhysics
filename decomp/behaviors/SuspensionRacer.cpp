@@ -607,14 +607,10 @@ float SuspensionRacerMW::DoHumanSteering(State &state) {
 	float steering_coeff = mMWAttributes->STEERING;
 	SteeringType steer_type = kGamePad;
 
-	//IPlayer *player = GetOwner()->GetPlayer();
-	//if (player) {
-	//	ISteeringWheel *device = player->GetSteeringDevice();
-	//
-	//	if (device && device->IsConnected()) {
-	//		steer_type = device->GetSteeringType();
-	//	}
-	//}
+	IPlayer *player = GetOwner()->GetPlayer();
+	if (player) {
+		steer_type = player->GetSteeringType();
+	}
 
 	float max_steering;
 	float newsteer = steer_input * CalculateMaxSteering(state, steer_type) * steering_coeff;

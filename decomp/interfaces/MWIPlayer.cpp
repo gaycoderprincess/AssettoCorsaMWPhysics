@@ -14,6 +14,12 @@ public:
 	bool mInGameBreaker = false;
 	float mGameBreakerCharge = 1.0;
 
+	virtual SteeringType GetSteeringType() {
+		if (!strcmp(pCar->controlsProvider->getName(), "Kunos Simulazioni Keyboard controls provider")) return kGamePad;
+		if (!strcmp(pCar->controlsProvider->getName(), "Kunos Simulazioni Joypad controls provider")) return kGamePad;
+		return kWheelSpeedInsensitive;
+	}
+
 	virtual bool CanDoGameBreaker() {
 		IVehicle *ivehicle;
 		if (!mCOMObject->QueryInterface(&ivehicle)) {
