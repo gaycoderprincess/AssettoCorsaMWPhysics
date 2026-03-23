@@ -337,7 +337,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->contactNormal = UMath::Vector4To3(mwTire->mNormal);
 		tire->status.angularVelocity = mwTire->GetAngularVelocity();
 		tire->status.distToGround = pSuspension->GetWheelRoadHeight(mwTireId);
-		tire->status.load = mwTire->GetCompression() / INCH2METERS(pSuspension->mMWAttributes->TRAVEL.At(i / 2));
+		tire->status.load = mwTire->GetLoad();
 		tire->status.isLocked = mwTire->IsBrakeLocked();
 		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
 		tire->status.slipRatio = 1.0 - mwTire->GetTraction();
