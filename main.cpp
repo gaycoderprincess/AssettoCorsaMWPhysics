@@ -123,18 +123,18 @@ void ACCarPostPhysics(Car* pThis, float dT) {
 
 void DoShifting(Car* pCar) {
 	auto iinput = GetPlayerInterface(pCar)->Find<IInput>();
+	auto transmission = GetPlayerInterface(pCar)->Find<ITransmission>();
+	auto tiptronic = GetPlayerInterface(pCar)->Find<ITiptronic>();
 	if (!GetPlayerInterface(pCar)->Find<IHumanAI>()) return; // ai uses automatic shift
-
-	auto pMWEngine = GetCarMWEngine(pCar);
 
 	if (pCar->controls.requestedGearIndex != -1) {
 		auto nextGear = pCar->controls.requestedGearIndex;
-		if (nextGear != pMWEngine->GetGear()) {
+		if (nextGear != transmission->GetGear()) {
 			if (iinput->IsAutomaticShift()) {
-				pMWEngine->SportShift((GearID)nextGear);
+				tiptronic->SportShift((GearID)nextGear);
 			}
 			else {
-				pMWEngine->Shift((GearID)nextGear);
+				transmission->Shift((GearID)nextGear);
 			}
 		}
 		return;
@@ -142,38 +142,38 @@ void DoShifting(Car* pCar) {
 
 	static bool bLastUp = false;
 	auto currentUp = pCar->controls.gearUp;
-	if (currentUp && !bLastUp && pMWEngine->GetGear() != pMWEngine->GetTopGear()) {
-		auto nextGear = pMWEngine->GetGear()+1;
+	if (currentUp && !bLastUp && transmission->GetGear() != transmission->GetTopGear()) {
+		auto nextGear = transmission->GetGear()+1;
 		if (iinput->IsAutomaticShift()) {
 			if (nextGear == G_NEUTRAL) nextGear = G_FIRST;
 			if (nextGear == G_FIRST) {
-				pMWEngine->Shift((GearID)nextGear);
+				transmission->Shift((GearID)nextGear);
 			}
 			else {
-				pMWEngine->SportShift((GearID)nextGear);
+				tiptronic->SportShift((GearID)nextGear);
 			}
 		}
 		else {
-			pMWEngine->Shift((GearID)nextGear);
+			transmission->Shift((GearID)nextGear);
 		}
 	}
 	bLastUp = currentUp;
 
 	static bool bLastDown = false;
 	auto currentDown = pCar->controls.gearDn;
-	if (currentDown && !bLastDown && pMWEngine->GetGear() != G_REVERSE) {
-		auto nextGear = pMWEngine->GetGear()-1;
+	if (currentDown && !bLastDown && transmission->GetGear() != G_REVERSE) {
+		auto nextGear = transmission->GetGear()-1;
 		if (iinput->IsAutomaticShift()) {
 			if (nextGear == G_NEUTRAL) nextGear = G_REVERSE;
 			if (nextGear == G_REVERSE) {
-				pMWEngine->Shift((GearID)nextGear);
+				transmission->Shift((GearID)nextGear);
 			}
 			else {
-				pMWEngine->SportShift((GearID)nextGear);
+				tiptronic->SportShift((GearID)nextGear);
 			}
 		}
 		else {
-			pMWEngine->Shift((GearID)nextGear);
+			transmission->Shift((GearID)nextGear);
 		}
 	}
 	bLastDown = currentDown;
