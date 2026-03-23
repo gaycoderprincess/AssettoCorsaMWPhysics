@@ -2,7 +2,8 @@
 
 Experiment for Assetto Corsa that converts the physics and handling model from NFS Most Wanted and Carbon
 
-Massive thanks to everyone involved with [dbalatoni13's MW reverse engineering project](https://github.com/dbalatoni13/nfsmw), this mod was heavily based off of it.
+This mod was heavily based off of the work done in [dbalatoni13's MW reverse engineering project](https://github.com/dbalatoni13/nfsmw).  
+I have recently discovered that they use AI, so while this mod was based off of their code, I no longer endorse the project.
 
 ## Installation
 
