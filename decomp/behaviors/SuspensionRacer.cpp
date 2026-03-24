@@ -399,7 +399,7 @@ void SuspensionRacerMW::CreateTires() {
 	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
 	for (int i = 0; i < 4; i++) {
-		auto v = GetWheelBasePosition(pCar, i);
+		auto v = GetWheelBasePosition(mMWAttributes, pCar, i);
 		GetWheel(i).SetLocalArm(v);
 	}
 

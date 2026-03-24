@@ -19,7 +19,7 @@ bool bSpeedbreakerEnabled = false;
 bool bNitrousEnabled = true;
 bool bCSPHacks = false;
 float fUpgradeLevel = 1.0;
-float fTireOffset = 0.1;
+float fTireOffset = 0.0;
 float fSteeringWheelLock = 360.0;
 
 #include "util.h"

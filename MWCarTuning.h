@@ -384,3 +384,13 @@ void GetLerpedCarTuning(MWCarTuning& out, const std::string& model) {
 Physics::Tunings* GetVehicleMWTunings(void* veh) {
 	return nullptr;
 }
+
+UMath::Vector3 GetWheelBasePosition(MWCarTuning* tuning, Car* car, int wheel) {
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	v.y += -acTire->data.radius;
+	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
+	v.y += fTireOffset;
+	return v;
+}

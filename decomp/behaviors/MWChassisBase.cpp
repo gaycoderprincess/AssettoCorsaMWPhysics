@@ -249,7 +249,7 @@ void ChassisMW::SetCOG(float extra_bias, float extra_ride) {
 	float front_z = mMWAttributes->FRONT_AXLE;
 	float rear_z = front_z - mMWAttributes->WHEEL_BASE;
 
-	auto v = GetWheelBasePosition(pCar, 0);
+	auto v = GetWheelBasePosition(mMWAttributes, pCar, 0);
 
 	float fwbias = (mMWAttributes->FRONT_WEIGHT_BIAS + extra_bias) * 0.01f;
 	if (GetNumWheelsOnGround() == 0) {
