@@ -6,6 +6,8 @@ cp orig_mw_full/bmwm3gtr.conf bmw_m3_e92_s1.conf
 cp orig_mw_full/bmwm3gtre46_top.conf bmw_m3_e92_s1_top.conf
 cp orig_mw_full/bmwm3gtr.conf bmw_m3_gt2.conf
 cp orig_mw_full/bmwm3gtre46_top.conf bmw_m3_gt2_top.conf
+cp orig_mw_full/bmwm3gtr.conf pb_m3gtr_nfs.conf
+cp orig_mw_full/bmwm3gtre46_top.conf pb_m3gtr_nfs_top.conf
 cp orig_mw_full/a3.conf ks_audi_a1s1.conf
 cp orig_mw_full/a3_top.conf ks_audi_a1s1_top.conf
 cp orig_mw_full/tt.conf ks_audi_tt_cup.conf
