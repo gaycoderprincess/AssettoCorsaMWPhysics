@@ -22,6 +22,9 @@ public:
 
 	virtual void SetCenterOfGravity(UMath::Vector3* cog) {
 		vCenterOfGravity = *cog;
+
+		auto zCenter = (pCar->bounds.min.z + pCar->bounds.max.z) * 0.5;
+		vCenterOfGravity.z += zCenter; // offset the forwards center of gravity by the model center
 	}
 	virtual UMath::Vector3* GetCenterOfGravity() {
 		return &vCenterOfGravity;

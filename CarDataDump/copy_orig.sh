@@ -54,6 +54,8 @@ cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_r_2016.conf
 cp orig_mw_full/911gt2_top.conf ks_porsche_911_gt3_r_2016_top.conf
 cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_rs.conf
 cp orig_mw_full/911gt2_top.conf ks_porsche_911_gt3_rs_top.conf
+cp orig_mw_full/911gt2.conf ks_porsche_911_r.conf
+cp orig_mw_full/911gt2_top.conf ks_porsche_911_r_top.conf
 cp orig_cb_full/corolla.conf ks_toyota_ae86.conf
 cp orig_cb_full/corolla_top.conf ks_toyota_ae86_top.conf
 cp orig_cb_full/corolla.conf ks_toyota_ae86_drift.conf

@@ -37,9 +37,9 @@ public:
 		*out = tmp.z;
 	}
 	virtual void GetDimension(UMath::Vector3 *out) { // todo is this correct?
-		out->x = std::max(std::abs(pCar->bounds.min.x), std::abs(pCar->bounds.max.x));
-		out->y = std::max(std::abs(pCar->bounds.min.y), std::abs(pCar->bounds.max.y));
-		out->z = std::max(std::abs(pCar->bounds.min.z), std::abs(pCar->bounds.max.z));
+		out->x = std::abs((pCar->bounds.max.x - pCar->bounds.min.x)) * 0.5;
+		out->y = std::abs((pCar->bounds.max.y - pCar->bounds.min.y)) * 0.5;
+		out->z = std::abs((pCar->bounds.max.z - pCar->bounds.min.z)) * 0.5;
 	}
 	virtual void ConvertWorldToLocal(UMath::Vector3 *val, bool translate) {
 		::ConvertWorldToLocal(pCar, *val, translate);
