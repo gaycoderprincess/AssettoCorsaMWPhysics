@@ -350,6 +350,9 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
 		tire->worldRotation.p = {0,0,0};
 
+		float traction = mwTire->GetTraction();
+		if (!mwTire->IsOnGround()) traction = 1.0; // prevent skid sounds when in the air
+
 		pSuspension->GetWheelCenterPos(&tire->worldPosition, mwTireId);
 		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
 		tire->contactNormal = UMath::Vector4To3(mwTire->mNormal);
@@ -358,8 +361,8 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->status.load = mwTire->GetLoad();
 		tire->status.isLocked = mwTire->IsBrakeLocked();
 		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
-		tire->status.slipRatio = 1.0 - mwTire->GetTraction();
-		tire->status.ndSlip = 1.0 - mwTire->GetTraction();
+		tire->status.slipRatio = 1.0 - traction;
+		tire->status.ndSlip = 1.0 - traction;
 		tire->slidingVelocityX = mwTire->GetLateralSpeed();
 		tire->slidingVelocityY = mwTire->GetRoadSpeed() * tire->status.slipAngleRAD;
 		tire->totalSlideVelocity = std::abs(tire->slidingVelocityX) + std::abs(tire->slidingVelocityY);
