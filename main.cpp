@@ -277,7 +277,9 @@ std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
-	pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, -9.8128, 0.0); // rigidbodyspecs, exact car gravity in MW
+	if (!bCSPHacks) {
+		pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, -9.8128, 0.0); // rigidbodyspecs, exact car gravity in MW
+	}
 
 	ACCarPrePhysics(pCar, dT);
 
@@ -359,6 +361,16 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->driven = pSuspension->IsDriveWheel(mwTireId);
 		tire->status.normalizedSlideX = tire->slidingVelocityX / tire->totalSlideVelocity;
 		tire->status.normalizedSlideY = tire->slidingVelocityY / tire->totalSlideVelocity;
+
+		// wth is this?
+		if (bCSPHacks) {
+			tire->status.Fx = 0.0;
+			tire->status.Fy = 0.0;
+			tire->status.Mz = 0.0;
+			tire->status.Dx = 0.0;
+			tire->status.Dy = 0.0;
+			tire->status.D = 0.0;
+		}
 	}
 
 	pCar->onTyresStepCompleted();
@@ -478,17 +490,7 @@ UMath::Vector3* MWSuspensionGetVelocity(ISuspension* susp, UMath::Vector3* resul
 void MWSuspensionAddLocalForceAndTorque(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* torque, const UMath::Vector3* driveTorque) {}
 void MWSuspensionAttach(ISuspension* susp) {}
 void MWSuspensionStop(ISuspension* susp) {}
-void MWSuspensionStep(ISuspension* susp, float dt) {
-	if (!bCSPHacks) return;
-
-	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
-		auto car = pMyPlugin->sim->cars[i]->physics;
-		if (car->suspensions[0] == susp) {
-			MWCarUpdate(car, dt);
-			break;
-		}
-	}
-}
+void MWSuspensionStep(ISuspension* susp, float dt) {}
 float MWSuspensionGetMass(ISuspension* susp) { return 1.0; }
 void MWSuspensionAddForceAtPos(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* pos, int64_t driven, bool addToSteerTorque) {}
 
@@ -567,6 +569,16 @@ void CarResetHooked(Car* pCar) {
 	}
 }
 
+void MWCarUpdateCSP(DRS* pThis, float dt) {
+	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
+		auto car = pMyPlugin->sim->cars[i]->physics;
+		if (&car->drs == pThis) {
+			MWCarUpdate(car, dt);
+			break;
+		}
+	}
+}
+
 void OnPluginStartup() {
 	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
 		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
@@ -579,7 +591,7 @@ void OnPluginStartup() {
 		bCSPHacks = config["csp_compatibility_hack"].value_or(bCSPHacks);
 	}
 
-	if (pMyPlugin->sim->client) {
+	if (pMyPlugin->sim->client || bCSPHacks) {
 		bSpeedbreakerEnabled = false;
 	}
 
@@ -618,6 +630,8 @@ void OnPluginStartup() {
 	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x26FECF, 0x90, 0x26FEDF - 0x26FECF); // Car::forcePosition
 	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x26FFE6, 0x90, 0x26FFFB - 0x26FFE6); // Car::forcePosition
 
+	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x276D79, 0x90, 0x276DD5 - 0x276D79); // Car::updateBodyMass
+
 	if (bCSPHacks) {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x276AE0, 0xC3); // disable Car::updateAirPressure
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B9590, 0xC3); // disable Autoclutch::step
@@ -642,6 +656,8 @@ void OnPluginStartup() {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BB910, 0xC3); // disable SpeedLimiter::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28D090, 0xC3); // disable SetupManager::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BFA50, 0xC3); // disable StabilityControl::step
+
+		NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x2B4E60, &MWCarUpdateCSP); // DRS::step
 	}
 
 	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);
