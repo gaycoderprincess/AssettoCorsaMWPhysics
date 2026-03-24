@@ -107,7 +107,12 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 }
 
 void ACCarPostPhysics(Car* pThis, float dT) {
-	if (bCSPHacks) return;
+	if (bCSPHacks) {
+		pThis->setupManager.checkRules = false;
+		pThis->setupManager.waitTime = 0.0;
+		pThis->setupManager.setupState = CarSetupState::Legal;
+		return;
+	}
 
 	// vanilla components
 	pThis->colliderManager.step(dT);
