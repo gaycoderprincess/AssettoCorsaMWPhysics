@@ -398,22 +398,14 @@ void SuspensionRacerMW::CreateTires() {
 	mRB->GetDimension(&dimension);
 	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
-	//float fWheelY = -dimension.y;
-	float fWheelY = fTireOffset;
-
 	for (int i = 0; i < 4; i++) {
-		auto acTire = &pCar->tyres[GetMWWheelID(i)];
-		ISuspension* hub = acTire->hub;
-		UMath::Vector3 v;
-		hub->getBasePosition(&v);
-		WriteLog(std::format("tire {} initial pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
-		v.y += -acTire->data.radius + fWheelY;
-		WriteLog(std::format("tire {} y-corrected pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
+		auto v = GetWheelBasePosition(pCar, i);
 		GetWheel(i).SetLocalArm(v);
 	}
 
-
-	/*float wheelbase = mMWAttributes->WHEEL_BASE;
+	/*
+	float fWheelY = -dimension.y;
+	float wheelbase = mMWAttributes->WHEEL_BASE;
 	float axle_width_f = mMWAttributes->TRACK_WIDTH.At(0) - mMWAttributes->SECTION_WIDTH.At(0) * 0.001f;
 	float axle_width_r = mMWAttributes->TRACK_WIDTH.At(1) - mMWAttributes->SECTION_WIDTH.At(1) * 0.001f;
 	float front_axle = mMWAttributes->FRONT_AXLE;

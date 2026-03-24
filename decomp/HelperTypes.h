@@ -443,3 +443,11 @@ namespace Dynamics {
 		}
 	}
 }
+
+UMath::Vector3 GetWheelBasePosition(Car* car, int wheel) {
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	v.y += -acTire->data.radius + fTireOffset;
+	return v;
+}
