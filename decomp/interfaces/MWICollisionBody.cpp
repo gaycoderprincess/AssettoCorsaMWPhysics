@@ -31,6 +31,11 @@ public:
 		static UMath::Vector3 normal;
 		normal = {0,1,0};
 
+		UMath::Matrix4 mat;
+		pCar->body->getWorldMatrix(&mat, 0.0);
+
+		if (mat.y.y > 0.5) return false; // when upright, we'll rely on wheel contact for now
+
 		UMath::Vector3 origin;
 		pCar->body->getPosition(&origin, 0.0);
 		auto dir = NyaVec3(0,-1,0);
