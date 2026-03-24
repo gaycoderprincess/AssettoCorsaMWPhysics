@@ -223,8 +223,12 @@ void SwitchToMWPhysics(Car* ply) {
 	aEngines.push_back(engine);
 	aSuspensions.push_back(susp);
 
+	//ply->mass = susp->mMWAttributes->MASS;
+	//ply->bodyInertia = {susp->mMWAttributes->TENSOR_SCALE[0],susp->mMWAttributes->TENSOR_SCALE[1],susp->mMWAttributes->TENSOR_SCALE[2]};
+	//ply->body->setMassBox(ply->mass, ply->bodyInertia.x, ply->bodyInertia.y, ply->bodyInertia.z);
+
 	WriteLog(std::format("MW max RPM {}", engine->GetMaxRPM()));
-	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.data.limiter));
+	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.defaultEngineLimiter));
 }
 
 float fOverrideTimescale = 1.0;
@@ -273,6 +277,8 @@ std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
+	pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, -9.8128, 0.0); // rigidbodyspecs, exact car gravity in MW
+
 	ACCarPrePhysics(pCar, dT);
 
 	if (pCar == pMyPlugin->car) {
@@ -314,6 +320,8 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	ivehicle->OnTaskSimulate(dT);
 	pEngine->OnTaskSimulate(dT);
 	pSuspension->OnTaskSimulate(dT);
+
+	GetPlayerInterface(pCar)->Find<IRigidBodyMW>()->DoDrag();
 
 	for (int i = 0; i < 4; i++) {
 		int mwTireId = GetMWWheelID(i);

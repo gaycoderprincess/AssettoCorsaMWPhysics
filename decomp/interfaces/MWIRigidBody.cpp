@@ -44,6 +44,9 @@ public:
 	virtual void ConvertWorldToLocal(UMath::Vector3 *val, bool translate) {
 		::ConvertWorldToLocal(pCar, *val, translate);
 	}
+	virtual void ConvertLocalToWorld(UMath::Vector3 *val, bool translate) {
+		::ConvertLocalToWorld(pCar, *val, translate);
+	}
 	virtual UMath::Vector3* GetLinearVelocity() {
 		static UMath::Vector3 tmp;
 		pCar->body->getVelocity(&tmp);
@@ -142,5 +145,48 @@ public:
 		auto pos = *GetPosition();
 		pos.z += offset;
 		pCar->body->setPosition(&pos);
+	}
+
+	virtual void DoDrag() {
+		bool bDoLinearDrag = true;
+		bool bDoAngularDrag = true;
+
+		UMath::Vector3 DRAG = {0,0,0};
+		UMath::Vector3 DRAG_ANGULAR = {0,0,0};
+
+		if (bDoAngularDrag) {
+			auto angularVel = *GetAngularVelocity();
+			ConvertWorldToLocal(&angularVel, false);
+
+			UMath::Vector3 dim;
+			GetDimension(&dim);
+
+			UMath::Vector3 v33;
+			v33.x = std::sqrt(dim.y * dim.y + dim.z * dim.z) * dim.x * 4.0;
+			v33.y = std::sqrt(dim.z * dim.z + dim.x * dim.x) * dim.y * 4.0;
+			v33.z = std::sqrt(dim.x * dim.x + dim.y * dim.y) * dim.z * 4.0;
+
+			UMath::Vector3 outDrag;
+			Dynamics::Aero::Drag(outDrag, angularVel, DRAG_ANGULAR, v33, 1.225);
+			ConvertLocalToWorld(&outDrag, false);
+			ResolveTorque(&outDrag);
+		}
+		if (bDoLinearDrag) {
+			auto linearVel = *GetLinearVelocity();
+			ConvertWorldToLocal(&linearVel, false);
+
+			UMath::Vector3 dim;
+			GetDimension(&dim);
+
+			UMath::Vector3 v33;
+			v33.x = (dim.x * dim.x) * 4.0;
+			v33.y = (dim.y * dim.y) * 4.0;
+			v33.z = (dim.z * dim.z) * 4.0;
+
+			UMath::Vector3 outDrag;
+			Dynamics::Aero::Drag(outDrag, linearVel, DRAG, v33, 1.225);
+			ConvertLocalToWorld(&outDrag, false);
+			ResolveForce(&outDrag);
+		}
 	}
 };

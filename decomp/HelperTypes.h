@@ -400,13 +400,24 @@ void ConvertWorldToLocal(Car* pCar, UMath::Vector3 &val, bool translate) {
 		UMath::Sub(val, pos, val);
 	}
 
-	// todo does this work?
 	UMath::Matrix4 mat;
 	pCar->body->getWorldMatrix(&mat, 0.0);
+	mat.p = {0,0,0};
 	UMath::Transpose(&mat, invorient);
-	//UMath::Transpose(*pCar->GetQuaternion(), invorient);
 
 	UMath::Rotate(val, invorient, val);
+}
+
+void ConvertLocalToWorld(Car* pCar, UMath::Vector3 &val, bool translate) {
+	UMath::Matrix4 mat;
+	pCar->body->getWorldMatrix(&mat, 0.0);
+	mat.p = {0,0,0};
+	UMath::Rotate(val, mat, val);
+	if (translate) {
+		UMath::Vector3 pos;
+		pCar->body->getPosition(&pos, 0.0);
+		UMath::Add(val, pos, val);
+	}
 }
 
 class SimSurface {
@@ -416,9 +427,19 @@ public:
 	float ROLLING_RESISTANCE = 1.0;
 };
 
-SimSurface* GetSimSurface(int surfaceType) {
+SimSurface* GetSimSurface(SurfaceDef* surface) {
 	static SimSurface tmp;
-	// todo!
-	//tmp.LATERAL_GRIP = tmp.DRIVE_GRIP = tmp.ROLLING_RESISTANCE = UMath::Clamp(1.0f / pEnvironment->aSurfaces[surfaceType].fBodyFriction, 0.5f, 1.0f);
+	tmp.LATERAL_GRIP = tmp.DRIVE_GRIP = UMath::Clamp(surface->gripMod, 0.5f, 1.0f);
+	tmp.ROLLING_RESISTANCE = (1.0 / tmp.DRIVE_GRIP) * 2;
 	return &tmp;
+}
+
+namespace Dynamics {
+	namespace Aero {
+		void Drag(UMath::Vector3 &pThis, const UMath::Vector3 &vel, const UMath::Vector3 &C, const UMath::Vector3 &A, double q) {
+			pThis = A * vel;
+			pThis *= C;
+			pThis *= (vel.length() * -0.5 * q);
+		}
+	}
 }

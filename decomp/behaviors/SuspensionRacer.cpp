@@ -351,7 +351,7 @@ float SuspensionRacerMW::Tire::UpdateLoaded(float lat_vel, float fwd_vel, float 
 	}
 
 	// factor surface friction into the tire force
-	auto surface = GetSimSurface(mSurface);
+	auto surface = GetSimSurface(mWorldPos.fSurface);
 	if (surface) {
 		mLateralForce *= surface->LATERAL_GRIP;
 		mLongitudeForce *= surface->DRIVE_GRIP;
@@ -404,9 +404,8 @@ void SuspensionRacerMW::CreateTires() {
 	for (int i = 0; i < 4; i++) {
 		auto acTire = &pCar->tyres[GetMWWheelID(i)];
 		ISuspension* hub = acTire->hub;
-		UMath::Matrix4 hubMatrix;
-		hub->getHubWorldMatrix(&hubMatrix);
-		auto v = hubMatrix.p;
+		UMath::Vector3 v;
+		hub->getBasePosition(&v);
 		WriteLog(std::format("tire {} initial pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
 		v.y += -acTire->data.radius + fWheelY;
 		WriteLog(std::format("tire {} y-corrected pos {:.2f} {:.2f} {:.2f}", i, v.x, v.y, v.z));
@@ -553,6 +552,18 @@ UMath::Vector3* SuspensionRacerMW::GetWheelCenterPos(UMath::Vector3* result, uns
 	if (!mRB) {
 		return result;
 	} else {
+		// get max suspension travel
+		if (!mTires[i]->IsOnGround()) {
+			UMath::Matrix4 matrix;
+			mRB->GetMatrix4(&matrix);
+			matrix.p = *mRB->GetPosition();
+
+			UMath::Vector3 p(mTires[i]->GetLocalArm());
+			p.y -= INCH2METERS(mMWAttributes->TRAVEL.At(i / 2u));
+			UMath::RotateTranslate(p, matrix, p);
+			*result = p;
+		}
+
 		UMath::Vector3 tmp;
 		mRB->GetUpVector(&tmp);
 		UMath::ScaleAdd(tmp, GetWheelRadius(i), *result, *result);

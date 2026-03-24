@@ -73,6 +73,7 @@ struct MWCarTuning {
 
 	// pvehicle
 	float TENSOR_SCALE[3];
+	float MASS;
 
 	// extra tires stuff for ac
 	AxlePair ASPECT_RATIO;
@@ -200,6 +201,7 @@ MWCarTuning* LoadCarTuningFromFile(std::string configCarName) {
 		tmp.TENSOR_SCALE[0] = 1.0;
 		WriteLog(std::format("TENSOR_SCALE missing for {}", configCarName));
 	}
+	tmp.MASS = config["pvehicle"]["MASS"].value_or(1500);
 
 	aCarTunings.push_back(tmp);
 	return &aCarTunings[aCarTunings.size()-1];
