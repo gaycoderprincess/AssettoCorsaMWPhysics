@@ -116,6 +116,9 @@ void ACCarPostPhysics(Car* pThis, float dT) {
 
 	// vanilla components
 	pThis->colliderManager.step(dT);
+	pThis->setupManager.checkRules = false;
+	pThis->setupManager.waitTime = 0.0;
+	pThis->setupManager.setupState = CarSetupState::Legal;
 	//pThis->setupManager.step(dT); // crash in PhysicsCore::reseatDistanceJointLocal
 	if (!pThis->physicsGUID) {
 		pThis->telemetry.step(dT);

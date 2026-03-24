@@ -28,21 +28,19 @@ public:
 	}
 
 	virtual bool IsInGroundContact() {
-		/*static UMath::Vector3 normal;
+		static UMath::Vector3 normal;
 		normal = {0,1,0};
 
-		auto origin = pCar->GetMatrix()->p;
-		origin.y += 2;
+		UMath::Vector3 origin;
+		pCar->body->getPosition(&origin, 0.0);
 		auto dir = NyaVec3(0,-1,0);
 
-		tLineOfSightIn prop;
-		prop.fMaxDistance = 10000;
-		tLineOfSightOut out;
-		if (CheckLineOfSight(&prop, pGameFlow->pHost->pUnkForLOS, &origin, &dir, &out)) {
-			return out.fHitDistance > 2.5;
+		RayCastResult result;
+		if (GetTrack()->rayCast(&origin, &dir, &result, 10000)) {
+			auto dist = (origin - result.pos).length();
+			return dist < 1.5;
 		}
-		return false;*/
-		return true; // todo for jump stabilizer!
+		return false;
 	}
 	virtual UMath::Vector3* GetGroundNormal() {
 		static UMath::Vector3 normal;
@@ -53,7 +51,7 @@ public:
 		auto dir = NyaVec3(0,-1,0);
 
 		RayCastResult result;
-		if (GetTrack()->rayCast((vec3f*)&origin, (vec3f*)&dir, &result, 10000)) {
+		if (GetTrack()->rayCast(&origin, &dir, &result, 10000)) {
 			normal = result.normal;
 		}
 		return &normal;
