@@ -562,8 +562,9 @@ float GetOptimalBrakeHooked() {
 	return 1.0;
 }
 
+auto MWTimeUpdate_orig = (void(__fastcall*)(PhysicsEngine*, float, double, double))nullptr;
 void MWTimeUpdate(PhysicsEngine* pThis, float dt, double currentTime, double gt) {
-	pThis->step(dt * fOverrideTimescale, currentTime, gt);
+	MWTimeUpdate_orig(pThis, dt * fOverrideTimescale, currentTime, gt);
 }
 
 void CarResetHooked(Car* pCar) {
@@ -614,7 +615,7 @@ void OnPluginStartup() {
 	}
 
 	if (bSpeedbreakerEnabled) {
-		NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1232DF, &MWTimeUpdate);
+		MWTimeUpdate_orig = (void(__fastcall*)(PhysicsEngine*, float, double, double))NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1232DF, &MWTimeUpdate);
 		NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1236BF, &MWTimeUpdate);
 	}
 

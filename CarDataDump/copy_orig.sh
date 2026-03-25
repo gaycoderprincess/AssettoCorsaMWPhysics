@@ -80,3 +80,5 @@ cp orig_mw_full/gti.conf golf_mk5_stock.conf
 cp orig_mw_full/gti_top.conf golf_mk5_stock_top.conf
 cp orig_mw_full/gti.conf golf_mk5_tuned.conf
 cp orig_mw_full/gti_top.conf golf_mk5_tuned_top.conf
+cp orig_mw_full/viper.conf a3dr_viper_rt10.conf
+cp orig_mw_full/viper_top.conf a3dr_viper_rt10_top.conf
