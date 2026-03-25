@@ -92,3 +92,7 @@ cp orig_mw_full/punto.conf ks_audi_sport_quattro_s1.conf
 cp orig_mw_full/punto_top.conf ks_audi_sport_quattro_s1_top.conf
 cp orig_mw_full/carreragt.conf ad_TD_porsche_carrera_gt.conf
 cp orig_mw_full/carreragt_top.conf ad_TD_porsche_carrera_gt_top.conf
+cp orig_mw_full/murcielago.conf ks_lamborghini_countach.conf
+cp orig_mw_full/murcielago_top.conf ks_lamborghini_countach_top.conf
+cp orig_mw_full/murcielago.conf ks_lamborghini_countach_s1.conf
+cp orig_mw_full/murcielago_top.conf ks_lamborghini_countach_s1_top.conf
