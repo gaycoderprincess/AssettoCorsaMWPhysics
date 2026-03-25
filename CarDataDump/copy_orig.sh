@@ -84,3 +84,11 @@ cp orig_mw_full/viper.conf a3dr_viper_rt10.conf
 cp orig_mw_full/viper_top.conf a3dr_viper_rt10_top.conf
 cp orig_mw_full/imprezawrx.conf mby_subaru_impreza_gdb.conf
 cp orig_mw_full/imprezawrx_top.conf mby_subaru_impreza_gdb_top.conf
+cp orig_mw_full/punto.conf ks_audi_sport_quattro.conf
+cp orig_mw_full/punto_top.conf ks_audi_sport_quattro_top.conf
+cp orig_mw_full/punto.conf ks_audi_sport_quattro_rally.conf
+cp orig_mw_full/punto_top.conf ks_audi_sport_quattro_rally_top.conf
+cp orig_mw_full/punto.conf ks_audi_sport_quattro_s1.conf
+cp orig_mw_full/punto_top.conf ks_audi_sport_quattro_s1_top.conf
+cp orig_mw_full/carreragt.conf ad_TD_porsche_carrera_gt.conf
+cp orig_mw_full/carreragt_top.conf ad_TD_porsche_carrera_gt_top.conf
