@@ -82,3 +82,5 @@ cp orig_mw_full/gti.conf golf_mk5_tuned.conf
 cp orig_mw_full/gti_top.conf golf_mk5_tuned_top.conf
 cp orig_mw_full/viper.conf a3dr_viper_rt10.conf
 cp orig_mw_full/viper_top.conf a3dr_viper_rt10_top.conf
+cp orig_mw_full/imprezawrx.conf mby_subaru_impreza_gdb.conf
+cp orig_mw_full/imprezawrx_top.conf mby_subaru_impreza_gdb_top.conf
