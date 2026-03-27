@@ -289,6 +289,14 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, -9.8128, 0.0); // rigidbodyspecs, exact car gravity in MW
 	}
 
+	EngineRacer* pEngine = GetCarMWEngine(pCar);
+	SuspensionRacerMW* pSuspension = GetCarMWSuspension(pCar);
+	if (!pEngine || !pSuspension) { // this can happen in multiplayer
+		SwitchToMWPhysics(pCar);
+		pEngine = GetCarMWEngine(pCar);
+		pSuspension = GetCarMWSuspension(pCar);
+	}
+
 	ACCarPrePhysics(pCar, dT);
 
 	if (pCar == pMyPlugin->car) {
@@ -296,10 +304,6 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		SpeedbreakerLoop();
 	}
 	fGlobalDeltaTime = dT;
-
-	EngineRacer* pEngine = GetCarMWEngine(pCar);
-	SuspensionRacerMW* pSuspension = GetCarMWSuspension(pCar);
-	if (!pEngine || !pSuspension) return;
 
 	mCarUpdateMutex.lock();
 
@@ -611,6 +615,7 @@ void OnPluginStartup() {
 	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
 		auto car = pMyPlugin->sim->cars[i]->physics;
 		if (car == pMyPlugin->car) continue;
+		if (!car) continue;
 		SwitchToMWPhysics(car);
 	}
 
