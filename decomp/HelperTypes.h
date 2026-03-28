@@ -428,8 +428,11 @@ public:
 };
 
 SimSurface* GetSimSurface(const SurfaceDef* surface) {
+	float gripMod = surface ? surface->gripMod : 1.0f;
+	if (gripMod > 0.98f) gripMod = 1.0f; // some tracks have road as 0.99 grip
+
 	static SimSurface tmp;
-	tmp.LATERAL_GRIP = tmp.DRIVE_GRIP = UMath::Clamp(surface ? surface->gripMod : 1.0f, 0.5f, 1.0f);
+	tmp.LATERAL_GRIP = tmp.DRIVE_GRIP = UMath::Clamp(gripMod, 0.5f, 1.0f);
 	tmp.ROLLING_RESISTANCE = (1.0 / tmp.DRIVE_GRIP) * 2;
 	return &tmp;
 }
