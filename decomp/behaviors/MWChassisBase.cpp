@@ -249,13 +249,15 @@ void ChassisMW::SetCOG(float extra_bias, float extra_ride) {
 	float front_z = mMWAttributes->FRONT_AXLE;
 	float rear_z = front_z - mMWAttributes->WHEEL_BASE;
 
+	UMath::Vector3 dim;
+	dim.y = -GetWheelBaseY(mMWAttributes, pCar, 0);
+
 	float fwbias = (mMWAttributes->FRONT_WEIGHT_BIAS + extra_bias) * 0.01f;
 	if (GetNumWheelsOnGround() == 0) {
 		fwbias = 0.5f;
 	}
 	float cg_z = (front_z - rear_z) * fwbias + rear_z;
-	float cg_y = INCH2METERS(mMWAttributes->ROLL_CENTER) - (-GetWheelBaseY(mMWAttributes, pCar, 0) + UMath::Max(INCH2METERS(mMWAttributes->RIDE_HEIGHT.At(0) + extra_ride),
-																			  INCH2METERS(mMWAttributes->RIDE_HEIGHT.At(1) + extra_ride)));
+	float cg_y = INCH2METERS(mMWAttributes->ROLL_CENTER) - (dim.y + extra_ride);
 	UMath::Vector3 cog(0.0f, cg_y, cg_z);
 	mRBComplex->SetCenterOfGravity(&cog);
 }

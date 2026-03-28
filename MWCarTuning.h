@@ -409,6 +409,7 @@ void GetLerpedCarTuning(MWCarTuning& out, const std::string& model, Car* pCar) {
 	auto f = fUpgradeLevel;
 	GetLerpedCarTuning(out, model, f, f, f, f, f, f, f);
 
+	if (bMWWheelPositions) return;
 	if (!pCar) return;
 
 	// derived AC properties

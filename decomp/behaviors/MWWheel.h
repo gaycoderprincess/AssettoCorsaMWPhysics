@@ -12,7 +12,7 @@ public:
 	int pad;
 	UMath::Vector3 mVelocity;
 	int pad2;
-	int mSurface;
+	SimSurface mSurface;
 	float mSurfaceStick;
 	UMath::Vector4 mIntegral;
 
@@ -47,10 +47,10 @@ public:
 		mForce.y = 0.0;
 		mForce.z = 0.0;
 		mWorldPos = WWorldPos();
-		mSurface = 0;
+		mSurface = SimSurface();
 	}
 
-	void UpdateSurface(int surface);
+	void UpdateSurface(const SurfaceDef* surface);
 	bool InitPosition(ICollisionBody* cb, IRigidBodyMW *rb, double maxcompression);
 	bool UpdatePosition(const UMath::Vector3 &body_av, const UMath::Vector3 &body_lv,
 							   const UMath::Matrix4 &body_matrix, const UMath::Vector3 &cog,
@@ -112,8 +112,8 @@ public:
 		mCompression = UMath::Max(c, 0.0f);
 	}
 
-	int GetSurface() const {
-		return mSurface;
+	const SimSurface *GetSurface() const {
+		return &mSurface;
 	}
 
 	const UMath::Vector3 &GetVelocity() const {

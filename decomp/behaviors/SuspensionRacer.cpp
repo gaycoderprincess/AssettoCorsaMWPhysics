@@ -351,7 +351,7 @@ float SuspensionRacerMW::Tire::UpdateLoaded(float lat_vel, float fwd_vel, float 
 	}
 
 	// factor surface friction into the tire force
-	auto surface = GetSimSurface(mWorldPos.fSurface);
+	auto surface = GetSurface();
 	if (surface) {
 		mLateralForce *= surface->LATERAL_GRIP;
 		mLongitudeForce *= surface->DRIVE_GRIP;
@@ -395,24 +395,23 @@ void SuspensionRacerMW::CreateTires() {
 		//mTires[i] = new Tire(pCar->tyres[GetMWWheelID(i)].data.radius, i, mMWAttributes);
 	}
 
-	//float fWheelY = -dimension.y;
-	float fWheelY = GetWheelBaseY(mMWAttributes, pCar, 0);
+	UMath::Vector3 dimension;
+	dimension.y = -GetWheelBaseY(mMWAttributes, pCar, 0);
+
 	float wheelbase = mMWAttributes->WHEEL_BASE;
 	float axle_width_f = mMWAttributes->TRACK_WIDTH.At(0) - mMWAttributes->SECTION_WIDTH.At(0) * 0.001f;
 	float axle_width_r = mMWAttributes->TRACK_WIDTH.At(1) - mMWAttributes->SECTION_WIDTH.At(1) * 0.001f;
 	float front_axle = mMWAttributes->FRONT_AXLE;
 
-	UMath::Vector3 fl(-axle_width_f * 0.5f, fWheelY, front_axle);
-	UMath::Vector3 fr(axle_width_f * 0.5f, fWheelY, front_axle);
-	UMath::Vector3 rl(-axle_width_r * 0.5f, fWheelY, front_axle - wheelbase);
-	UMath::Vector3 rr(axle_width_r * 0.5f, fWheelY, front_axle - wheelbase);
+	UMath::Vector3 fl(-axle_width_f * 0.5f, -dimension.y, front_axle);
+	UMath::Vector3 fr(axle_width_f * 0.5f, -dimension.y, front_axle);
+	UMath::Vector3 rl(-axle_width_r * 0.5f, -dimension.y, front_axle - wheelbase);
+	UMath::Vector3 rr(axle_width_r * 0.5f, -dimension.y, front_axle - wheelbase);
 
 	GetWheel(0).SetLocalArm(fl);
 	GetWheel(1).SetLocalArm(fr);
 	GetWheel(2).SetLocalArm(rl);
 	GetWheel(3).SetLocalArm(rr);
-
-	WriteLog(std::format("tire pos {:.2f} {:.2f} {:.2f}", fl.x, fl.y, fl.z));
 }
 
 void SuspensionRacerMW::OnBehaviorChange() {
@@ -1009,19 +1008,9 @@ void SuspensionRacerMW::TuneWheelParams(State &state) {
 		brake_biased[1] -= brake_biased[1] * tunings->Value[Physics::Tunings::BRAKES] * 0.5f;
 	}
 	float suspension_yaw_control_limit = CalcYawControlLimit(state.speed);
-	//IPlayer *player = GetOwner()->GetPlayer();
 	if (state.driver_style == STYLE_DRAG) {
 		suspension_yaw_control_limit = 0.1f;
 	}
-	//else if (player) {
-	//	PlayerSettings *settings = player->GetSettings();
-	//	if (settings) {
-	//		// increase yaw control limit when stability control is off (unused by normal means)
-	//		if (!settings->Handling) {
-	//			suspension_yaw_control_limit += 2.5f;
-	//		}
-	//	}
-	//}
 
 	float max_slip = 0.0f;
 	int max_slip_wheel = 0;

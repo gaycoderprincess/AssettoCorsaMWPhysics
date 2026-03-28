@@ -4,6 +4,7 @@ rev_limiter = true			# enables the rev limiter, set to false to have higher RPMs
 upgrade_level = 1.0			# set to 0.0 for have stock cars, 1.0 for fully tuned Junkman parts
 tire_y_offset = -0.03			# change this if the wheel positions look wrong
 steering_wheel_lock = 360.0         	# max steering angle for steering wheels
+mw_wheel_positions = false		# moves the wheels to where they would be in Most Wanted, ensures handling accuracy but might look very wrong
 csp_compatibility_hack = false		# enable this for really buggy "support" for CSP, if for some reason you can't remove CSP
 
 # Settings if the compatibility hack is used instead of removing CSP:

@@ -239,7 +239,7 @@ class SuspensionRacerMW : public ChassisMW {
 	bool IsWheelOnGround(unsigned int i) {
 		return mTires[i]->IsOnGround();
 	}
-	int GetWheelRoadSurface(unsigned int i) {
+	const SimSurface *GetWheelRoadSurface(unsigned int i) {
 		return mTires[i]->GetSurface();
 	}
 	const UMath::Vector3 *GetWheelVelocity(unsigned int i) {

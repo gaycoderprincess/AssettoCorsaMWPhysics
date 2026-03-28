@@ -17,6 +17,7 @@ void OnPluginStartup();
 bool bRevLimiter = true;
 bool bSpeedbreakerEnabled = false;
 bool bNitrousEnabled = true;
+bool bMWWheelPositions = false;
 bool bCSPHacks = false;
 float fUpgradeLevel = 1.0;
 float fTireOffset = 0.0;
@@ -604,6 +605,7 @@ void OnPluginStartup() {
 		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
 		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
 		fSteeringWheelLock = config["steering_wheel_lock"].value_or(fSteeringWheelLock);
+		bMWWheelPositions = config["mw_wheel_positions"].value_or(bMWWheelPositions);
 		bCSPHacks = config["csp_compatibility_hack"].value_or(bCSPHacks);
 	}
 
