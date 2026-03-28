@@ -19,6 +19,7 @@ bool bSpeedbreakerEnabled = false;
 bool bNitrousEnabled = true;
 bool bMWWheelPositions = false;
 bool bCSPHacks = false;
+bool bCSPHacks_FullOverride = false;
 float fUpgradeLevel = 1.0;
 float fTireOffset = 0.0;
 float fSteeringWheelLock = 360.0;
@@ -76,7 +77,7 @@ SuspensionRacerMW* GetCarMWSuspension(Car* pCar) {
 }
 
 void ACCarPrePhysics(Car* pThis, float dT) {
-	if (bCSPHacks) return;
+	if (bCSPHacks && !bCSPHacks_FullOverride) return;
 
 	pThis->pollControls(dT);
 
@@ -108,7 +109,7 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 }
 
 void ACCarPostPhysics(Car* pThis, float dT) {
-	if (bCSPHacks) {
+	if (bCSPHacks && !bCSPHacks_FullOverride) {
 		pThis->setupManager.checkRules = false;
 		pThis->setupManager.waitTime = 0.0;
 		pThis->setupManager.setupState = CarSetupState::Legal;
@@ -484,7 +485,9 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 			mwSusp->GetWheelCenterPos(&result->p, GetMWWheelID(i));
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
-			result->p += velocity * 0.003;
+			if (!bCSPHacks) {
+				result->p += velocity * 0.003;
+			}
 			return result;
 		}
 	}
@@ -676,7 +679,14 @@ void OnPluginStartup() {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28D090, 0xC3); // disable SetupManager::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BFA50, 0xC3); // disable StabilityControl::step
 
-		NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x2B4E60, &MWCarUpdateCSP); // DRS::step
+		auto pluginBase = (uintptr_t)GetModuleHandleW((std::filesystem::current_path().wstring() + L"/dwrite.dll").c_str());
+		if (pluginBase && *(uint64_t*)(pluginBase + 0xEC4210) == 0x5518588948C48B48) {
+			NyaHookLib::PatchRelative(NyaHookLib::JMP, pluginBase + 0xEC4210, &MWCarUpdate); // CSP Car::step
+			bCSPHacks_FullOverride = true;
+		}
+		else {
+			NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x2B4E60, &MWCarUpdateCSP); // DRS::step
+		}
 	}
 
 	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);
