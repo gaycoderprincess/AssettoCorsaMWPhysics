@@ -137,6 +137,14 @@ void ACCarPostPhysics(Car* pThis, float dT) {
 	if (!pThis->physicsGUID) {
 		pThis->stepJumpStart(dT);
 	}
+
+	// force enable car bottom collision when less than 2 wheels are on the ground
+	auto mask = pThis->body->getMeshCollideMask(0);
+	auto susp = GetPlayerInterface(pThis)->Find<IChassis>();
+	if (susp->GetNumWheelsOnGround() <= 2) {
+		mask |= 1;
+		pThis->body->setMeshCollideMask(0, mask);
+	}
 }
 
 void DoShifting(Car* pCar) {
@@ -367,7 +375,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 			traction = 0.0;
 			skid = 5;
 		}
-		
+
 		// prevent skid sounds when in the air
 		if (!mwTire->IsOnGround()) {
 			traction = 1.0;
