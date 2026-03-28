@@ -357,8 +357,22 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->worldRotation.p = {0,0,0};
 
 		float traction = mwTire->GetTraction();
-		if (mwTire->IsBrakeLocked()) traction = 0.0; // always make skidmarks when brakes are locked
-		if (!mwTire->IsOnGround()) traction = 1.0; // prevent skid sounds when in the air
+
+		float skidSpeed = std::sqrt(mwTire->mSlip * mwTire->mSlip + mwTire->mLateralSpeed * mwTire->mLateralSpeed);
+		float skid = (skidSpeed * 0.1) * 1.5;
+		skid += (1.0 - traction);
+
+		// always leave skidmarks when brakes are locked
+		if (mwTire->IsBrakeLocked()) {
+			traction = 0.0;
+			skid = 5;
+		}
+		
+		// prevent skid sounds when in the air
+		if (!mwTire->IsOnGround()) {
+			traction = 1.0;
+			skid = 0;
+		}
 
 		pSuspension->GetWheelCenterPos(&tire->worldPosition, mwTireId);
 		tire->contactPoint = tire->unmodifiedContactPoint = mwTire->mWorldPos.fHitPosition;
@@ -369,7 +383,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->status.isLocked = mwTire->IsBrakeLocked();
 		tire->status.slipAngleRAD = mwTire->GetSlipAngle();
 		tire->status.slipRatio = 1.0 - traction;
-		tire->status.ndSlip = (1.0 - traction) * 10; // this is responsible for skidmarks!
+		tire->status.ndSlip = skid; // this is responsible for skidmarks! 1.5 or above makes skidmarks
 		tire->slidingVelocityX = mwTire->GetLateralSpeed();
 		tire->slidingVelocityY = mwTire->GetRoadSpeed() * tire->status.slipAngleRAD;
 		tire->totalSlideVelocity = std::abs(tire->slidingVelocityX) + std::abs(tire->slidingVelocityY);
