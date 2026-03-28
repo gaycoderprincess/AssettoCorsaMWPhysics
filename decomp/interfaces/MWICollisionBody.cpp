@@ -22,9 +22,6 @@ public:
 
 	virtual void SetCenterOfGravity(UMath::Vector3* cog) {
 		vCenterOfGravity = *cog;
-
-		auto zCenter = (pCar->bounds.min.z + pCar->bounds.max.z) * 0.5;
-		vCenterOfGravity.z += zCenter; // offset the forwards center of gravity by the model center
 	}
 	virtual UMath::Vector3* GetCenterOfGravity() {
 		return &vCenterOfGravity;
@@ -67,7 +64,7 @@ public:
 	virtual UMath::Vector3* GetInertiaTensor() {
 		if (vTensorScale.x == 0.0f) {
 			MWCarTuning tune;
-			GetLerpedCarTuning(tune, mCOMObject->Find<IVehicle>()->GetVehicleName());
+			GetLerpedCarTuning(tune, mCOMObject->Find<IVehicle>()->GetVehicleName(), nullptr);
 			vTensorScale.x = tune.TENSOR_SCALE[0];
 			vTensorScale.y = tune.TENSOR_SCALE[1];
 			vTensorScale.z = tune.TENSOR_SCALE[2];

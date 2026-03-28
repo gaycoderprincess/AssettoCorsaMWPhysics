@@ -218,6 +218,23 @@ int GetCarTuning(const std::string& model) {
 	return -1;
 }
 
+UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	return v;
+}
+
+float GetWheelBaseY(MWCarTuning* tuning, Car* car, int wheel) {
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	v.y += -acTire->data.radius;
+	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
+	v.y += fTireOffset;
+	return v.y;
+}
+
 #define TUNED_VALUE(value, delta) tmp.value = std::lerp(base->value, top->value, delta);
 
 void GetLerpedCarTuning(MWCarTuning& tmp, const std::string& model, float brake, float drivetrain, float engine, float induction, float nitro, float suspension, float tire) {
@@ -373,24 +390,46 @@ void GetLerpedCarTuning(MWCarTuning& tmp, const std::string& model, float brake,
 	TUNED_VALUE(PSI, induction);
 	TUNED_VALUE(HIGH_BOOST, induction);
 
+	// extra tires stuff for ac
+	TUNED_VALUE(ASPECT_RATIO.Front, tire);
+	TUNED_VALUE(ASPECT_RATIO.Rear, tire);
+	TUNED_VALUE(RIM_SIZE.Front, tire);
+	TUNED_VALUE(RIM_SIZE.Rear, tire);
+	TUNED_VALUE(SECTION_WIDTH.Front, tire);
+	TUNED_VALUE(SECTION_WIDTH.Rear, tire);
+	TUNED_VALUE(TRACK_WIDTH.Front, suspension);
+	TUNED_VALUE(TRACK_WIDTH.Rear, suspension);
+	TUNED_VALUE(WHEEL_BASE, suspension);
+	TUNED_VALUE(FRONT_AXLE, suspension);
+
 	while (tmp.GEAR_RATIO[tmp.GEAR_RATIO.size()-1] <= 0.35) { tmp.GEAR_RATIO.pop_back(); }
 }
 
-void GetLerpedCarTuning(MWCarTuning& out, const std::string& model) {
+void GetLerpedCarTuning(MWCarTuning& out, const std::string& model, Car* pCar) {
 	auto f = fUpgradeLevel;
-	return GetLerpedCarTuning(out, model, f, f, f, f, f, f, f);
+	GetLerpedCarTuning(out, model, f, f, f, f, f, f, f);
+
+	if (!pCar) return;
+
+	// derived AC properties
+	auto front = GetWheelBaseXZ(pCar, 0);
+	auto rear = GetWheelBaseXZ(pCar, 2);
+
+	// front_axle = front wheel position
+	out.FRONT_AXLE = front.z;
+
+	// front_axle - wheelbase = rear wheel position
+	out.WHEEL_BASE = front.z - rear.z;
+
+	// distance between wheel centers
+	out.TRACK_WIDTH.Front = std::abs(front.x) * 2;
+	out.TRACK_WIDTH.Rear = std::abs(rear.x) * 2;
+
+	// plus wheel size
+	out.TRACK_WIDTH.Front += out.SECTION_WIDTH.Front * 0.001;
+	out.TRACK_WIDTH.Rear += out.SECTION_WIDTH.Rear * 0.001;
 }
 
 Physics::Tunings* GetVehicleMWTunings(void* veh) {
 	return nullptr;
-}
-
-UMath::Vector3 GetWheelBasePosition(MWCarTuning* tuning, Car* car, int wheel) {
-	auto acTire = &car->tyres[GetMWWheelID(wheel)];
-	UMath::Vector3 v;
-	acTire->hub->getBasePosition(&v);
-	v.y += -acTire->data.radius;
-	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
-	v.y += fTireOffset;
-	return v;
 }

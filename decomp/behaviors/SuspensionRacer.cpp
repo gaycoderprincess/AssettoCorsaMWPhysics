@@ -394,17 +394,9 @@ void SuspensionRacerMW::CreateTires() {
 		mTires[i] = new Tire(diameter * 0.5f, i, mMWAttributes);
 		//mTires[i] = new Tire(pCar->tyres[GetMWWheelID(i)].data.radius, i, mMWAttributes);
 	}
-	UMath::Vector3 dimension;
-	mRB->GetDimension(&dimension);
-	WriteLog(std::format("dimension {:.2f} {:.2f} {:.2f}", dimension.x, dimension.y, dimension.z).c_str());
 
-	for (int i = 0; i < 4; i++) {
-		auto v = GetWheelBasePosition(mMWAttributes, pCar, i);
-		GetWheel(i).SetLocalArm(v);
-	}
-
-	/*
-	float fWheelY = -dimension.y;
+	//float fWheelY = -dimension.y;
+	float fWheelY = GetWheelBaseY(mMWAttributes, pCar, 0);
 	float wheelbase = mMWAttributes->WHEEL_BASE;
 	float axle_width_f = mMWAttributes->TRACK_WIDTH.At(0) - mMWAttributes->SECTION_WIDTH.At(0) * 0.001f;
 	float axle_width_r = mMWAttributes->TRACK_WIDTH.At(1) - mMWAttributes->SECTION_WIDTH.At(1) * 0.001f;
@@ -420,7 +412,7 @@ void SuspensionRacerMW::CreateTires() {
 	GetWheel(2).SetLocalArm(rl);
 	GetWheel(3).SetLocalArm(rr);
 
-	WriteLog(std::format("tire pos {:.2f} {:.2f} {:.2f}", fl.x, fl.y, fl.z));*/
+	WriteLog(std::format("tire pos {:.2f} {:.2f} {:.2f}", fl.x, fl.y, fl.z));
 }
 
 void SuspensionRacerMW::OnBehaviorChange() {
