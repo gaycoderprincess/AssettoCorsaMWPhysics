@@ -44,6 +44,8 @@ cp orig_cb_full/350z.conf ks_nissan_gtr.conf
 cp orig_cb_full/350z_top.conf ks_nissan_gtr_top.conf
 cp orig_cb_full/350z.conf ks_nissan_gtr_gt3.conf
 cp orig_cb_full/350z_top.conf ks_nissan_gtr_gt3_top.conf
+cp orig_cb_full/350z.conf hd_ngt_350z.conf
+cp orig_cb_full/350z_top.conf hd_ngt_350z_top.conf
 cp orig_cb_full/skyline.conf ks_nissan_skyline_r34.conf
 cp orig_cb_full/skyline_top.conf ks_nissan_skyline_r34_top.conf
 cp orig_mw_full/997s.conf ks_porsche_991_carrera_s.conf
@@ -116,6 +118,8 @@ cp orig_mw_full/murcielago.conf murcielago_lp640.conf
 cp orig_mw_full/murcielago_top.conf murcielago_lp640_top.conf
 cp orig_cb_full/240sx.conf adam_lz_240sx.conf
 cp orig_cb_full/240sx_top.conf adam_lz_240sx_top.conf
+cp orig_cb_full/240sx.conf dthwsh_nissan_240sx.conf
+cp orig_cb_full/240sx_top.conf dthwsh_nissan_240sx_top.conf
 cp orig_mw_full/imprezawrx.conf GrA_Subaru_555.conf
 cp orig_mw_full/imprezawrx_top.conf GrA_Subaru_555_top.conf
 cp orig_mw_full/lancerevo8.conf Gravel_Mitsubishi_Evo9_R4.conf
@@ -132,5 +136,7 @@ cp orig_mw_full/slr.conf mercedes_mclaren_slr.conf
 cp orig_mw_full/slr_top.conf mercedes_mclaren_slr_top.conf
 cp orig_mw_full/sl500.conf mercedes_c63_amg_black_series.conf
 cp orig_mw_full/sl500_top.conf mercedes_c63_amg_black_series_top.conf
+cp orig_mw_full/eclipsegt.conf tjl_mitsubishi_eclipse_gs-t.conf
+cp orig_mw_full/eclipsegt_top.conf tjl_mitsubishi_eclipse_gs-t_top.conf
 cp orig_cb_full/charger06.conf dodge_char_srt8.conf
 cp orig_cb_full/charger06_top.conf dodge_char_srt8_top.conf
