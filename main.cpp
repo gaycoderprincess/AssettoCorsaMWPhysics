@@ -18,8 +18,6 @@ bool bRevLimiter = true;
 bool bSpeedbreakerEnabled = false;
 bool bNitrousEnabled = true;
 bool bMWWheelPositions = false;
-bool bCSPHacks = false;
-bool bCSPHacks_FullOverride = false;
 float fUpgradeLevel = 1.0;
 float fTireOffset = 0.0;
 float fSteeringWheelLock = 360.0;
@@ -77,7 +75,7 @@ SuspensionRacerMW* GetCarMWSuspension(Car* pCar) {
 }
 
 void ACCarPrePhysics(Car* pThis, float dT) {
-	if (bCSPHacks && !bCSPHacks_FullOverride) return;
+	if (IsUnsupportedCSPInstalled()) return;
 
 	pThis->pollControls(dT);
 
@@ -109,7 +107,7 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 }
 
 void ACCarPostPhysics(Car* pThis, float dT) {
-	if (bCSPHacks && !bCSPHacks_FullOverride) {
+	if (IsUnsupportedCSPInstalled()) {
 		pThis->setupManager.checkRules = false;
 		pThis->setupManager.waitTime = 0.0;
 		pThis->setupManager.setupState = CarSetupState::Legal;
@@ -295,7 +293,7 @@ std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
-	if (!bCSPHacks) {
+	if (!IsAnyCSPInstalled()) {
 		pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, -9.8128, 0.0); // rigidbodyspecs, exact car gravity in MW
 	}
 
@@ -403,7 +401,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		tire->status.normalizedSlideY = tire->slidingVelocityY / tire->totalSlideVelocity;
 
 		// wth is this?
-		if (bCSPHacks) {
+		if (IsAnyCSPInstalled()) {
 			tire->status.Fx = 0.0;
 			tire->status.Fy = 0.0;
 			tire->status.Mz = 0.0;
@@ -508,7 +506,7 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 			mwSusp->GetWheelCenterPos(&result->p, GetMWWheelID(i));
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
-			if (!bCSPHacks) {
+			if (!IsSupportedCSPInstalled()) {
 				result->p += velocity * 0.003;
 			}
 			return result;
@@ -632,10 +630,9 @@ void OnPluginStartup() {
 		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
 		fSteeringWheelLock = config["steering_wheel_lock"].value_or(fSteeringWheelLock);
 		bMWWheelPositions = config["mw_wheel_positions"].value_or(bMWWheelPositions);
-		bCSPHacks = config["csp_compatibility_hack"].value_or(bCSPHacks);
 	}
 
-	if (pMyPlugin->sim->client || bCSPHacks) {
+	if (pMyPlugin->sim->client || IsAnyCSPInstalled()) {
 		bSpeedbreakerEnabled = false;
 	}
 
@@ -652,9 +649,6 @@ void OnPluginStartup() {
 		NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1236BF, &MWTimeUpdate);
 	}
 
-	if (!bCSPHacks) {
-		NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
-	}
 	ReplaceSuspensionVTable(0x4FF878);
 	ReplaceSuspensionVTable(0x4FFC88);
 	ReplaceSuspensionVTable(0x4FFE98);
@@ -677,7 +671,11 @@ void OnPluginStartup() {
 
 	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x276D79, 0x90, 0x276DD5 - 0x276D79); // Car::updateBodyMass
 
-	if (bCSPHacks) {
+	if (!IsAnyCSPInstalled()) {
+		NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
+		WriteLog("Initialized for vanilla game");
+	}
+	else {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x276AE0, 0xC3); // disable Car::updateAirPressure
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2B9590, 0xC3); // disable Autoclutch::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2769F0, 0xC3); // disable Car::stepThermalObjects
@@ -702,13 +700,15 @@ void OnPluginStartup() {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x28D090, 0xC3); // disable SetupManager::step
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x2BFA50, 0xC3); // disable StabilityControl::step
 
-		auto pluginBase = (uintptr_t)GetModuleHandleW((std::filesystem::current_path().wstring() + L"/dwrite.dll").c_str());
+		auto pluginBase = GetSupportedCSPBaseAddress();
 		if (pluginBase && *(uint64_t*)(pluginBase + 0xEC4210) == 0x5518588948C48B48) {
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, pluginBase + 0xEC4210, &MWCarUpdate); // CSP Car::step
-			bCSPHacks_FullOverride = true;
+			WriteLog("Initialized supported CSP hacks");
 		}
 		else {
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x2B4E60, &MWCarUpdateCSP); // DRS::step
+			MessageBoxA(nullptr, "WARNING: Unsupported version of CSP detected, your gameplay experience WILL be worse!", "nya?!~", MB_ICONERROR);
+			WriteLog("Initialized unsupported CSP hacks");
 		}
 	}
 

@@ -83,3 +83,23 @@ int GetMWWheelID(int acWheel) {
 			return 2;
 	}
 }
+
+uint64_t GetSupportedCSPBaseAddress() {
+	auto pluginBase = (uintptr_t)GetModuleHandleW((std::filesystem::current_path().wstring() + L"/dwrite.dll").c_str());
+	if (pluginBase && *(uint64_t*)(pluginBase + 0xC32B50) == 0x6C894810245C8948) return pluginBase;
+	return 0;
+}
+
+bool IsAnyCSPInstalled() {
+	auto dwritePresent = (uintptr_t)GetModuleHandleW((std::filesystem::current_path().wstring() + L"/dwrite.dll").c_str()) != 0;
+	if (!dwritePresent) return false;
+	return *(uint8_t*)(NyaHookLib::mEXEBase + 0x105480) != 0x48; // GhostCar::getGhostCarOpacity
+}
+
+bool IsSupportedCSPInstalled() {
+	return IsAnyCSPInstalled() && GetSupportedCSPBaseAddress() != 0;
+}
+
+bool IsUnsupportedCSPInstalled() {
+	return IsAnyCSPInstalled() && GetSupportedCSPBaseAddress() == 0;
+}

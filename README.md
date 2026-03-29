@@ -22,7 +22,7 @@ I have recently discovered that the latter project uses AI, so while this mod wa
 
 - FOR DEVELOPERS: Almost all handling values have been replaced! For editing car handling, edit the files in `CarDataDump` instead, except for car mass and some aerodynamics-related values
 - Only cars that have configs in the `CarDataDump` folder work in-game! Copy a car from the `orig_mw_full` or `orig_cb_full` subfolders and rename it to your desired car's name to make it work!
-- This mod is NOT compatible with CSP!!! A hack can be enabled in the config to make it kinda work, but it requires some CSP settings to be disabled, and is still INSANELY broken
+- This mod is only compatible with the vanilla game or CSP 0.2.11 (NO OTHER VERSION)! If you're using CSP, Tyres FX has to be disabled!
 
 ## Building
 
