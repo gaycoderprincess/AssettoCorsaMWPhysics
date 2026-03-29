@@ -32,6 +32,8 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 #include "decomp/HelperTypes.h"
 
 #include "MWCarTuning.h"
+
+#include "decomp/Physics.h"
 #include "decomp/interfaces/MWInterface.h"
 #include "decomp/interfaces/MWIChassis.h"
 #include "decomp/interfaces/MWIRaceEngine.h"

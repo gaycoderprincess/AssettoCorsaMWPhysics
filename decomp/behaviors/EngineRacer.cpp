@@ -394,11 +394,11 @@ float EngineRacer::GetDriveWheelSlippage() {
 	int drivewheels = 0;
 	if (RearWheelDrive()) {
 		drivewheels += 2;
-		retval += mSuspension->GetWheelSlip(TIRE_RR) + mSuspension->GetWheelSlip(TIRE_RL);
+		retval += mSuspension->GetWheelSlip(2) + mSuspension->GetWheelSlip(3);
 	}
 	if (FrontWheelDrive()) {
 		drivewheels += 2;
-		retval += mSuspension->GetWheelSlip(TIRE_FL) + mSuspension->GetWheelSlip(TIRE_FR);
+		retval += mSuspension->GetWheelSlip(0) + mSuspension->GetWheelSlip(1);
 	}
 
 	return retval / drivewheels;
