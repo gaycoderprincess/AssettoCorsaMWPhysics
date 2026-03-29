@@ -235,7 +235,6 @@ CarAvatar* GetCarAvatar(Car* pCar) {
 
 // wheels in AC are always at 0 Y, moved by graphicsoffset for center of mass reasons
 float GetWheelBaseY(MWCarTuning* tuning, Car* car, int wheel) {
-	auto acTire = &car->tyres[GetMWWheelID(wheel)];
 	float y = GetCarAvatar(car)->graphicsOffset.y;
 	y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
 	y += fTireOffset;

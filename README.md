@@ -3,7 +3,7 @@
 Experiment for Assetto Corsa that converts the physics and handling model from NFS Most Wanted and Carbon
 
 This mod was heavily based off of the work done in [Brawltendo's MW vehicles decompilation](https://github.com/Brawltendo/Most-Wanted-Vehicles-Decomp) and the cleanups and extensions of it done in [dbalatoni13's MW reverse engineering project](https://github.com/dbalatoni13/nfsmw).  
-I have recently discovered that the latter project uses AI, so while this mod was based off of their code, I no longer endorse dbalatoni13's project.
+I have recently discovered that the latter project uses AI, so while this mod was based off of their code, I do not endorse dbalatoni13's project.
 
 ## Installation
 
