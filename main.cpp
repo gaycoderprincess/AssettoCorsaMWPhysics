@@ -506,7 +506,7 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 			mwSusp->GetWheelCenterPos(&result->p, GetMWWheelID(i));
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
-			if (!IsSupportedCSPInstalled()) {
+			if (!IsSupportedCSPInstalled() && !pMyPlugin->sim->physicsAvatar->isPaused) {
 				result->p += velocity * 0.003;
 			}
 			return result;

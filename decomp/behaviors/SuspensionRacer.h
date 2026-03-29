@@ -415,7 +415,7 @@ class SuspensionRacerMW : public ChassisMW {
 	Burnout mBurnOut;
 	Steering mSteering;
 	Tire *mTires[4];
+	State lastState;
 };
-ChassisMW::State LastChassisState = {};
 
 float YawFrictionBoost(float yaw, float ebrake, float speed, float yawcontrol, float grade);

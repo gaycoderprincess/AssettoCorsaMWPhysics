@@ -225,14 +225,21 @@ UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
 	return v;
 }
 
+CarAvatar* GetCarAvatar(Car* pCar) {
+	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
+		auto car = pMyPlugin->sim->cars[i];
+		if (car->physics == pCar) return car;
+	}
+	return nullptr;
+}
+
+// wheels in AC are always at 0 Y, moved by graphicsoffset for center of mass reasons
 float GetWheelBaseY(MWCarTuning* tuning, Car* car, int wheel) {
 	auto acTire = &car->tyres[GetMWWheelID(wheel)];
-	UMath::Vector3 v;
-	acTire->hub->getBasePosition(&v);
-	v.y += -acTire->data.radius;
-	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
-	v.y += fTireOffset;
-	return v.y;
+	float y = GetCarAvatar(car)->graphicsOffset.y;
+	y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
+	y += fTireOffset;
+	return y;
 }
 
 #define TUNED_VALUE(value, delta) tmp.value = std::lerp(base->value, top->value, delta);

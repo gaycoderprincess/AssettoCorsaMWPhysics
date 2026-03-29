@@ -463,7 +463,7 @@ void SuspensionRacerMW::OnTaskSimulate(float dT) {
 
 	State state;
 	ComputeState(dT, state);
-	LastChassisState = state;
+	lastState = state;
 
 	mSteering.CollisionTimer = UMath::Max(mSteering.CollisionTimer - state.time, 0.0f);
 	mGameBreaker = 0.0f;
@@ -537,10 +537,7 @@ UMath::Vector3* SuspensionRacerMW::GetWheelCenterPos(UMath::Vector3* result, uns
 	} else {
 		// get max suspension travel
 		if (!mTires[i]->IsOnGround()) {
-			UMath::Matrix4 matrix;
-			mRB->GetMatrix4(&matrix);
-			matrix.p = *mRB->GetPosition();
-
+			auto matrix = lastState.matrix;
 			UMath::Vector3 p(mTires[i]->GetLocalArm());
 			p.y -= INCH2METERS(mMWAttributes->TRAVEL.At(i / 2u));
 			UMath::RotateTranslate(p, matrix, p);
