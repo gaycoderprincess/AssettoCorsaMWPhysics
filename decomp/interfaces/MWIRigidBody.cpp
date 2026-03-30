@@ -67,7 +67,7 @@ public:
 		auto force = *_force;
 		auto torque = *_torque;
 
-		float oom = 1.0 / mCOMObject->Find<ICollisionBody>()->GetMass();
+		float oom = 1.0 / GetMass();
 		auto dT = fGlobalDeltaTime;
 
 		UMath::Matrix4 bodyMatrix;
