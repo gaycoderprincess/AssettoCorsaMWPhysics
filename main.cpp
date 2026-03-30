@@ -651,17 +651,11 @@ void ManageMWSetupItems(Car* pThis) {
 
 	int itemIds[Physics::Tunings::MAX_TUNINGS];
 	for (int i = 0; i < Physics::Tunings::MAX_TUNINGS; i++) {
-		SetupItem item = {};
-		item.attached = true;
-		item.connectedFloat = &PlayerCarTunings.Value[i];
-		item.labelMultiplier = 1.0;
-		item.multiplier = 1.0;
-		item.name = ACSTD::wstring();
-		item.name.assign(names[i].c_str(), names[i].length());
-		item.units = ACSTD::wstring();
-		item.newValue = *item.connectedFloat;
+		auto name = ACSTD::wstring();
+		auto units = ACSTD::wstring();
+		name.assign(names[i].c_str(), names[i].length());
 		itemIds[i] = pThis->setupManager.items.size();
-		pThis->setupManager.items.push_back(item);
+		pThis->setupManager.items.push_back(SetupItem(&name, &PlayerCarTunings.Value[i], &units, true, 1.0, 1.0));
 	}
 
 	for (int i = 0; i < Physics::Tunings::MAX_TUNINGS; i++) {
