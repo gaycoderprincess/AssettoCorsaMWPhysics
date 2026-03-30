@@ -10,7 +10,7 @@ public:
 		return GetLinearVelocity()->length();
 	}
 	virtual float GetMass() {
-		return pCar->body->getMass();
+		return mCOMObject->Find<ICollisionBody>()->GetMass();
 	}
 	virtual void GetMatrix4(UMath::Matrix4* out) {
 		pCar->body->getWorldMatrix(out, 0.0);
@@ -67,7 +67,7 @@ public:
 		auto force = *_force;
 		auto torque = *_torque;
 
-		float oom = 1.0 / pCar->body->getMass();
+		float oom = 1.0 / mCOMObject->Find<ICollisionBody>()->GetMass();
 		auto dT = fGlobalDeltaTime;
 
 		UMath::Matrix4 bodyMatrix;

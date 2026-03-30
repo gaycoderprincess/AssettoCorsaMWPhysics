@@ -52,7 +52,6 @@ extern "C" __declspec(dllexport) bool __fastcall acpInit(ACPlugin* plugin) {
 	WriteLog(std::format("car {:X}", (uintptr_t)plugin->car));
 	WriteLog(std::format("sim {:X}", (uintptr_t)plugin->sim));
 	WriteLog(std::format("car unixName {}", GetStringNarrow(plugin->car->unixName.c_str())));
-	WriteLog(std::format("car screenName {}", GetStringNarrow(plugin->car->screenName.c_str())));
 	OnPluginStartup();
 	return true;
 }

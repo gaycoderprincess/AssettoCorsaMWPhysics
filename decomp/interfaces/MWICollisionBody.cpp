@@ -5,6 +5,7 @@ public:
 	static inline const char* _IIDName = "ICollisionBody";
 
 	Car* pCar;
+	float fMass = 1000.0;
 	UMath::Vector3 vTensorScale = {0.0, 0.0, 0.0};
 	UMath::Vector3 vCenterOfGravity = {0.0, 0.0, 0.0};
 
@@ -18,6 +19,10 @@ public:
 		static UMath::Vector3 tmp;
 		tmp = {0,0,0};
 		return &tmp;
+	}
+
+	virtual float GetMass() {
+		return fMass;
 	}
 
 	virtual void SetCenterOfGravity(UMath::Vector3* cog) {
@@ -68,7 +73,9 @@ public:
 			vTensorScale.x = tune.TENSOR_SCALE[0];
 			vTensorScale.y = tune.TENSOR_SCALE[1];
 			vTensorScale.z = tune.TENSOR_SCALE[2];
-			WriteLog(std::format("car mass {:.2f}", pCar->body->getMass()));
+			fMass = tune.MASS;
+			WriteLog(std::format("AC mass {:.2f}", pCar->body->getMass()));
+			WriteLog(std::format("MW mass {:.2f}", fMass));
 		}
 
 		UMath::Vector3 dim;
@@ -77,7 +84,7 @@ public:
 		dim.z = std::max(std::abs(pCar->bounds.min.z), std::abs(pCar->bounds.max.z));
 
 		static UMath::Vector3 tmp;
-		tmp = CalculateInertiaTensor(vTensorScale, pCar->body->getMass(), dim);
+		tmp = CalculateInertiaTensor(vTensorScale, fMass, dim);
 		return &tmp;
 	}
 	virtual void Damp(float amount) {
