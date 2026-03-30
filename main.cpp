@@ -220,14 +220,18 @@ void ManageMWSetupItems(Car* pThis, EngineRacer* pEngine, SuspensionRacerMW* pSu
 			L"Ride Height",
 			L"Aerodynamics",
 			L"Nitrous",
-			L"Supercharger",
+			L"Induction",
 	};
 
 	const int max = Physics::Tunings::MAX_TUNINGS;
 
-	bool disabled[max];
+	bool disabled[max] = {};
 	disabled[Physics::Tunings::INDUCTION] = pEngine->InductionType() == Physics::Info::INDUCTION_NONE;
 	disabled[Physics::Tunings::NOS] = !pEngine->HasNOS();
+
+	if (!disabled[Physics::Tunings::INDUCTION]) {
+		names[Physics::Tunings::INDUCTION] = pEngine->InductionType() == Physics::Info::INDUCTION_SUPER_CHARGER ? L"Supercharger" : L"Turbocharger";
+	}
 
 	int itemIds[max];
 	for (int i = 0; i < max; i++) {
