@@ -421,7 +421,7 @@ void SuspensionRacerMW::OnBehaviorChange() {
 
 Meters SuspensionRacerMW::GetRideHeight(unsigned int idx) {
 	float ride = ChassisMW::GetRideHeight(idx);
-	const Physics::Tunings *tunings = GetVehicleMWTunings(GetVehicle());
+	const Physics::Tunings *tunings = GetVehicleTunings();
 	if (tunings) {
 		ride += INCH2METERS(tunings->Value[Physics::Tunings::RIDEHEIGHT]);
 	}
@@ -455,7 +455,7 @@ void SuspensionRacerMW::OnTaskSimulate(float dT) {
 	}
 
 	float ride_extra = 0.0f;
-	const Physics::Tunings *tunings = GetVehicleMWTunings(GetVehicle());
+	const Physics::Tunings *tunings = GetVehicleTunings();
 	if (tunings) {
 		ride_extra = tunings->Value[Physics::Tunings::RIDEHEIGHT];
 	}
@@ -643,7 +643,7 @@ float SuspensionRacerMW::CalculateMaxSteering(State &state, SteeringType steer_t
 	max_steering *= BrakeSteeringRangeMultiplier * tbcoeff * SteeringSpeedTable.GetValue(state.local_vel.z) + 1.0f;
 	max_steering *= SteeringRangeCoeffTable.GetValue(std::abs(mSteering.InputAverage.GetValue()));
 
-	const Physics::Tunings *tunings = GetVehicleMWTunings(GetVehicle());
+	const Physics::Tunings *tunings = GetVehicleTunings();
 	if (tunings) {
 		max_steering *= tunings->Value[Physics::Tunings::STEERING] * Tweak_TuningSteering_Ratio + 1.0f;
 	}
@@ -998,7 +998,7 @@ void SuspensionRacerMW::TuneWheelParams(State &state) {
 
 	float brake_biased[2] = {state.brake_input, state.brake_input};
 	yawcontrol *= (1.0f - mDrift.Value); // pointless parentheses for matching purposes
-	const Physics::Tunings *tunings = GetVehicleMWTunings(GetVehicle());
+	const Physics::Tunings *tunings = GetVehicleTunings();
 	if (tunings) {
 		// brake tuning adjusts the brake bias
 		brake_biased[0] += brake_biased[0] * tunings->Value[Physics::Tunings::BRAKES] * 0.5f;
@@ -1225,7 +1225,7 @@ void SuspensionRacerMW::DoWheelForces(State &state) {
 	const float mass = state.mass;
 
 	float ride_extra = 0.0f;
-	const Physics::Tunings *tunings = GetVehicleMWTunings(GetVehicle());
+	const Physics::Tunings *tunings = GetVehicleTunings();
 	if (tunings) {
 		ride_extra = tunings->Value[Physics::Tunings::RIDEHEIGHT];
 	}

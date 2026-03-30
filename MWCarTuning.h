@@ -440,6 +440,8 @@ void GetLerpedCarTuning(MWCarTuning& out, const std::string& model, Car* pCar) {
 	out.TRACK_WIDTH.Rear += out.SECTION_WIDTH.Rear * 0.001;
 }
 
-Physics::Tunings* GetVehicleMWTunings(void* veh) {
+Physics::Tunings PlayerCarTunings = {};
+Physics::Tunings* GetVehicleMWTunings(Car* veh) {
+	if (veh == pMyPlugin->car) return &PlayerCarTunings;
 	return nullptr;
 }

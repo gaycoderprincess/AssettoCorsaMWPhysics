@@ -312,7 +312,16 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pCar == pMyPlugin->car) {
 		SimSystem::fSimTime += dT;
 		SpeedbreakerLoop();
+
+		for (int i = 0; i < pCar->setupManager.items.size(); i++) {
+			auto item = &pCar->setupManager.items[i];
+			for (int j = 0; j < Physics::Tunings::MAX_TUNINGS; j++) {
+				if (item->connectedFloat != &PlayerCarTunings.Value[j]) continue;
+				PlayerCarTunings.Value[j] = item->newValue / 5.0;
+			}
+		}
 	}
+
 	fGlobalDeltaTime = dT;
 
 	mCarUpdateMutex.lock();
@@ -622,6 +631,55 @@ void MWCarUpdateCSP(DRS* pThis, float dt) {
 	}
 }
 
+void ManageMWSetupItems(Car* pThis) {
+	static std::wstring title = L"MOST WANTED";
+	ACSTD::wstring wTitle;
+	wTitle.assign(title.c_str(), title.length());
+
+	auto setupScreen = pMyPlugin->sim->escMenu->setupScreen;
+	auto mostWantedTab = setupScreen->getSetupTab(&wTitle);
+
+	static std::wstring names[] = {
+		L"Steering",
+		L"Handling",
+		L"Brakes",
+		L"Ride Height",
+		L"Aerodynamics",
+		L"Nitrous",
+		L"Supercharger",
+	};
+
+	int itemIds[Physics::Tunings::MAX_TUNINGS];
+	for (int i = 0; i < Physics::Tunings::MAX_TUNINGS; i++) {
+		SetupItem item = {};
+		item.attached = true;
+		item.connectedFloat = &PlayerCarTunings.Value[i];
+		item.labelMultiplier = 1.0;
+		item.multiplier = 1.0;
+		item.name = ACSTD::wstring();
+		item.name.assign(names[i].c_str(), names[i].length());
+		item.units = ACSTD::wstring();
+		item.newValue = *item.connectedFloat;
+		itemIds[i] = pThis->setupManager.items.size();
+		pThis->setupManager.items.push_back(item);
+	}
+
+	for (int i = 0; i < Physics::Tunings::MAX_TUNINGS; i++) {
+		auto def = new SetupItemDef;
+		def->name.assign(names[i].c_str(), names[i].length());
+		def->connection = &pThis->setupManager.items[itemIds[i]];
+		def->defaultValue = 0;
+		def->helpKey = ACSTD::wstring();
+		def->minValue = -5;
+		def->maxValue = 5;
+		def->px = 0.5;
+		def->py = i;
+		def->showClicksMode = eShowClicksType::eShowClicks;
+		def->step = 1.0;
+		mostWantedTab->addItem(def);
+	}
+}
+
 void OnPluginStartup() {
 	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
 		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
@@ -713,6 +771,8 @@ void OnPluginStartup() {
 			WriteLog("Initialized unsupported CSP hacks");
 		}
 	}
+
+	ManageMWSetupItems(pMyPlugin->car);
 
 	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);
 

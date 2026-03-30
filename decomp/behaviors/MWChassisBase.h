@@ -94,6 +94,10 @@ public:
 		return GetOwner()->Find<IVehicle>();
 	}
 
+	Physics::Tunings* GetVehicleTunings() {
+		return GetVehicleMWTunings(pCar);
+	}
+
 	int nLastRaceState;
 
 	const char* mChassisType = "Chassis";

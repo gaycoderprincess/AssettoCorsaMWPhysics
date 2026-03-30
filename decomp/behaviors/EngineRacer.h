@@ -88,7 +88,7 @@ class EngineRacer : public IEngine, public IEngineDamage, public IRaceEngine, pu
 	void AutoShift(float dT);
 
 	Physics::Tunings* GetVehicleTunings() {
-		return GetVehicleMWTunings(GetVehicle());
+		return GetVehicleMWTunings(pCar);
 	}
 
 	~EngineRacer();
