@@ -235,10 +235,13 @@ CarAvatar* GetCarAvatar(Car* pCar) {
 
 // wheels in AC are always at 0 Y, moved by graphicsoffset for center of mass reasons
 float GetWheelBaseY(MWCarTuning* tuning, Car* car, int wheel) {
-	float y = GetCarAvatar(car)->graphicsOffset.y;
-	y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
-	y += fTireOffset;
-	return y;
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	v.y += -acTire->data.radius;
+	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
+	v.y += fTireOffset;
+	return v.y;
 }
 
 #define TUNED_VALUE(value, delta) tmp.value = std::lerp(base->value, top->value, delta);
