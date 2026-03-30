@@ -16,6 +16,7 @@ I have recently discovered that the latter project uses AI, so while this mod wa
 - Full 1:1 port of Most Wanted's engine, gearbox, suspension and tire physics as well as the aerodynamics such as drag and air stabilization
 - The mod is based on actual code rather than tweaks of random values, ensuring the handling is as accurate as possible
 - Nitrous has been added, bound to the ALT key on the keyboard and B on an Xbox controller, the NOS gauge replaces the fuel gauge.
+- Performance tuning has been added, available in the new Most Wanted section of the car setup menu
 - Speedbreaker has been added, enabled by the `speedbreaker` option in the toml file, bound to the X key on the keyboard or X on an Xbox controller
 
 ## Useful info
