@@ -205,6 +205,60 @@ void DoShifting(Car* pCar) {
 	bLastDown = currentDown;
 }
 
+void ManageMWSetupItems(Car* pThis, EngineRacer* pEngine, SuspensionRacerMW* pSuspension) {
+	static std::wstring title = L"MOST WANTED";
+	ACSTD::wstring wTitle;
+	wTitle.assign(title.c_str(), title.length());
+
+	auto setupScreen = pMyPlugin->sim->escMenu->setupScreen;
+	auto mostWantedTab = setupScreen->getSetupTab(&wTitle);
+
+	static std::wstring names[] = {
+			L"Steering",
+			L"Handling",
+			L"Brakes",
+			L"Ride Height",
+			L"Aerodynamics",
+			L"Nitrous",
+			L"Supercharger",
+	};
+
+	const int max = Physics::Tunings::MAX_TUNINGS;
+
+	bool disabled[max];
+	disabled[Physics::Tunings::INDUCTION] = pEngine->InductionType() == Physics::Info::INDUCTION_NONE;
+	disabled[Physics::Tunings::NOS] = !pEngine->HasNOS();
+
+	int itemIds[max];
+	for (int i = 0; i < max; i++) {
+		if (disabled[i]) continue;
+
+		auto name = ACSTD::wstring();
+		auto units = ACSTD::wstring();
+		name.assign(names[i].c_str(), names[i].length());
+		itemIds[i] = pThis->setupManager.items.size();
+		pThis->setupManager.items.push_back(SetupItem(&name, &PlayerCarTunings.Value[i], &units, true, 1.0, 1.0));
+	}
+
+	int num = 0;
+	for (int i = 0; i < max; i++) {
+		if (disabled[i]) continue;
+
+		auto def = new SetupItemDef;
+		def->name.assign(names[i].c_str(), names[i].length());
+		def->connection = &pThis->setupManager.items[itemIds[i]];
+		def->defaultValue = 0;
+		def->helpKey = ACSTD::wstring();
+		def->minValue = -5;
+		def->maxValue = 5;
+		def->px = 0.5;
+		def->py = num++;
+		def->showClicksMode = eShowClicksType::eShowClicks;
+		def->step = 1.0;
+		mostWantedTab->addItem(def);
+	}
+}
+
 void SwitchToMWPhysics(Car* ply) {
 	if (GetCarMWEngine(ply) || GetCarMWSuspension(ply)) return;
 
@@ -241,9 +295,9 @@ void SwitchToMWPhysics(Car* ply) {
 	aEngines.push_back(engine);
 	aSuspensions.push_back(susp);
 
-	//ply->mass = susp->mMWAttributes->MASS;
-	//ply->bodyInertia = {susp->mMWAttributes->TENSOR_SCALE[0],susp->mMWAttributes->TENSOR_SCALE[1],susp->mMWAttributes->TENSOR_SCALE[2]};
-	//ply->body->setMassBox(ply->mass, ply->bodyInertia.x, ply->bodyInertia.y, ply->bodyInertia.z);
+	if (playerId == 0) {
+		ManageMWSetupItems(pMyPlugin->car, engine, susp);
+	}
 
 	WriteLog(std::format("MW max RPM {}", engine->GetMaxRPM()));
 	WriteLog(std::format("AC max RPM {}", ply->drivetrain.acEngine.defaultEngineLimiter));
@@ -631,49 +685,6 @@ void MWCarUpdateCSP(DRS* pThis, float dt) {
 	}
 }
 
-void ManageMWSetupItems(Car* pThis) {
-	static std::wstring title = L"MOST WANTED";
-	ACSTD::wstring wTitle;
-	wTitle.assign(title.c_str(), title.length());
-
-	auto setupScreen = pMyPlugin->sim->escMenu->setupScreen;
-	auto mostWantedTab = setupScreen->getSetupTab(&wTitle);
-
-	static std::wstring names[] = {
-		L"Steering",
-		L"Handling",
-		L"Brakes",
-		L"Ride Height",
-		L"Aerodynamics",
-		L"Nitrous",
-		L"Supercharger",
-	};
-
-	int itemIds[Physics::Tunings::MAX_TUNINGS];
-	for (int i = 0; i < Physics::Tunings::MAX_TUNINGS; i++) {
-		auto name = ACSTD::wstring();
-		auto units = ACSTD::wstring();
-		name.assign(names[i].c_str(), names[i].length());
-		itemIds[i] = pThis->setupManager.items.size();
-		pThis->setupManager.items.push_back(SetupItem(&name, &PlayerCarTunings.Value[i], &units, true, 1.0, 1.0));
-	}
-
-	for (int i = 0; i < Physics::Tunings::MAX_TUNINGS; i++) {
-		auto def = new SetupItemDef;
-		def->name.assign(names[i].c_str(), names[i].length());
-		def->connection = &pThis->setupManager.items[itemIds[i]];
-		def->defaultValue = 0;
-		def->helpKey = ACSTD::wstring();
-		def->minValue = -5;
-		def->maxValue = 5;
-		def->px = 0.5;
-		def->py = i;
-		def->showClicksMode = eShowClicksType::eShowClicks;
-		def->step = 1.0;
-		mostWantedTab->addItem(def);
-	}
-}
-
 void OnPluginStartup() {
 	if (std::filesystem::exists("plugins/AssettoCorsaMWPhysics_gcp.toml")) {
 		auto config = toml::parse_file("plugins/AssettoCorsaMWPhysics_gcp.toml");
@@ -765,8 +776,6 @@ void OnPluginStartup() {
 			WriteLog("Initialized unsupported CSP hacks");
 		}
 	}
-
-	ManageMWSetupItems(pMyPlugin->car);
 
 	NyaAudio::Init((HWND)pMyPlugin->sim->game->window.hWnd);
 
