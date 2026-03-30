@@ -497,8 +497,8 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	pCar->controls.brake = iinput->GetControlBrake();
 	pCar->controls.handBrake = iinput->GetControlHandBrake();
 
-	// todo calculate
-	pCar->brakeSystem.frontBias = pCar->brakeSystem.biasOverride = 0.5;
+	float total = pEngine->mMWInfo->BRAKES.Front + pEngine->mMWInfo->BRAKES.Rear;
+	pCar->brakeSystem.frontBias = pCar->brakeSystem.biasOverride = pEngine->mMWInfo->BRAKES.Front / total;
 
 	pCar->drivetrain.currentGear = pEngine->GetGear();
 	pCar->drivetrain.isGearGrinding = pEngine->IsGearChanging();
