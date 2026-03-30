@@ -468,7 +468,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 			if (audio && pEngine->IsNOSEngaged()) {
 				NyaAudio::Stop(audio);
 				NyaAudio::SkipTo(audio, 0, false);
-				NyaAudio::SetVolume(audio, 1.0);
+				NyaAudio::SetVolume(audio, pMyPlugin->sim->game->masterVolume);
 				NyaAudio::Play(audio);
 			}
 		}
@@ -477,7 +477,7 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 			if (pEngine->IsNOSEngaged()) {
 				if (NyaAudio::IsFinishedPlaying(audio)) {
 					NyaAudio::SkipTo(audio, 0, false);
-					NyaAudio::SetVolume(audio, 1.0);
+					NyaAudio::SetVolume(audio, pMyPlugin->sim->game->masterVolume);
 					NyaAudio::Play(audio);
 				}
 			}
