@@ -257,7 +257,7 @@ void ChassisMW::SetCOG(float extra_bias, float extra_ride) {
 		fwbias = 0.5f;
 	}
 	float cg_z = (front_z - rear_z) * fwbias + rear_z;
-	float cg_y = INCH2METERS(mMWAttributes->ROLL_CENTER) - (dim.y + extra_ride);
+	float cg_y = INCH2METERS(mMWAttributes->ROLL_CENTER) - (dim.y + INCH2METERS(extra_ride));
 	UMath::Vector3 cog(0.0f, cg_y, cg_z);
 	mRBComplex->SetCenterOfGravity(&cog);
 }
