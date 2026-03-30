@@ -86,6 +86,8 @@ cp orig_mw_full/gti.conf golf_mk5_tuned.conf
 cp orig_mw_full/gti_top.conf golf_mk5_tuned_top.conf
 cp orig_mw_full/gti.conf vw_golf_v_gti.conf
 cp orig_mw_full/gti_top.conf vw_golf_v_gti_top.conf
+cp orig_mw_full/gti.conf kas_vw_golf_gti_mkv_2006.conf
+cp orig_mw_full/gti_top.conf kas_vw_golf_gti_mkv_2006_top.conf
 cp orig_mw_full/viper.conf a3dr_viper_rt10.conf
 cp orig_mw_full/viper_top.conf a3dr_viper_rt10_top.conf
 cp orig_mw_full/viper.conf ag_dodge_vipercc_08.conf
