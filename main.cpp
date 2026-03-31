@@ -207,7 +207,7 @@ void DoShifting(Car* pCar) {
 }
 
 void ManageMWSetupItems(Car* pThis, EngineRacer* pEngine, SuspensionRacerMW* pSuspension) {
-	static std::wstring title = L"MOST WANTED";
+	static std::wstring title = L"PERFORMANCE TUNING";
 	ACSTD::wstring wTitle;
 	wTitle.assign(title.c_str(), title.length());
 
@@ -261,6 +261,36 @@ void ManageMWSetupItems(Car* pThis, EngineRacer* pEngine, SuspensionRacerMW* pSu
 		def->showClicksMode = eShowClicksType::eShowClicks;
 		def->step = 1.0;
 		mostWantedTab->addItem(def);
+	}
+
+	for (int i = 0; i < setupScreen->tabs.size(); i++) {
+		setupScreen->tabs[i]->setVisible(false);
+	}
+	for (int i = 0; i < setupScreen->tabBar->elements.size(); i++) {
+		setupScreen->tabBar->elements[i]->setVisible(false);
+	}
+
+	for (int i = 0; i < setupScreen->tabs.size(); i++) {
+		if (setupScreen->tabs[i] != mostWantedTab) continue;
+
+		mostWantedTab->setVisible(true);
+		setupScreen->tabs.clear();
+		setupScreen->tabs.push_back(mostWantedTab);
+
+		auto mwElement = setupScreen->tabBar->elements[i];
+		mwElement->setVisible(true);
+		setupScreen->tabBar->elements.clear();
+		setupScreen->tabBar->elements.push_back(mwElement);
+
+		// swap-and-replace method
+		//setupScreen->tabs[i] = setupScreen->tabs[0];
+		//setupScreen->tabs[0] = mostWantedTab;
+		//setupScreen->tabs[i]->setVisible(false);
+		//setupScreen->tabs[0]->setVisible(true);
+		//auto bak = setupScreen->tabBar->elements[0];
+		//setupScreen->tabBar->elements[0] = setupScreen->tabBar->elements[i];
+		//setupScreen->tabBar->elements[i] = bak;
+		break;
 	}
 }
 
