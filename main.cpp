@@ -18,6 +18,7 @@ bool bRevLimiter = true;
 bool bSpeedbreakerEnabled = false;
 bool bNitrousEnabled = true;
 bool bMWWheelPositions = false;
+bool bMWPhysicsTickrate = false;
 float fUpgradeLevel = 1.0;
 float fTireOffset = 0.0;
 float fSteeringWheelLock = 360.0;
@@ -576,7 +577,7 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
 			if (!IsSupportedCSPInstalled() && !pMyPlugin->sim->physicsAvatar->isPaused) {
-				result->p += velocity * 0.003;
+				result->p += velocity * (bMWPhysicsTickrate ? 1.0 / 60.0 : 0.003);
 			}
 			return result;
 		}
@@ -662,6 +663,12 @@ float GetOptimalBrakeHooked() {
 
 auto MWTimeUpdate_orig = (void(__fastcall*)(PhysicsEngine*, float, double, double))nullptr;
 void MWTimeUpdate(PhysicsEngine* pThis, float dt, double currentTime, double gt) {
+	if (bMWPhysicsTickrate) {
+		pMyPlugin->sim->physicsAvatar->driveThread.currentTime -= dt * 1000.0;
+		dt = 1.0 / 60.0;
+		pMyPlugin->sim->physicsAvatar->driveThread.currentTime += dt * 1000.0;
+	}
+
 	MWTimeUpdate_orig(pThis, dt * fOverrideTimescale, currentTime, gt);
 }
 
