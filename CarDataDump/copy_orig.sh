@@ -176,3 +176,7 @@ cp orig_mw_full/carreragt.conf ks_ferrari_488_gtb.conf
 cp orig_mw_full/carreragt_top.conf ks_ferrari_488_gtb_top.conf
 cp orig_mw_full/clio.conf trafpizza.conf
 cp orig_mw_full/clio_top.conf trafpizza_top.conf
+cp orig_mw_full/cobaltss.conf pb_cobalt_ss_sc.conf
+cp orig_mw_full/cobaltss_top.conf pb_cobalt_ss_sc_top.conf
+cp orig_mw_full/cobaltss.conf pb_cobalt_ss_turbo.conf
+cp orig_mw_full/cobaltss_top.conf pb_cobalt_ss_turbo_top.conf
