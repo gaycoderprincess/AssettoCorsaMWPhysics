@@ -269,6 +269,7 @@ void ManageMWSetupItems(Car* pThis, EngineRacer* pEngine, SuspensionRacerMW* pSu
 	for (int i = 0; i < setupScreen->tabBar->elements.size(); i++) {
 		setupScreen->tabBar->elements[i]->setVisible(false);
 	}
+	setupScreen->setupInfo->setVisible(false);
 
 	for (int i = 0; i < setupScreen->tabs.size(); i++) {
 		if (setupScreen->tabs[i] != mostWantedTab) continue;
@@ -277,8 +278,12 @@ void ManageMWSetupItems(Car* pThis, EngineRacer* pEngine, SuspensionRacerMW* pSu
 		setupScreen->tabs.clear();
 		setupScreen->tabs.push_back(mostWantedTab);
 
+		auto rect = setupScreen->tabBar->elements[0]->rect;
+		auto rectBase = setupScreen->tabBar->elements[0]->rectBase;
 		auto mwElement = setupScreen->tabBar->elements[i];
 		mwElement->setVisible(true);
+		mwElement->rect = rect;
+		mwElement->rectBase = rectBase;
 		setupScreen->tabBar->elements.clear();
 		setupScreen->tabBar->elements.push_back(mwElement);
 
