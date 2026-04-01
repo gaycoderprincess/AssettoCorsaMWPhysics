@@ -828,6 +828,10 @@ void OnPluginStartup() {
 	WriteLog("Mod initialized");
 }
 
+extern "C" __declspec(dllexport) bool __fastcall ChloeMW_IsNOSEnabled(Car* car) {
+	return bNitrousEnabled;
+}
+
 extern "C" __declspec(dllexport) bool __fastcall ChloeMW_HasTurbo(Car* car) {
 	auto i = GetCarMWEngine(car);
 	if (!i) return false;
