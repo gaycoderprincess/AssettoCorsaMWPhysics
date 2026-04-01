@@ -846,6 +846,18 @@ extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetInductionPSI(Car* c
 	return i->GetInductionPSI();
 }
 
+extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetRPM(Car* car) {
+	auto i = GetCarMWEngine(car);
+	if (!i) return 0.0;
+	return i->GetRPM();
+}
+
+extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetMaxRPM(Car* car) {
+	auto i = GetCarMWEngine(car);
+	if (!i) return 0.0;
+	return i->GetMaxRPM();
+}
+
 extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetRedline(Car* car) {
 	auto i = GetCarMWEngine(car);
 	if (!i) return 0.0;

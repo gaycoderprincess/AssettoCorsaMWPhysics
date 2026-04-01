@@ -25,6 +25,18 @@ namespace ChloeMWPhysics {
 		return funcPtr(car);
 	}
 
+	float GetRPM(void* car) {
+		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_GetRPM");
+		if (!funcPtr) return 0.0;
+		return funcPtr(car);
+	}
+
+	float GetMaxRPM(void* car) {
+		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_GetMaxRPM");
+		if (!funcPtr) return 0.0;
+		return funcPtr(car);
+	}
+
 	float GetRedline(void* car) {
 		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_GetRedline");
 		if (!funcPtr) return 0.0;
