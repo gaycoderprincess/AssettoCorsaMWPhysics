@@ -828,6 +828,27 @@ void OnPluginStartup() {
 	WriteLog("Mod initialized");
 }
 
+extern "C" __declspec(dllexport) bool __fastcall ChloeMW_HasTurbo(Car* car) {
+	auto i = GetCarMWEngine(car);
+	if (!i) return false;
+	return i->InductionType() != Physics::Info::INDUCTION_NONE;
+}
+
+extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetInductionPSI(Car* car) {
+	auto i = GetCarMWEngine(car);
+	if (!i) return 0.0;
+	return i->GetInductionPSI();
+}
+
+extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetGameBreakerCharge(Car* car) {
+	if (!bSpeedbreakerEnabled) return 0.0;
+
+	auto i = GetPlayerInterface(car);
+	if (!i) return 0.0;
+	if (auto ply = i->Find<IPlayer>()) return ply->mGameBreakerCharge;
+	return 0.0;
+}
+
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 	switch(fdwReason) {
 		case DLL_PROCESS_ATTACH: {
