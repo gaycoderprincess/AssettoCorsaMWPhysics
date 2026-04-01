@@ -870,6 +870,13 @@ extern "C" __declspec(dllexport) bool __fastcall ChloeMW_InGameBreaker(Car* car)
 	return false;
 }
 
+extern "C" __declspec(dllexport) bool __fastcall ChloeMW_IsInPerfectLaunchRange(Car* car) {
+	auto i = GetPlayerInterface(car);
+	if (!i) return false;
+	if (auto ply = i->Find<IVehicle>()) return ply->IsInPerfectLaunchRange();
+	return false;
+}
+
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 	switch(fdwReason) {
 		case DLL_PROCESS_ATTACH: {

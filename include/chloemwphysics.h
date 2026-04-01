@@ -42,4 +42,10 @@ namespace ChloeMWPhysics {
 		if (!funcPtr) return false;
 		return funcPtr(car);
 	}
+
+	bool IsInPerfectLaunchRange(void* car) {
+		static auto funcPtr = GetFuncPtr<bool(__fastcall*)(void*)>("ChloeMW_IsInPerfectLaunchRange");
+		if (!funcPtr) return false;
+		return funcPtr(car);
+	}
 }
