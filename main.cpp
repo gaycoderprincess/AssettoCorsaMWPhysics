@@ -864,6 +864,12 @@ extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetRedline(Car* car) {
 	return i->GetRedline();
 }
 
+extern "C" __declspec(dllexport) int __fastcall ChloeMW_GetShiftPotential(Car* car) {
+	auto i = GetCarMWEngine(car);
+	if (!i) return 0.0;
+	return i->GetShiftPotential();
+}
+
 extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetGameBreakerCharge(Car* car) {
 	if (!bSpeedbreakerEnabled) return 0.0;
 

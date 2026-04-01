@@ -43,6 +43,12 @@ namespace ChloeMWPhysics {
 		return funcPtr(car);
 	}
 
+	int GetShiftPotential(void* car) {
+		static auto funcPtr = GetFuncPtr<int(__fastcall*)(void*)>("ChloeMW_GetShiftPotential");
+		if (!funcPtr) return 0;
+		return funcPtr(car);
+	}
+
 	float GetGameBreakerCharge(void* car) {
 		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_GetGameBreakerCharge");
 		if (!funcPtr) return 0.0;
