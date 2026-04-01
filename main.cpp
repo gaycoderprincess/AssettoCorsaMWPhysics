@@ -760,6 +760,10 @@ void OnPluginStartup() {
 		NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x1236BF, &MWTimeUpdate);
 	}
 
+	if (bNitrousEnabled) {
+		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0xBC030, 0xC3); // disable fuel warnings
+	}
+
 	ReplaceSuspensionVTable(0x4FF878);
 	ReplaceSuspensionVTable(0x4FFC88);
 	ReplaceSuspensionVTable(0x4FFE98);
