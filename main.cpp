@@ -782,6 +782,8 @@ void OnPluginStartup() {
 
 	NyaHookLib::Fill(NyaHookLib::mEXEBase + 0x276D79, 0x90, 0x276DD5 - 0x276D79); // Car::updateBodyMass
 
+	NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0x26E0D0, 0xC3); // remove Car dtor, temporary hack to fix a crash
+
 	if (!IsAnyCSPInstalled()) {
 		NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x275DA0, &MWCarUpdate);
 		WriteLog("Initialized for vanilla game");
@@ -844,6 +846,12 @@ extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetInductionPSI(Car* c
 	return i->GetInductionPSI();
 }
 
+extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetRedline(Car* car) {
+	auto i = GetCarMWEngine(car);
+	if (!i) return 0.0;
+	return i->GetRedline();
+}
+
 extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetGameBreakerCharge(Car* car) {
 	if (!bSpeedbreakerEnabled) return 0.0;
 
@@ -851,6 +859,15 @@ extern "C" __declspec(dllexport) float __fastcall ChloeMW_GetGameBreakerCharge(C
 	if (!i) return 0.0;
 	if (auto ply = i->Find<IPlayer>()) return ply->mGameBreakerCharge;
 	return 0.0;
+}
+
+extern "C" __declspec(dllexport) bool __fastcall ChloeMW_InGameBreaker(Car* car) {
+	if (!bSpeedbreakerEnabled) return false;
+
+	auto i = GetPlayerInterface(car);
+	if (!i) return false;
+	if (auto ply = i->Find<IPlayer>()) return ply->InGameBreaker();
+	return false;
 }
 
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {

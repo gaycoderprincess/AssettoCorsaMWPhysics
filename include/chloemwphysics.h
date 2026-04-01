@@ -25,9 +25,21 @@ namespace ChloeMWPhysics {
 		return funcPtr(car);
 	}
 
+	float GetRedline(void* car) {
+		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_GetRedline");
+		if (!funcPtr) return 0.0;
+		return funcPtr(car);
+	}
+
 	float GetGameBreakerCharge(void* car) {
 		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_GetGameBreakerCharge");
 		if (!funcPtr) return 0.0;
+		return funcPtr(car);
+	}
+
+	bool InGameBreaker(void* car) {
+		static auto funcPtr = GetFuncPtr<float(__fastcall*)(void*)>("ChloeMW_InGameBreaker");
+		if (!funcPtr) return false;
 		return funcPtr(car);
 	}
 }
