@@ -873,7 +873,7 @@ extern "C" __declspec(dllexport) bool __fastcall ChloeMW_InGameBreaker(Car* car)
 extern "C" __declspec(dllexport) bool __fastcall ChloeMW_IsInPerfectLaunchRange(Car* car) {
 	auto i = GetPlayerInterface(car);
 	if (!i) return false;
-	if (auto ply = i->Find<IVehicle>()) return ply->IsInPerfectLaunchRange();
+	if (auto ply = i->Find<IVehicle>()) return ply->IsStaging() && ply->IsInPerfectLaunchRange();
 	return false;
 }
 
