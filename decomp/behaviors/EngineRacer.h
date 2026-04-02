@@ -321,7 +321,7 @@ class EngineRacer : public IEngine, public IEngineDamage, public IRaceEngine, pu
 	IInput *mIInput;
 	IChassis *mSuspension;
 	ICheater *mCheater;
-	MWCarTuning* mMWInfo;
+	MWCarDataTuned* mMWInfo;
 	Car* pCar;
 	float mRPM;
 	ShiftStatus mShiftStatus;

@@ -9,7 +9,7 @@ inline unsigned int UTIL_InterprolateIndex(unsigned int last_index, float value,
 
 namespace Physics {
 	namespace Info {
-		float AerodynamicDownforce(MWCarTuning* pThis, const float speed) {
+		float AerodynamicDownforce(MWCarDataTuned* pThis, const float speed) {
 			return speed * 2 * pThis->AERO_COEFFICIENT * 1000.0f;
 		}
 
@@ -20,7 +20,7 @@ namespace Physics {
 		};
 
 		// Credits: Brawltendo
-		float EngineInertia(const MWCarTuning* mw, const bool loaded) {
+		float EngineInertia(const MWCarDataTuned* mw, const bool loaded) {
 			float scale;
 			if (loaded)
 				scale = 1.f;
@@ -30,7 +30,7 @@ namespace Physics {
 		}
 
 		// Credits: Brawltendo
-		eInductionType InductionType(const MWCarTuning* mw) {
+		eInductionType InductionType(const MWCarDataTuned* mw) {
 			if (mw->HIGH_BOOST > 0.0f || mw->LOW_BOOST > 0.0f) {
 				// turbochargers don't produce significant boost until above the boost threshold (the lowest engine RPM at which it will spool up)
 				// meanwhile superchargers apply boost proportionally to the engine RPM, so this param isn't needed there
@@ -44,7 +44,7 @@ namespace Physics {
 			}
 		}
 
-		float Torque(const MWCarTuning* mw, float rpm) {
+		float Torque(const MWCarDataTuned* mw, float rpm) {
 			float rpm_min = mw->IDLE;
 			float rpm_max = mw->MAX_RPM;
 			rpm = UMath::Clamp(rpm, mw->IDLE, mw->RED_LINE);
@@ -60,14 +60,14 @@ namespace Physics {
 			return 0.0f;
 		}
 
-		float WheelDiameter(const MWCarTuning* tires, bool front) {
+		float WheelDiameter(const MWCarDataTuned* tires, bool front) {
 			int axle = front ? 0 : 1;
 			float diameter = INCH2METERS(tires->RIM_SIZE.At(axle));
 			return diameter + tires->SECTION_WIDTH.At(axle) * 0.001f * 2.0f * (tires->ASPECT_RATIO.At(axle) * 0.01f);
 		}
 
 		// Credits: Brawltendo
-		float NosBoost(const MWCarTuning* mw, const Tunings *tunings) {
+		float NosBoost(const MWCarDataTuned* mw, const Tunings *tunings) {
 			float torque_scale = 1.0f;
 			float boost = mw->TORQUE_BOOST;
 			if (tunings) {
@@ -77,7 +77,7 @@ namespace Physics {
 		}
 
 		// Credits: Brawltendo
-		float NosCapacity(const MWCarTuning* mw, const Tunings *tunings) {
+		float NosCapacity(const MWCarDataTuned* mw, const Tunings *tunings) {
 			float capacity = mw->NOS_CAPACITY;
 			if (tunings) {
 				capacity -= capacity * tunings->Value[Physics::Tunings::NOS] * 0.25f;
@@ -86,7 +86,7 @@ namespace Physics {
 		}
 
 		// Credits: Brawltendo
-		Mps Speedometer(const MWCarTuning* mw, Rpm rpm, GearID gear, const Tunings *tunings) {
+		Mps Speedometer(const MWCarDataTuned* mw, Rpm rpm, GearID gear, const Tunings *tunings) {
 			float speed = 0.0f;
 			float gear_ratio = mw->GEAR_RATIO[gear] * mw->FINAL_GEAR;
 			float power_range = mw->RED_LINE - mw->IDLE;
@@ -108,7 +108,7 @@ namespace Physics {
 		}
 
 		// Credits: Brawltendo
-		float InductionRPM(const MWCarTuning* mw, const Tunings *tunings) {
+		float InductionRPM(const MWCarDataTuned* mw, const Tunings *tunings) {
 			float spool = mw->SPOOL;
 
 			// tune the (normalized) RPM at which forced induction kicks in
@@ -128,7 +128,7 @@ namespace Physics {
 		}
 
 		// Credits: Brawltendo
-		float InductionBoost(const MWCarTuning* mw, float rpm, float spool, const Tunings *tunings, float *psi) {
+		float InductionBoost(const MWCarDataTuned* mw, float rpm, float spool, const Tunings *tunings, float *psi) {
 			if (psi) {
 				*psi = 0.0f;
 			}
@@ -171,7 +171,7 @@ namespace Physics {
 		}
 
 		// Credits: Brawltendo
-		bool ShiftPoints(const MWCarTuning* mw, float *shift_up, float *shift_down, unsigned int numpts) {
+		bool ShiftPoints(const MWCarDataTuned* mw, float *shift_up, float *shift_down, unsigned int numpts) {
 			for (int i = 0; i < numpts; ++i) {
 				shift_up[i] = 0.0f;
 				shift_down[i] = 0.0f;
@@ -236,7 +236,7 @@ namespace Physics {
 			return true;
 		}
 
-		float MaxInductedTorque(const MWCarTuning* mw, Rpm &atrpm, const Tunings *tunings) {
+		float MaxInductedTorque(const MWCarDataTuned* mw, Rpm &atrpm, const Tunings *tunings) {
 			if (mw->TORQUE.size() > 1)  {
 				auto v9 = 0.0;
 				atrpm = mw->IDLE;
@@ -266,7 +266,7 @@ namespace Physics {
 			return 0.0;
 		}
 
-		float MaxInductedPower(const MWCarTuning* mw, const Tunings* tunings) {
+		float MaxInductedPower(const MWCarDataTuned* mw, const Tunings* tunings) {
 			if (mw->TORQUE.size() > 1)  {
 				float v11 = 0.0;
 				auto v12 = mw->IDLE;

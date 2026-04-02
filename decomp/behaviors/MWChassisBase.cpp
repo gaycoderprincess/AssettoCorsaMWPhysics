@@ -21,8 +21,7 @@ void ChassisMW::Create(Car* car) {
 	mJumpAlititude = 0.0f;
 	mTireHeat = 0.0f;
 
-	mMWAttributes = new MWCarTuning;
-	GetLerpedCarTuning(*mMWAttributes, GetVehicle()->GetVehicleName(), pCar);
+	mMWAttributes = new MWCarDataTuned(GetVehicle()->GetVehicleName(), pCar);
 
 	GetOwner()->QueryInterface(&mRBComplex);
 	GetOwner()->QueryInterface(&mRB);

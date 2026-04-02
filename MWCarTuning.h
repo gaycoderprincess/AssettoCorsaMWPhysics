@@ -1,89 +1,38 @@
-struct MWCarTuning {
-	std::string carName;
+#define TUNED_VALUE(value) value = std::lerp(a.value, b.value, f);
+#define TUNED_AXLEPAIR(value) value.Front = std::lerp(a.value.Front, b.value.Front, f); value.Rear = std::lerp(a.value.Rear, b.value.Rear, f);
+#define TOML_VALUE(category, value) value = config[category][#value].value_or(-0.011f); if (value == 0.011f) { MessageBoxA(nullptr, std::format("Failed to find value for {}", #value).c_str(), "nya?!~", MB_ICONERROR); }
+#define TOML_AXLEPAIR(category, value) value.Front = config[category][#value][0].value_or(-0.011f); value.Rear = config[category][#value][1].value_or(-0.011f);
+#define TOML_VECTOR(category, value) ReadTOMLVector(config, value, category, #value);
+#define TOML_ARRAY(category, value) ReadTOMLArray(config, value, category, #value);
 
-	// chassis
-	AxlePair SHOCK_DIGRESSION;
-	AxlePair SPRING_PROGRESSION;
-	AxlePair TRAVEL;
-	AxlePair RIDE_HEIGHT;
-	AxlePair SHOCK_EXT_STIFFNESS;
-	AxlePair SHOCK_STIFFNESS;
-	AxlePair SPRING_STIFFNESS;
-	AxlePair SHOCK_VALVING;
-	AxlePair SWAYBAR_STIFFNESS;
-	float ROLL_CENTER;
-	float SHOCK_BLOWOUT;
-	float AERO_CG;
-	float RENDER_MOTION;
-	float AERO_COEFFICIENT;
-	float FRONT_WEIGHT_BIAS;
-	float DRAG_COEFFICIENT;
+struct MWCarDataBase {
+	static void TUNED_VECTOR(const std::vector<float>& a, const std::vector<float>& b, std::vector<float>& out, float f) {
+		// don't care about lengths on none or full tune
+		if (f <= 0.0) {
+			out = a;
+			return;
+		}
+		if (f >= 1.0) {
+			out = b;
+			return;
+		}
 
-	// brakes
-	AxlePair BRAKE_LOCK;
-	AxlePair BRAKES;
-	float EBRAKE;
+		for (int i = 0; i < a.size() && i < b.size(); i++) {
+			out.push_back(std::lerp(a[i], b[i], f));
+		}
+	}
 
-	// tires
-	std::vector<float> YAW_CONTROL;
-	AxlePair GRIP_SCALE;
-	AxlePair DYNAMIC_GRIP;
-	AxlePair STATIC_GRIP;
-	float STEERING;
-	float YAW_SPEED;
+	template<size_t size>
+	static void ReadTOMLArray(const toml::table& config, float (&out)[size], const char* category, const char* name) {
+		for (int i = 0; i < size; i++) {
+			out[i] = config[category][name][i].value_or(-0.011f);
+			if (out[i] == 0.011f) {
+				MessageBoxA(nullptr, std::format("Failed to find value for {}[{}]", name, i).c_str(), "nya?!~", MB_ICONERROR);
+			}
+		}
+	}
 
-	// transmission
-	std::vector<float> GEAR_RATIO;
-	float DIFFERENTIAL[3];
-	float GEAR_EFFICIENCY[9];
-	float TORQUE_CONVERTER;
-	float TORQUE_SPLIT;
-	float CLUTCH_SLIP;
-	float OPTIMAL_SHIFT;
-	float SHIFT_SPEED;
-	float FINAL_GEAR;
-
-	// engine
-	std::vector<float> TORQUE;
-	float SPEED_LIMITER[2];
-	std::vector<float> ENGINE_BRAKING;
-	float FLYWHEEL_MASS;
-	float MAX_RPM;
-	float RED_LINE;
-	float IDLE;
-
-	// induction
-	float LOW_BOOST;
-	float SPOOL_TIME_DOWN;
-	float VACUUM;
-	float SPOOL;
-	float SPOOL_TIME_UP;
-	float PSI;
-	float HIGH_BOOST;
-
-	// nos
-	float NOS_DISENGAGE = 2.0;
-	float TORQUE_BOOST = 1.0;
-	float FLOW_RATE = 3.0;
-	float RECHARGE_MIN = 50;
-	float NOS_CAPACITY = 5.0;
-	float RECHARGE_MAX = 30;
-	float RECHARGE_MAX_SPEED = 100;
-	float RECHARGE_MIN_SPEED = 50;
-
-	// pvehicle
-	float TENSOR_SCALE[3];
-	float MASS;
-
-	// extra tires stuff for ac
-	AxlePair ASPECT_RATIO;
-	AxlePair RIM_SIZE;
-	AxlePair SECTION_WIDTH;
-	AxlePair TRACK_WIDTH;
-	float WHEEL_BASE;
-	float FRONT_AXLE;
-
-	static void ReadDynamicArray(toml::table& config, std::vector<float>& out, const char* category, const char* name) {
+	static void ReadTOMLVector(const toml::table& config, std::vector<float>& out, const char* category, const char* name) {
 		out.clear();
 		for (int i = 0; i < 1024; i++) {
 			float f = config[category][name][i].value_or(-0.011f);
@@ -91,119 +40,446 @@ struct MWCarTuning {
 			out.push_back(f);
 		}
 	}
+
+	class Brakes {
+	public:
+		AxlePair BRAKE_LOCK;
+		AxlePair BRAKES;
+		float EBRAKE;
+
+		Brakes() {}
+		Brakes(const toml::table& config, const char* category) {
+			TOML_AXLEPAIR(category, BRAKE_LOCK);
+			TOML_AXLEPAIR(category, BRAKES);
+			TOML_VALUE(category, EBRAKE);
+		}
+		Brakes(const Brakes& a, const Brakes& b, float f) {
+			TUNED_AXLEPAIR(BRAKE_LOCK);
+			TUNED_AXLEPAIR(BRAKES);
+			TUNED_VALUE(EBRAKE);
+		}
+		Brakes(const std::vector<Brakes>& vec, float f) {
+			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+
+			if (vec.size() == 1) *this = vec[0];
+			else {
+				*this = Brakes(vec[0], vec[1], f);
+			}
+		}
+	};
+
+	struct Chassis {
+		float AERO_CG;
+		float AERO_COEFFICIENT;
+		float DRAG_COEFFICIENT;
+		float FRONT_AXLE;
+		float FRONT_WEIGHT_BIAS;
+		float RENDER_MOTION;
+		AxlePair RIDE_HEIGHT;
+		float ROLL_CENTER;
+		float SHOCK_BLOWOUT;
+		AxlePair SHOCK_DIGRESSION;
+		AxlePair SHOCK_EXT_STIFFNESS;
+		AxlePair SHOCK_STIFFNESS;
+		AxlePair SHOCK_VALVING;
+		AxlePair SPRING_PROGRESSION;
+		AxlePair SPRING_STIFFNESS;
+		AxlePair SWAYBAR_STIFFNESS;
+		AxlePair TRACK_WIDTH;
+		AxlePair TRAVEL;
+		float WHEEL_BASE;
+
+		Chassis() {}
+		Chassis(const toml::table& config, const char* category) {
+			TOML_VALUE(category, AERO_CG);
+			TOML_VALUE(category, AERO_COEFFICIENT);
+			TOML_VALUE(category, DRAG_COEFFICIENT);
+			TOML_VALUE(category, FRONT_AXLE);
+			TOML_VALUE(category, FRONT_WEIGHT_BIAS);
+			TOML_VALUE(category, RENDER_MOTION);
+			TOML_AXLEPAIR(category, RIDE_HEIGHT);
+			TOML_VALUE(category, ROLL_CENTER);
+			TOML_VALUE(category, SHOCK_BLOWOUT);
+			TOML_AXLEPAIR(category, SHOCK_DIGRESSION);
+			TOML_AXLEPAIR(category, SHOCK_EXT_STIFFNESS);
+			TOML_AXLEPAIR(category, SHOCK_STIFFNESS);
+			TOML_AXLEPAIR(category, SHOCK_VALVING);
+			TOML_AXLEPAIR(category, SPRING_PROGRESSION);
+			TOML_AXLEPAIR(category, SPRING_STIFFNESS);
+			TOML_AXLEPAIR(category, SWAYBAR_STIFFNESS);
+			TOML_AXLEPAIR(category, TRACK_WIDTH);
+			TOML_AXLEPAIR(category, TRAVEL);
+			TOML_VALUE(category, WHEEL_BASE);
+		}
+		Chassis(const Chassis& a, const Chassis& b, float f) {
+			TUNED_VALUE(AERO_CG);
+			TUNED_VALUE(AERO_COEFFICIENT);
+			TUNED_VALUE(DRAG_COEFFICIENT);
+			TUNED_VALUE(FRONT_AXLE);
+			TUNED_VALUE(FRONT_WEIGHT_BIAS);
+			TUNED_VALUE(RENDER_MOTION);
+			TUNED_AXLEPAIR(RIDE_HEIGHT);
+			TUNED_VALUE(ROLL_CENTER);
+			TUNED_VALUE(SHOCK_BLOWOUT);
+			TUNED_AXLEPAIR(SHOCK_DIGRESSION);
+			TUNED_AXLEPAIR(SHOCK_EXT_STIFFNESS);
+			TUNED_AXLEPAIR(SHOCK_STIFFNESS);
+			TUNED_AXLEPAIR(SHOCK_VALVING);
+			TUNED_AXLEPAIR(SPRING_PROGRESSION);
+			TUNED_AXLEPAIR(SPRING_STIFFNESS);
+			TUNED_AXLEPAIR(SWAYBAR_STIFFNESS);
+			TUNED_AXLEPAIR(TRACK_WIDTH);
+			TUNED_AXLEPAIR(TRAVEL);
+			TUNED_VALUE(WHEEL_BASE);
+		}
+		Chassis(const std::vector<Chassis>& vec, float f) {
+			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+
+			if (vec.size() == 1) *this = vec[0];
+			else {
+				*this = Chassis(vec[0], vec[1], f);
+			}
+		}
+	};
+
+	struct Engine {
+		std::vector<float> ENGINE_BRAKING;
+		float FLYWHEEL_MASS;
+		float IDLE;
+		float MAX_RPM;
+		float RED_LINE;
+		float SPEED_LIMITER[2];
+		std::vector<float> TORQUE;
+
+		Engine() {}
+		Engine(const toml::table& config, const char* category) {
+			TOML_VECTOR(category, ENGINE_BRAKING);
+			TOML_VALUE(category, FLYWHEEL_MASS);
+			TOML_VALUE(category, IDLE);
+			TOML_VALUE(category, MAX_RPM);
+			TOML_VALUE(category, RED_LINE);
+			TOML_ARRAY(category, SPEED_LIMITER);
+			TOML_VECTOR(category, TORQUE);
+		}
+		Engine(const Engine& a, const Engine& b, float f) {
+			TUNED_VECTOR(a.ENGINE_BRAKING, b.ENGINE_BRAKING, ENGINE_BRAKING, f);
+			TUNED_VALUE(FLYWHEEL_MASS);
+			TUNED_VALUE(IDLE);
+			TUNED_VALUE(MAX_RPM);
+			TUNED_VALUE(RED_LINE);
+			for (int i = 0; i < 2; i++) {
+				TUNED_VALUE(SPEED_LIMITER[i]);
+			}
+			TUNED_VECTOR(a.TORQUE, b.TORQUE, TORQUE, f);
+		}
+		Engine(const std::vector<Engine>& vec, float f) {
+			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+
+			if (vec.size() == 1) *this = vec[0];
+			else {
+				*this = Engine(vec[0], vec[1], f);
+			}
+		}
+	};
+
+	struct Induction {
+		float HIGH_BOOST;
+		float LOW_BOOST;
+		float PSI;
+		float SPOOL;
+		float SPOOL_TIME_DOWN;
+		float SPOOL_TIME_UP;
+		float VACUUM;
+
+		Induction() {
+			HIGH_BOOST = 0.0f;
+			LOW_BOOST = 0.0f;
+			PSI = 0.0f;
+			SPOOL = 0.0f;
+			SPOOL_TIME_DOWN = 0.0f;
+			SPOOL_TIME_UP = 0.0f;
+			VACUUM = 0.0f;
+		}
+		Induction(const toml::table& config, const char* category) {
+			TOML_VALUE(category, HIGH_BOOST);
+			TOML_VALUE(category, LOW_BOOST);
+			TOML_VALUE(category, PSI);
+			TOML_VALUE(category, SPOOL);
+			TOML_VALUE(category, SPOOL_TIME_DOWN);
+			TOML_VALUE(category, SPOOL_TIME_UP);
+			TOML_VALUE(category, VACUUM);
+		}
+		Induction(const Induction& a, const Induction& b, float f) {
+			TUNED_VALUE(HIGH_BOOST);
+			TUNED_VALUE(LOW_BOOST);
+			TUNED_VALUE(PSI);
+			TUNED_VALUE(SPOOL);
+			TUNED_VALUE(SPOOL_TIME_DOWN);
+			TUNED_VALUE(SPOOL_TIME_UP);
+			TUNED_VALUE(VACUUM);
+		}
+		Induction(const std::vector<Induction>& vec, float f) {
+			if (!vec.empty()) {
+				// if the car has none by default, leave it like that if it has zero upgrades
+				if (f <= 0.0 || vec.size() == 1) {
+					*this = Induction(vec[0]);
+				}
+				else {
+					// some cars have default, _base and _top
+					if (vec.size() == 3) {
+						*this = Induction(vec[1], vec[2], f);
+					}
+					// other cars have only _base and _top
+					else if (vec.size() == 2) {
+						*this = Induction(vec[0], vec[1], f);
+					}
+					else __debugbreak();
+				}
+			}
+			else {
+				Induction();
+			}
+		}
+	};
+
+	struct Nos {
+		float FLOW_RATE;
+		float NOS_CAPACITY;
+		float NOS_DISENGAGE;
+		float RECHARGE_MAX;
+		float RECHARGE_MAX_SPEED;
+		float RECHARGE_MIN;
+		float RECHARGE_MIN_SPEED;
+		float TORQUE_BOOST;
+
+		Nos() {
+			FLOW_RATE = 0.0f;
+			NOS_CAPACITY = 0.0f;
+			NOS_DISENGAGE = 0.0f;
+			RECHARGE_MAX = 0.0f;
+			RECHARGE_MAX_SPEED = 0.0f;
+			RECHARGE_MIN = 0.0f;
+			RECHARGE_MIN_SPEED = 0.0f;
+			TORQUE_BOOST = 0.0f;
+		}
+		Nos(const toml::table& config, const char* category) {
+			TOML_VALUE(category, FLOW_RATE);
+			TOML_VALUE(category, NOS_CAPACITY);
+			TOML_VALUE(category, NOS_DISENGAGE);
+			TOML_VALUE(category, RECHARGE_MAX);
+			TOML_VALUE(category, RECHARGE_MAX_SPEED);
+			TOML_VALUE(category, RECHARGE_MIN);
+			TOML_VALUE(category, RECHARGE_MIN_SPEED);
+			TOML_VALUE(category, TORQUE_BOOST);
+		}
+		Nos(const Nos& a, const Nos& b, float f) {
+			TUNED_VALUE(FLOW_RATE);
+			TUNED_VALUE(NOS_CAPACITY);
+			TUNED_VALUE(NOS_DISENGAGE);
+			TUNED_VALUE(RECHARGE_MAX);
+			TUNED_VALUE(RECHARGE_MAX_SPEED);
+			TUNED_VALUE(RECHARGE_MIN);
+			TUNED_VALUE(RECHARGE_MIN_SPEED);
+			TUNED_VALUE(TORQUE_BOOST);
+		}
+		Nos(const std::vector<Nos>& vec, float f) {
+			if (!vec.empty()) {
+				// if the car has none by default, leave it like that if it has zero upgrades
+				if (f <= 0.0 || vec.size() == 1) {
+					*this = Nos(vec[0]);
+				}
+				else {
+					// some cars have default, _base and _top
+					if (vec.size() == 3) {
+						*this = Nos(vec[1], vec[2], f);
+					}
+					// other cars have only _base and _top
+					else if (vec.size() == 2) {
+						*this = Nos(vec[0], vec[1], f);
+					}
+					else __debugbreak();
+				}
+			}
+			else {
+				Induction();
+			}
+		}
+	};
+
+	struct Tires {
+		AxlePair ASPECT_RATIO;
+		AxlePair DYNAMIC_GRIP;
+		AxlePair GRIP_SCALE;
+		AxlePair RIM_SIZE;
+		AxlePair SECTION_WIDTH;
+		AxlePair STATIC_GRIP;
+		float STEERING;
+		std::vector<float> YAW_CONTROL;
+		float YAW_SPEED;
+
+		Tires() {}
+		Tires(const toml::table& config, const char* category) {
+			TOML_AXLEPAIR(category, ASPECT_RATIO);
+			TOML_AXLEPAIR(category, DYNAMIC_GRIP);
+			TOML_AXLEPAIR(category, GRIP_SCALE);
+			TOML_AXLEPAIR(category, RIM_SIZE);
+			TOML_AXLEPAIR(category, SECTION_WIDTH);
+			TOML_AXLEPAIR(category, STATIC_GRIP);
+			TOML_VALUE(category, STEERING);
+			TOML_VECTOR(category, YAW_CONTROL);
+			TOML_VALUE(category, YAW_SPEED);
+		}
+		Tires(const Tires& a, const Tires& b, float f) {
+			TUNED_AXLEPAIR(ASPECT_RATIO);
+			TUNED_AXLEPAIR(DYNAMIC_GRIP);
+			TUNED_AXLEPAIR(GRIP_SCALE);
+			TUNED_AXLEPAIR(RIM_SIZE);
+			TUNED_AXLEPAIR(SECTION_WIDTH);
+			TUNED_AXLEPAIR(STATIC_GRIP);
+			TUNED_VALUE(STEERING);
+			TUNED_VECTOR(a.YAW_CONTROL, b.YAW_CONTROL, YAW_CONTROL, f);
+			TUNED_VALUE(YAW_SPEED);
+		}
+		Tires(const std::vector<Tires>& vec, float f) {
+			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+
+			if (vec.size() == 1) *this = vec[0];
+			else {
+				*this = Tires(vec[0], vec[1], f);
+			}
+		}
+	};
+
+	struct Transmission {
+		float CLUTCH_SLIP;
+		float DIFFERENTIAL[3];
+		float FINAL_GEAR;
+		float GEAR_EFFICIENCY[9];
+		std::vector<float> GEAR_RATIO;
+		float OPTIMAL_SHIFT;
+		float SHIFT_SPEED;
+		float TORQUE_CONVERTER;
+		float TORQUE_SPLIT;
+
+		Transmission() {}
+		Transmission(const toml::table& config, const char* category) {
+			TOML_VALUE(category, CLUTCH_SLIP);
+			TOML_ARRAY(category, DIFFERENTIAL);
+			TOML_VALUE(category, FINAL_GEAR);
+			TOML_ARRAY(category, GEAR_EFFICIENCY);
+			TOML_VECTOR(category, GEAR_RATIO);
+			TOML_VALUE(category, OPTIMAL_SHIFT);
+			TOML_VALUE(category, SHIFT_SPEED);
+			TOML_VALUE(category, TORQUE_CONVERTER);
+			TOML_VALUE(category, TORQUE_SPLIT)
+
+			// todo? carbon cars require this
+			while (GEAR_RATIO[GEAR_RATIO.size()-1] <= 0.05) {
+				GEAR_RATIO.pop_back();
+				if (GEAR_RATIO.empty()) {
+					MessageBoxA(nullptr, "ERROR: GEAR_RATIO is empty!", "nya?!~", MB_ICONERROR);
+					__debugbreak();
+				}
+			}
+		}
+		Transmission(const Transmission& a, const Transmission& b, float f) {
+			TUNED_VALUE(CLUTCH_SLIP);
+			for (int i = 0; i < 3; i++) {
+				TUNED_VALUE(DIFFERENTIAL[i]);
+			}
+			TUNED_VALUE(FINAL_GEAR);
+			for (int i = 0; i < 9; i++) {
+				TUNED_VALUE(GEAR_EFFICIENCY[i]);
+			}
+			TUNED_VECTOR(a.GEAR_RATIO, b.GEAR_RATIO, GEAR_RATIO, f);
+			TUNED_VALUE(OPTIMAL_SHIFT);
+			TUNED_VALUE(SHIFT_SPEED);
+			TUNED_VALUE(TORQUE_CONVERTER);
+			TUNED_VALUE(TORQUE_SPLIT);
+		}
+		Transmission(const std::vector<Transmission>& vec, float f) {
+			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+
+			if (vec.size() == 1) *this = vec[0];
+			else {
+				*this = Transmission(vec[0], vec[1], f);
+			}
+		}
+	};
+
+	// pvehicle
+	std::string carName;
+	float TENSOR_SCALE[3];
+	float MASS;
+	float HandlingRating[2];
+
+	// frontend
+	int Cost;
 };
-std::vector<MWCarTuning> aCarTunings;
-MWCarTuning* LoadCarTuningFromFile(std::string configCarName) {
-	if (configCarName.ends_with(".conf")) {
+
+struct MWCarData : public MWCarDataBase {
+	std::vector<Brakes> aBrakes;
+	std::vector<Chassis> aChassis;
+	std::vector<Engine> aEngine;
+	std::vector<Induction> aInduction;
+	std::vector<Nos> aNos;
+	std::vector<Tires> aTires;
+	std::vector<Transmission> aTransmission;
+
+	template<typename T>
+	static void CreateTunedVector(const toml::table& config, std::vector<T>& data, const char* category, int maxCount) {
+		if (!config[category].is_table()) {
+			MessageBoxA(nullptr, std::format("Failed to find {}!", category).c_str(), "nya?!~", MB_ICONERROR);
+			__debugbreak();
+		}
+		
+		data.clear();
+		for (int i = 0; i < maxCount; i++) {
+			if (i == 0) {
+				data.push_back(T(config, category));
+			}
+			else {
+				auto catWithId = std::format("{}_{}", category, i);
+				if (!config[catWithId].is_table()) continue;
+				data.push_back(T(config, std::format("{}_{}", category, i).c_str()));
+			}
+		}
+	}
+
+	MWCarData(const toml::table& config, const std::string& name) {
+		carName = name;
+		TOML_ARRAY("pvehicle", TENSOR_SCALE);
+		TOML_VALUE("pvehicle", MASS);
+		TOML_ARRAY("pvehicle", HandlingRating);
+		TOML_VALUE("frontend", Cost);
+
+		CreateTunedVector(config, aBrakes, "brakes", 2);
+		CreateTunedVector(config, aChassis, "chassis", 2);
+		CreateTunedVector(config, aEngine, "engine", 2);
+		CreateTunedVector(config, aInduction, "induction", 3);
+		CreateTunedVector(config, aNos, "nos", 3);
+		CreateTunedVector(config, aTires, "tires", 2);
+		CreateTunedVector(config, aTransmission, "transmission", 2);
+	}
+};
+std::vector<MWCarData> aCarTunings;
+
+MWCarData* LoadCarTuningFromFile(const std::string& configCarName) {
+	auto carName = configCarName;
+	if (carName.ends_with(".conf")) {
 		for (int i = 0; i < 5; i++) {
-			configCarName.pop_back();
+			carName.pop_back();
 		}
 	}
 
 	// default to custom setups, then mw, then carbon
-	auto fileName = std::format("plugins/CarDataDump/{}.conf", configCarName);
+	auto fileName = std::format("CarDataDump/{}.conf", carName);
+	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_mw_full/{}.conf", carName); }
+	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_cb_full/{}.conf", carName); }
 	if (!std::filesystem::exists(fileName)) return nullptr;
+
 	auto config = toml::parse_file(fileName);
-
-	MWCarTuning tmp;
-	tmp.carName = configCarName;
-
-	// brakes
-	tmp.BRAKE_LOCK.Front = config["brakes"]["BRAKE_LOCK"][0].value_or(0.0);
-	tmp.BRAKE_LOCK.Rear = config["brakes"]["BRAKE_LOCK"][1].value_or(0.0);
-	tmp.BRAKES.Front = config["brakes"]["BRAKES"][0].value_or(0.0);
-	tmp.BRAKES.Rear = config["brakes"]["BRAKES"][1].value_or(0.0);
-	tmp.EBRAKE = config["brakes"]["EBRAKE"].value_or(0.0);
-
-	// chassis
-	tmp.AERO_CG = config["chassis"]["AERO_CG"].value_or(50.0);
-	tmp.AERO_COEFFICIENT = config["chassis"]["AERO_COEFFICIENT"].value_or(0.0);
-	tmp.DRAG_COEFFICIENT = config["chassis"]["DRAG_COEFFICIENT"].value_or(0.0);
-	tmp.FRONT_AXLE = config["chassis"]["FRONT_AXLE"].value_or(1.0);
-	tmp.FRONT_WEIGHT_BIAS = config["chassis"]["FRONT_WEIGHT_BIAS"].value_or(50.0);
-	tmp.RENDER_MOTION = config["chassis"]["RENDER_MOTION"].value_or(1.0);
-	tmp.RIDE_HEIGHT.Front = config["chassis"]["RIDE_HEIGHT"][0].value_or(10.0);
-	tmp.RIDE_HEIGHT.Rear = config["chassis"]["RIDE_HEIGHT"][1].value_or(10.0);
-	tmp.ROLL_CENTER = config["chassis"]["ROLL_CENTER"].value_or(0.0);
-	tmp.SHOCK_BLOWOUT = config["chassis"]["SHOCK_BLOWOUT"].value_or(0.0);
-	tmp.SHOCK_DIGRESSION.Front = config["chassis"]["SHOCK_DIGRESSION"][0].value_or(0.0);
-	tmp.SHOCK_DIGRESSION.Rear = config["chassis"]["SHOCK_DIGRESSION"][1].value_or(0.0);
-	tmp.SHOCK_EXT_STIFFNESS.Front = config["chassis"]["SHOCK_EXT_STIFFNESS"][0].value_or(0.0);
-	tmp.SHOCK_EXT_STIFFNESS.Rear = config["chassis"]["SHOCK_EXT_STIFFNESS"][1].value_or(0.0);
-	tmp.SHOCK_STIFFNESS.Front = config["chassis"]["SHOCK_STIFFNESS"][0].value_or(0.0);
-	tmp.SHOCK_STIFFNESS.Rear = config["chassis"]["SHOCK_STIFFNESS"][1].value_or(0.0);
-	tmp.SHOCK_VALVING.Front = config["chassis"]["SHOCK_VALVING"][0].value_or(0.0);
-	tmp.SHOCK_VALVING.Rear = config["chassis"]["SHOCK_VALVING"][1].value_or(0.0);
-	tmp.SPRING_PROGRESSION.Front = config["chassis"]["SPRING_PROGRESSION"][0].value_or(0.0);
-	tmp.SPRING_PROGRESSION.Rear = config["chassis"]["SPRING_PROGRESSION"][1].value_or(0.0);
-	tmp.SPRING_STIFFNESS.Front = config["chassis"]["SPRING_STIFFNESS"][0].value_or(0.0);
-	tmp.SPRING_STIFFNESS.Rear = config["chassis"]["SPRING_STIFFNESS"][1].value_or(0.0);
-	tmp.SWAYBAR_STIFFNESS.Front = config["chassis"]["SWAYBAR_STIFFNESS"][0].value_or(0.0);
-	tmp.SWAYBAR_STIFFNESS.Rear = config["chassis"]["SWAYBAR_STIFFNESS"][1].value_or(0.0);
-	tmp.TRACK_WIDTH.Front = config["chassis"]["TRACK_WIDTH"][0].value_or(1.5);
-	tmp.TRACK_WIDTH.Rear = config["chassis"]["TRACK_WIDTH"][1].value_or(1.5);
-	tmp.TRAVEL.Front = config["chassis"]["TRAVEL"][0].value_or(5.0);
-	tmp.TRAVEL.Rear = config["chassis"]["TRAVEL"][1].value_or(5.0);
-	tmp.WHEEL_BASE = config["chassis"]["WHEEL_BASE"].value_or(2.5);
-
-	// tires
-	tmp.ASPECT_RATIO.Front = config["tires"]["ASPECT_RATIO"][0].value_or(50.0);
-	tmp.ASPECT_RATIO.Rear = config["tires"]["ASPECT_RATIO"][1].value_or(50.0);
-	tmp.DYNAMIC_GRIP.Front = config["tires"]["DYNAMIC_GRIP"][0].value_or(1.0);
-	tmp.DYNAMIC_GRIP.Rear = config["tires"]["DYNAMIC_GRIP"][1].value_or(1.0);
-	tmp.GRIP_SCALE.Front = config["tires"]["GRIP_SCALE"][0].value_or(1.0);
-	tmp.GRIP_SCALE.Rear = config["tires"]["GRIP_SCALE"][1].value_or(1.0);
-	tmp.RIM_SIZE.Front = config["tires"]["RIM_SIZE"][0].value_or(15.0);
-	tmp.RIM_SIZE.Rear = config["tires"]["RIM_SIZE"][1].value_or(15.0);
-	tmp.SECTION_WIDTH.Front = config["tires"]["SECTION_WIDTH"][0].value_or(200.0);
-	tmp.SECTION_WIDTH.Rear = config["tires"]["SECTION_WIDTH"][1].value_or(200.0);
-	tmp.STATIC_GRIP.Front = config["tires"]["STATIC_GRIP"][0].value_or(2.0);
-	tmp.STATIC_GRIP.Rear = config["tires"]["STATIC_GRIP"][1].value_or(2.0);
-	tmp.STEERING = config["tires"]["STEERING"].value_or(1.0);
-	tmp.ReadDynamicArray(config, tmp.YAW_CONTROL, "tires", "YAW_CONTROL");
-	tmp.YAW_SPEED = config["tires"]["YAW_SPEED"].value_or(1.0);
-
-	// transmission
-	tmp.ReadDynamicArray(config, tmp.GEAR_RATIO, "transmission", "GEAR_RATIO");
-	for (int i = 0; i < 3; i++) { tmp.DIFFERENTIAL[i] = config["transmission"]["DIFFERENTIAL"][i].value_or(1.0); }
-	for (int i = 0; i < 9; i++) { tmp.GEAR_EFFICIENCY[i] = config["transmission"]["GEAR_EFFICIENCY"][i].value_or(1.0); }
-	tmp.TORQUE_CONVERTER = config["transmission"]["TORQUE_CONVERTER"].value_or(0.5);
-	tmp.TORQUE_SPLIT = config["transmission"]["TORQUE_SPLIT"].value_or(0.5);
-	tmp.CLUTCH_SLIP = config["transmission"]["CLUTCH_SLIP"].value_or(0.5);
-	tmp.OPTIMAL_SHIFT = config["transmission"]["OPTIMAL_SHIFT"].value_or(0.5);
-	tmp.SHIFT_SPEED = config["transmission"]["SHIFT_SPEED"].value_or(0.5);
-	tmp.FINAL_GEAR = config["transmission"]["FINAL_GEAR"].value_or(0.5);
-
-	// engine
-	tmp.ReadDynamicArray(config, tmp.TORQUE, "engine", "TORQUE");
-	tmp.SPEED_LIMITER[0] = config["engine"]["SPEED_LIMITER"][0].value_or(0.0);
-	tmp.SPEED_LIMITER[1] = config["engine"]["SPEED_LIMITER"][1].value_or(0.0);
-	tmp.ReadDynamicArray(config, tmp.ENGINE_BRAKING, "engine", "ENGINE_BRAKING");
-	tmp.FLYWHEEL_MASS = config["engine"]["FLYWHEEL_MASS"].value_or(0.0);
-	tmp.MAX_RPM = config["engine"]["MAX_RPM"].value_or(0.0);
-	tmp.RED_LINE = config["engine"]["RED_LINE"].value_or(0.0);
-	tmp.IDLE = config["engine"]["IDLE"].value_or(0.0);
-
-	// induction
-	tmp.LOW_BOOST = config["induction"]["LOW_BOOST"].value_or(0.0);
-	tmp.SPOOL_TIME_DOWN = config["induction"]["SPOOL_TIME_DOWN"].value_or(0.0);
-	tmp.VACUUM = config["induction"]["VACUUM"].value_or(0.0);
-	tmp.SPOOL = config["induction"]["SPOOL"].value_or(0.0);
-	tmp.SPOOL_TIME_UP = config["induction"]["SPOOL_TIME_UP"].value_or(0.0);
-	tmp.PSI = config["induction"]["PSI"].value_or(0.0);
-	tmp.HIGH_BOOST = config["induction"]["HIGH_BOOST"].value_or(0.0);
-
-	// pvehicle
-	tmp.TENSOR_SCALE[0] = config["pvehicle"]["TENSOR_SCALE"][0].value_or(-0.011f);
-	tmp.TENSOR_SCALE[1] = config["pvehicle"]["TENSOR_SCALE"][1].value_or(3.5);
-	tmp.TENSOR_SCALE[2] = config["pvehicle"]["TENSOR_SCALE"][2].value_or(1.0);
-	if (tmp.TENSOR_SCALE[0] == -0.011f) {
-		tmp.TENSOR_SCALE[0] = 1.0;
-		WriteLog(std::format("TENSOR_SCALE missing for {}", configCarName));
-	}
-	tmp.MASS = config["pvehicle"]["MASS"].value_or(1500);
-
-	aCarTunings.push_back(tmp);
+	aCarTunings.emplace_back(config, carName);
 	return &aCarTunings[aCarTunings.size()-1];
 }
 
@@ -218,6 +494,134 @@ int GetCarTuning(const std::string& model) {
 	return -1;
 }
 
+class MWCarDataTuned : public MWCarDataBase, public MWCarDataBase::Brakes, public MWCarDataBase::Chassis, public MWCarDataBase::Engine, public MWCarDataBase::Induction, public MWCarDataBase::Nos, public MWCarDataBase::Tires, public MWCarDataBase::Transmission {
+public:
+	struct Junkman {
+		bool brakes = false;
+		bool chassis = false;
+		bool engine = false;
+		bool induction = false;
+		bool nos = false;
+		bool tires = false;
+		bool transmission = false;
+
+		void SetAll(bool b) {
+			brakes = b;
+			chassis = b;
+			engine = b;
+			induction = b;
+			nos = b;
+			tires = b;
+			transmission = b;
+		}
+	};
+
+	MWCarDataTuned(MWCarData& data, float brakes, float chassis, float engine, float induction, float nos, float tires, float transmission, Junkman junkman)
+			: MWCarDataBase::Brakes(data.aBrakes, std::clamp(brakes, 0.0f, 1.0f)),
+			  MWCarDataBase::Chassis(data.aChassis, std::clamp(chassis, 0.0f, 1.0f)),
+			  MWCarDataBase::Engine(data.aEngine, std::clamp(engine, 0.0f, 1.0f)),
+			  MWCarDataBase::Induction(data.aInduction, std::clamp(induction, 0.0f, 1.0f)),
+			  MWCarDataBase::Nos(data.aNos, std::clamp(nos, 0.0f, 1.0f)),
+			  MWCarDataBase::Tires(data.aTires, std::clamp(tires, 0.0f, 1.0f)),
+			  MWCarDataBase::Transmission(data.aTransmission, std::clamp(transmission, 0.0f, 1.0f)),
+			  MWCarDataBase(data) // car name, tensor scale, cost, etc
+	{
+		if (junkman.brakes) {
+			BRAKES.Front *= 1.2;
+			BRAKES.Rear *= 1.2;
+			EBRAKE *= 1.1;
+		}
+		if (junkman.chassis) {
+			DRAG_COEFFICIENT *= 0.9;
+			ROLL_CENTER *= 1.05;
+			SPRING_STIFFNESS.Front *= 1.05;
+			SPRING_STIFFNESS.Rear *= 1.05;
+			FRONT_WEIGHT_BIAS *= 1.01;
+			AERO_COEFFICIENT *= 1.05;
+			SPRING_PROGRESSION.Front *= 1.05;
+			SPRING_PROGRESSION.Rear *= 1.05;
+		}
+		if (junkman.engine) {
+			for (auto& f : TORQUE) {
+				f *= 1.1;
+			}
+			for (auto& f : ENGINE_BRAKING) {
+				f *= 1.1;
+			}
+		}
+		if (junkman.induction) {
+			HIGH_BOOST *= 1.15;
+			LOW_BOOST *= 1.15;
+		}
+		if (junkman.nos) {
+			NOS_CAPACITY *= 1.1;
+			TORQUE_BOOST *= 1.02;
+		}
+		if (junkman.tires) {
+			STATIC_GRIP.Front *= 1.1;
+			STATIC_GRIP.Rear *= 1.1;
+			DYNAMIC_GRIP.Front *= 1.1;
+			DYNAMIC_GRIP.Rear *= 1.1;
+			GRIP_SCALE.Front *= 1.02;
+			GRIP_SCALE.Rear *= 1.02;
+			for (auto& f : YAW_CONTROL) {
+				f *= 1.1;
+			}
+			STEERING *= 1.05;
+		}
+		if (junkman.transmission) {
+			for (auto& f : GEAR_EFFICIENCY) {
+				f *= 1.1;
+			}
+		}
+	}
+
+	MWCarDataTuned(const std::string& model, float brakes, float chassis, float engine, float induction, float nos, float tires, float transmission, Junkman junkman) {
+		WriteLog(std::format("GetLerpedCarTuning {} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f}", model, brakes, chassis, engine, induction, nos, tires, transmission));
+
+		auto id = GetCarTuning(model);
+		if (id < 0) {
+			MessageBoxA(nullptr, std::format("Failed to find tunings for {}", model).c_str(), "nya?!~", MB_ICONERROR);
+			__debugbreak();
+		}
+		*this = MWCarDataTuned(aCarTunings[id], brakes, chassis, engine, induction, nos, tires, transmission, junkman);
+	}
+
+	MWCarDataTuned(const std::string& model, Car* pCar) {
+		Junkman junkman;
+		junkman.SetAll(bUpgradeJunkman);
+		float f = fUpgradeLevel;
+		*this = MWCarDataTuned(model, f, f, f, f, f, f, f, junkman);
+
+		if (bMWWheelPositions) return;
+		if (!pCar) return;
+
+		// derived AC properties
+		auto front = GetWheelBaseXZ(pCar, 0);
+		auto rear = GetWheelBaseXZ(pCar, 2);
+
+		// front_axle = front wheel position
+		FRONT_AXLE = front.z;
+
+		// front_axle - wheelbase = rear wheel position
+		WHEEL_BASE = front.z - rear.z;
+
+		// distance between wheel centers
+		TRACK_WIDTH.Front = std::abs(front.x) * 2;
+		TRACK_WIDTH.Rear = std::abs(rear.x) * 2;
+
+		// plus wheel size
+		TRACK_WIDTH.Front += SECTION_WIDTH.Front * 0.001;
+		TRACK_WIDTH.Rear += SECTION_WIDTH.Rear * 0.001;
+	}
+};
+
+Physics::Tunings PlayerCarTunings = {};
+Physics::Tunings* GetVehicleMWTunings(Car* veh) {
+	if (veh == pMyPlugin->car) return &PlayerCarTunings;
+	return nullptr;
+}
+
 UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
 	auto acTire = &car->tyres[GetMWWheelID(wheel)];
 	UMath::Vector3 v;
@@ -225,16 +629,8 @@ UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
 	return v;
 }
 
-CarAvatar* GetCarAvatar(Car* pCar) {
-	for (int i = 0; i < pMyPlugin->sim->cars.size(); i++) {
-		auto car = pMyPlugin->sim->cars[i];
-		if (car->physics == pCar) return car;
-	}
-	return nullptr;
-}
-
 // wheels in AC are always at 0 Y, moved by graphicsoffset for center of mass reasons
-float GetWheelBaseY(MWCarTuning* tuning, Car* car, int wheel) {
+float GetWheelBaseY(MWCarDataTuned* tuning, Car* car, int wheel) {
 	auto acTire = &car->tyres[GetMWWheelID(wheel)];
 	UMath::Vector3 v;
 	acTire->hub->getBasePosition(&v);
@@ -244,204 +640,9 @@ float GetWheelBaseY(MWCarTuning* tuning, Car* car, int wheel) {
 	return v.y;
 }
 
-#define TUNED_VALUE(value, delta) tmp.value = std::lerp(base->value, top->value, delta);
-
-void GetLerpedCarTuning(MWCarTuning& tmp, const std::string& model, float brake, float drivetrain, float engine, float induction, float nitro, float suspension, float tire) {
-	auto baseId = GetCarTuning(model);
-	auto topId = GetCarTuning(model + "_top");
-	auto base = baseId >= 0 ? &aCarTunings[baseId] : nullptr;
-	auto top = topId >= 0 ? &aCarTunings[topId] : nullptr;
-	if (!top && !base) {
-		MessageBoxA(nullptr, std::format("Failed to find tunings for {}", model).c_str(), "nya?!~", MB_ICONERROR);
-		__debugbreak();
-	}
-	if (!top) {
-		tmp = *base;
-		return;
-	}
-	if (!base) {
-		tmp = *top;
-		return;
-	}
-
-	if (base->YAW_CONTROL.size() != top->YAW_CONTROL.size() || base->GEAR_RATIO.size() != top->GEAR_RATIO.size() || base->TORQUE.size() != top->TORQUE.size() || base->ENGINE_BRAKING.size() != top->ENGINE_BRAKING.size()) {
-		WriteLog(std::format("Mismatched tunings for {}", model));
-	}
-
-	while (base->YAW_CONTROL.size() < top->YAW_CONTROL.size()) { base->YAW_CONTROL.push_back(0.0); }
-	while (base->GEAR_RATIO.size() < top->GEAR_RATIO.size()) { base->GEAR_RATIO.push_back(0.0); }
-	while (base->TORQUE.size() < top->TORQUE.size()) { base->TORQUE.push_back(0.0); }
-	while (base->ENGINE_BRAKING.size() < top->ENGINE_BRAKING.size()) { base->ENGINE_BRAKING.push_back(0.0); }
-
-	while (top->YAW_CONTROL.size() < base->YAW_CONTROL.size()) { top->YAW_CONTROL.push_back(0.0); }
-	while (top->GEAR_RATIO.size() < base->GEAR_RATIO.size()) { top->GEAR_RATIO.push_back(0.0); }
-	while (top->TORQUE.size() < base->TORQUE.size()) { top->TORQUE.push_back(0.0); }
-	while (top->ENGINE_BRAKING.size() < base->ENGINE_BRAKING.size()) { top->ENGINE_BRAKING.push_back(0.0); }
-
-	WriteLog(std::format("GetLerpedCarTuning {} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f}", model, brake, drivetrain, engine, induction, nitro, suspension, tire));
-
-	tmp = *base;
-
-	brake = UMath::Clamp(brake, 0.0, 1.0);
-	drivetrain = UMath::Clamp(drivetrain, 0.0, 1.0);
-	engine = UMath::Clamp(engine, 0.0, 1.0);
-	induction = UMath::Clamp(induction, 0.0, 1.0);
-	nitro = UMath::Clamp(nitro, -1.0, 1.0);
-	suspension = UMath::Clamp(suspension, 0.0, 1.0);
-	tire = UMath::Clamp(tire, 0.0, 1.0);
-
-	// brakes
-	TUNED_VALUE(BRAKE_LOCK.Front, brake);
-	TUNED_VALUE(BRAKE_LOCK.Rear, brake);
-	TUNED_VALUE(BRAKES.Front, brake);
-	TUNED_VALUE(BRAKES.Rear, brake);
-	TUNED_VALUE(EBRAKE, brake);
-
-	// chassis
-	TUNED_VALUE(AERO_CG, suspension);
-	TUNED_VALUE(AERO_COEFFICIENT, suspension);
-	TUNED_VALUE(DRAG_COEFFICIENT, suspension);
-	TUNED_VALUE(FRONT_WEIGHT_BIAS, suspension);
-	TUNED_VALUE(RENDER_MOTION, suspension);
-	TUNED_VALUE(RIDE_HEIGHT.Front, suspension);
-	TUNED_VALUE(RIDE_HEIGHT.Rear, suspension);
-	TUNED_VALUE(ROLL_CENTER, suspension);
-	TUNED_VALUE(SHOCK_BLOWOUT, suspension);
-	TUNED_VALUE(SHOCK_DIGRESSION.Front, suspension);
-	TUNED_VALUE(SHOCK_DIGRESSION.Rear, suspension);
-	TUNED_VALUE(SHOCK_EXT_STIFFNESS.Front, suspension);
-	TUNED_VALUE(SHOCK_EXT_STIFFNESS.Rear, suspension);
-	TUNED_VALUE(SHOCK_STIFFNESS.Front, suspension);
-	TUNED_VALUE(SHOCK_STIFFNESS.Rear, suspension);
-	TUNED_VALUE(SHOCK_VALVING.Front, suspension);
-	TUNED_VALUE(SHOCK_VALVING.Rear, suspension);
-	TUNED_VALUE(SPRING_PROGRESSION.Front, suspension);
-	TUNED_VALUE(SPRING_PROGRESSION.Rear, suspension);
-	TUNED_VALUE(SPRING_STIFFNESS.Front, suspension);
-	TUNED_VALUE(SPRING_STIFFNESS.Rear, suspension);
-	TUNED_VALUE(SWAYBAR_STIFFNESS.Front, suspension);
-	TUNED_VALUE(SWAYBAR_STIFFNESS.Rear, suspension);
-	TUNED_VALUE(TRAVEL.Front, suspension);
-	TUNED_VALUE(TRAVEL.Rear, suspension);
-
-	// tires
-	TUNED_VALUE(DYNAMIC_GRIP.Front, tire);
-	TUNED_VALUE(DYNAMIC_GRIP.Rear, tire);
-	TUNED_VALUE(GRIP_SCALE.Front, tire);
-	TUNED_VALUE(GRIP_SCALE.Rear, tire);
-	TUNED_VALUE(STATIC_GRIP.Front, tire);
-	TUNED_VALUE(STATIC_GRIP.Rear, tire);
-	TUNED_VALUE(STEERING, tire);
-	for (int i = 0; i < tmp.YAW_CONTROL.size(); i++) {
-		TUNED_VALUE(YAW_CONTROL[i], tire);
-	}
-	TUNED_VALUE(YAW_SPEED, tire);
-
-	// transmission
-	for (int i = 0; i < tmp.GEAR_RATIO.size(); i++) {
-		TUNED_VALUE(GEAR_RATIO[i], drivetrain);
-	}
-	for (int i = 0; i < 3; i++) {
-		TUNED_VALUE(DIFFERENTIAL[i], drivetrain);
-	}
-	for (int i = 0; i < 9; i++) {
-		TUNED_VALUE(GEAR_EFFICIENCY[i], drivetrain);
-	}
-	TUNED_VALUE(TORQUE_CONVERTER, drivetrain);
-	TUNED_VALUE(TORQUE_SPLIT, drivetrain);
-	TUNED_VALUE(CLUTCH_SLIP, drivetrain);
-	TUNED_VALUE(OPTIMAL_SHIFT, drivetrain);
-	TUNED_VALUE(SHIFT_SPEED, drivetrain);
-	TUNED_VALUE(FINAL_GEAR, drivetrain);
-
-	// engine
-	for (int i = 0; i < tmp.TORQUE.size(); i++) {
-		TUNED_VALUE(TORQUE[i], engine);
-	}
-	TUNED_VALUE(SPEED_LIMITER[0], engine);
-	TUNED_VALUE(SPEED_LIMITER[1], engine);
-	for (int i = 0; i < tmp.ENGINE_BRAKING.size(); i++) {
-		TUNED_VALUE(ENGINE_BRAKING[i], engine);
-	}
-	TUNED_VALUE(FLYWHEEL_MASS, engine);
-	TUNED_VALUE(MAX_RPM, engine);
-	TUNED_VALUE(RED_LINE, engine);
-	TUNED_VALUE(IDLE, engine);
-
-	// nos
-	if (nitro < 0.0) {
-		tmp.FLOW_RATE = 0.0;
-		tmp.NOS_CAPACITY = 40.0;
-		tmp.NOS_DISENGAGE = 2.0;
-		tmp.RECHARGE_MAX = 0.0;
-		tmp.RECHARGE_MAX_SPEED = 0.0;
-		tmp.RECHARGE_MIN = 0.0;
-		tmp.RECHARGE_MIN_SPEED = 0.0;
-		tmp.TORQUE_BOOST = 0.0;
-	}
-	else {
-		tmp.FLOW_RATE = 3.0;
-		tmp.NOS_CAPACITY = std::lerp(2.5, 5.0, nitro);
-		tmp.NOS_DISENGAGE = 2.0;
-		tmp.RECHARGE_MAX = 30;
-		tmp.RECHARGE_MAX_SPEED = 100;
-		tmp.RECHARGE_MIN = 50;
-		tmp.RECHARGE_MIN_SPEED = 50;
-		tmp.TORQUE_BOOST = std::lerp(0.75, 1.0, nitro);
-	}
-
-	// induction
-	TUNED_VALUE(LOW_BOOST, induction);
-	TUNED_VALUE(SPOOL_TIME_DOWN, induction);
-	TUNED_VALUE(VACUUM, induction);
-	TUNED_VALUE(SPOOL, induction);
-	TUNED_VALUE(SPOOL_TIME_UP, induction);
-	TUNED_VALUE(PSI, induction);
-	TUNED_VALUE(HIGH_BOOST, induction);
-
-	// extra tires stuff for ac
-	TUNED_VALUE(ASPECT_RATIO.Front, tire);
-	TUNED_VALUE(ASPECT_RATIO.Rear, tire);
-	TUNED_VALUE(RIM_SIZE.Front, tire);
-	TUNED_VALUE(RIM_SIZE.Rear, tire);
-	TUNED_VALUE(SECTION_WIDTH.Front, tire);
-	TUNED_VALUE(SECTION_WIDTH.Rear, tire);
-	TUNED_VALUE(TRACK_WIDTH.Front, suspension);
-	TUNED_VALUE(TRACK_WIDTH.Rear, suspension);
-	TUNED_VALUE(WHEEL_BASE, suspension);
-	TUNED_VALUE(FRONT_AXLE, suspension);
-
-	while (tmp.GEAR_RATIO[tmp.GEAR_RATIO.size()-1] <= 0.35) { tmp.GEAR_RATIO.pop_back(); }
-}
-
-void GetLerpedCarTuning(MWCarTuning& out, const std::string& model, Car* pCar) {
-	auto f = fUpgradeLevel;
-	GetLerpedCarTuning(out, model, f, f, f, f, f, f, f);
-
-	if (bMWWheelPositions) return;
-	if (!pCar) return;
-
-	// derived AC properties
-	auto front = GetWheelBaseXZ(pCar, 0);
-	auto rear = GetWheelBaseXZ(pCar, 2);
-
-	// front_axle = front wheel position
-	out.FRONT_AXLE = front.z;
-
-	// front_axle - wheelbase = rear wheel position
-	out.WHEEL_BASE = front.z - rear.z;
-
-	// distance between wheel centers
-	out.TRACK_WIDTH.Front = std::abs(front.x) * 2;
-	out.TRACK_WIDTH.Rear = std::abs(rear.x) * 2;
-
-	// plus wheel size
-	out.TRACK_WIDTH.Front += out.SECTION_WIDTH.Front * 0.001;
-	out.TRACK_WIDTH.Rear += out.SECTION_WIDTH.Rear * 0.001;
-}
-
-Physics::Tunings PlayerCarTunings = {};
-Physics::Tunings* GetVehicleMWTunings(Car* veh) {
-	if (veh == pMyPlugin->car) return &PlayerCarTunings;
-	return nullptr;
-}
+#undef TUNED_VALUE
+#undef TUNED_AXLEPAIR
+#undef TOML_VALUE
+#undef TOML_AXLEPAIR
+#undef TOML_VECTOR
+#undef TOML_ARRAY

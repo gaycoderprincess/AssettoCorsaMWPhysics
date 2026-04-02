@@ -3,7 +3,7 @@ class SuspensionRacerMW : public ChassisMW {
   public:
 	class Tire : public WheelMW {
 	  public:
-		Tire(float radius, int index, MWCarTuning* mwSpecs);
+		Tire(float radius, int index, MWCarDataTuned* mwSpecs);
 		void BeginFrame(float max_slip, float grip_boost, float traction_boost, float drag_reduction);
 		void EndFrame(float dT);
 		float ComputeLateralForce(float load, float slip_angle);
@@ -153,7 +153,7 @@ class SuspensionRacerMW : public ChassisMW {
 		float mLastTorque;
 		const int mWheelIndex;
 		float mRoadSpeed;
-		const MWCarTuning *mMWSpecs;
+		const MWCarDataTuned *mMWSpecs;
 		float mAngularAcc;
 		const int mAxleIndex;
 		float mTraction;

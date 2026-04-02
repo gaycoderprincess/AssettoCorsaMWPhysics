@@ -20,6 +20,7 @@ bool bNitrousEnabled = true;
 bool bMWWheelPositions = false;
 bool bMWPhysicsTickrate = false;
 float fUpgradeLevel = 1.0;
+bool bUpgradeJunkman = false;
 float fTireOffset = 0.0;
 float fSteeringWheelLock = 360.0;
 
@@ -738,6 +739,7 @@ void OnPluginStartup() {
 		bNitrousEnabled = config["nitrous"].value_or(bNitrousEnabled);
 		bRevLimiter = config["rev_limiter"].value_or(bRevLimiter);
 		fUpgradeLevel = config["upgrade_level"].value_or(fUpgradeLevel);
+		bUpgradeJunkman = config["upgrade_junkman"].value_or(bUpgradeJunkman);
 		fTireOffset = config["tire_y_offset"].value_or(fTireOffset);
 		fSteeringWheelLock = config["steering_wheel_lock"].value_or(fSteeringWheelLock);
 		bMWWheelPositions = config["mw_wheel_positions"].value_or(bMWWheelPositions);

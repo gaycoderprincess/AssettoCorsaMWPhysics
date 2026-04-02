@@ -2,6 +2,7 @@ speedbreaker = false			# enables speedbreaker, bound to the X key or X on contro
 nitrous = true				# enables nitrous, bound to the ALT key or B on controller
 rev_limiter = true			# enables the rev limiter, set to false to have higher RPMs
 upgrade_level = 1.0			# set to 0.0 for have stock cars, 1.0 for fully tuned Junkman parts
+upgrade_junkman = false			# set to true to add junkman parts to the cars
 tire_y_offset = -0.05			# change this if the wheel positions look wrong
 steering_wheel_lock = 900.0         	# max steering angle for steering wheels
 mw_wheel_positions = false		# moves the wheels to where they would be in Most Wanted, ensures handling accuracy but will look very wrong

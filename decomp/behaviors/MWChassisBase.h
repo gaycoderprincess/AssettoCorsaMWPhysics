@@ -81,7 +81,7 @@ public:
 	IEngineDamage *mEngineDamage;
 	ISpikeable *mSpikeDamage;
 	Car* pCar;
-	MWCarTuning* mMWAttributes;
+	MWCarDataTuned* mMWAttributes;
 	float mJumpTime;
 	float mJumpAlititude;
 	float mTireHeat;

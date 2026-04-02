@@ -30,8 +30,7 @@ EngineRacer::EngineRacer(Car* car) {
 	mIInput = nullptr;
 	mSuspension = nullptr;
 
-	mMWInfo = new MWCarTuning;
-	GetLerpedCarTuning(*mMWInfo, GetVehicle()->GetVehicleName(), pCar);
+	mMWInfo = new MWCarDataTuned(GetVehicle()->GetVehicleName(), pCar);
 
 	mRPM = 0.0f;
 	mShiftStatus = SHIFT_STATUS_NONE;
