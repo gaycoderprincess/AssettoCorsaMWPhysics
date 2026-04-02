@@ -322,6 +322,8 @@ public:
 
 		RayCastResult result;
 		if (GetTrack()->rayCast(&origin, &dir, &result, 1000)) {
+			if (std::abs(result.normal.y) < 0.05) return false; // skip walls
+
 			auto dist = (origin - result.pos).length();
 			if (result.normal.y < 0) {
 				result.normal *= -1;
