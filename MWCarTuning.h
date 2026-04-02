@@ -603,10 +603,35 @@ public:
 	}
 
 	MWCarDataTuned(const std::string& model, Car* pCar) {
-		Junkman junkman;
-		junkman.SetAll(bUpgradeJunkman);
-		float f = fUpgradeLevel;
-		*this = MWCarDataTuned(model, f, f, f, f, f, f, f, junkman);
+		const char* tuningPath = pCar == pMyPlugin->car ? "plugins/player.tune" : "plugins/ai.tune";
+		if (std::filesystem::exists(tuningPath)) {
+			float brakes = 0.0;
+			float chassis = 0.0;
+			float engine = 0.0;
+			float induction = 0.0;
+			float nos = 0.0;
+			float tires = 0.0;
+			float transmission = 0.0;
+			Junkman junkman;
+
+			auto file = std::ifstream(tuningPath, std::ios::in | std::ios::binary);
+			file.read((char*)&brakes, sizeof(float));
+			file.read((char*)&chassis, sizeof(float));
+			file.read((char*)&engine, sizeof(float));
+			file.read((char*)&induction, sizeof(float));
+			file.read((char*)&nos, sizeof(float));
+			file.read((char*)&tires, sizeof(float));
+			file.read((char*)&transmission, sizeof(float));
+			file.read((char*)&junkman, sizeof(Junkman));
+
+			*this = MWCarDataTuned(model, brakes, chassis, engine, induction, nos, tires, transmission, junkman);
+		}
+		else {
+			Junkman junkman;
+			junkman.SetAll(bUpgradeJunkman);
+			float f = fUpgradeLevel;
+			*this = MWCarDataTuned(model, f, f, f, f, f, f, f, junkman);
+		}
 
 		if (bMWWheelPositions) return;
 		if (!pCar) return;
