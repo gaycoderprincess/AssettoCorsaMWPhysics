@@ -408,9 +408,16 @@ struct MWCarDataBase {
 	};
 
 	// pvehicle
-	std::string carName;
-	float TENSOR_SCALE[3];
+	std::string CollectionName;
+	int brakes_upgrades; // 0 = no upgrades, 1 = ultimate only, 2 = super pro, ultimate, 3 = pro, super pro, ultimate, 4 = race, pro, super pro, ultimate
+	int chassis_upgrades;
+	int engine_upgrades;
+	int induction_upgrades;
 	float MASS;
+	int nos_upgrades;
+	float TENSOR_SCALE[3];
+	int tires_upgrades;
+	int transmission_upgrades;
 	float HandlingRating[2];
 
 	// frontend
@@ -447,10 +454,18 @@ struct MWCarData : public MWCarDataBase {
 	}
 
 	MWCarData(const toml::table& config, const std::string& name) {
-		carName = name;
-		TOML_ARRAY("pvehicle", TENSOR_SCALE);
+		CollectionName = name;
+		TOML_VALUE("pvehicle", brakes_upgrades);
+		TOML_VALUE("pvehicle", chassis_upgrades);
+		TOML_VALUE("pvehicle", engine_upgrades);
+		TOML_VALUE("pvehicle", induction_upgrades);
 		TOML_VALUE("pvehicle", MASS);
+		TOML_VALUE("pvehicle", nos_upgrades);
+		TOML_ARRAY("pvehicle", TENSOR_SCALE);
+		TOML_VALUE("pvehicle", tires_upgrades);
+		TOML_VALUE("pvehicle", transmission_upgrades);
 		TOML_ARRAY("pvehicle", HandlingRating);
+
 		TOML_VALUE("frontend", Cost);
 
 		CreateTunedVector(config, aBrakes, "brakes", 2);
@@ -482,7 +497,7 @@ MWCarData* LoadCarTuningFromFile(const std::string& configCarName) {
 
 int GetCarTuning(const std::string& model) {
 	for (auto& tuning : aCarTunings) {
-		if (tuning.carName == model) return &tuning - &aCarTunings[0];
+		if (tuning.CollectionName == model) return &tuning - &aCarTunings[0];
 	}
 	if (auto tuning = LoadCarTuningFromFile(model)) {
 		return aCarTunings.size()-1;
