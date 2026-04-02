@@ -494,6 +494,24 @@ int GetCarTuning(const std::string& model) {
 	return -1;
 }
 
+UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	return v;
+}
+
+// wheels in AC are always at 0 Y, moved by graphicsoffset for center of mass reasons
+float GetWheelBaseY(MWCarDataBase::Chassis* tuning, Car* car, int wheel) {
+	auto acTire = &car->tyres[GetMWWheelID(wheel)];
+	UMath::Vector3 v;
+	acTire->hub->getBasePosition(&v);
+	v.y += -acTire->data.radius;
+	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
+	v.y += fTireOffset;
+	return v.y;
+}
+
 class MWCarDataTuned : public MWCarDataBase, public MWCarDataBase::Brakes, public MWCarDataBase::Chassis, public MWCarDataBase::Engine, public MWCarDataBase::Induction, public MWCarDataBase::Nos, public MWCarDataBase::Tires, public MWCarDataBase::Transmission {
 public:
 	struct Junkman {
@@ -620,24 +638,6 @@ Physics::Tunings PlayerCarTunings = {};
 Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 	if (veh == pMyPlugin->car) return &PlayerCarTunings;
 	return nullptr;
-}
-
-UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
-	auto acTire = &car->tyres[GetMWWheelID(wheel)];
-	UMath::Vector3 v;
-	acTire->hub->getBasePosition(&v);
-	return v;
-}
-
-// wheels in AC are always at 0 Y, moved by graphicsoffset for center of mass reasons
-float GetWheelBaseY(MWCarDataTuned* tuning, Car* car, int wheel) {
-	auto acTire = &car->tyres[GetMWWheelID(wheel)];
-	UMath::Vector3 v;
-	acTire->hub->getBasePosition(&v);
-	v.y += -acTire->data.radius;
-	v.y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
-	v.y += fTireOffset;
-	return v.y;
 }
 
 #undef TUNED_VALUE

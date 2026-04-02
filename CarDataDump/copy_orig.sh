@@ -89,7 +89,7 @@ cp orig_mw_full/carreragt.conf ks_ferrari_488_challenge_evo.conf
 cp orig_mw_full/carreragt.conf ks_ferrari_488_gt3.conf
 cp orig_mw_full/carreragt.conf ks_ferrari_488_gt3_2020.conf
 cp orig_mw_full/carreragt.conf ks_ferrari_488_gtb.conf
-cp orig_mw_full/clio.conf trafpizza.conf
+cp orig_mw_full/cs_clio_trafpizza.conf trafpizza.conf
 cp orig_mw_full/cobaltss.conf pb_cobalt_ss_sc.conf
 cp orig_mw_full/cobaltss.conf pb_cobalt_ss_turbo.conf
 cp orig_mw_full/corvettec6r.conf ks_mclaren_f1_gtr.conf
