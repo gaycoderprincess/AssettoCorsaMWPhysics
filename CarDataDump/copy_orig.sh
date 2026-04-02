@@ -281,4 +281,4 @@ cp orig_mw_full/rx8_top.conf mazda_rx8_types_top.conf
 cp orig_cb_full/mazdaspeed3.conf mazda_mazda_speed_3_2009.conf
 cp orig_cb_full/mazdaspeed3_top.conf mazda_mazda_speed_3_2009_top.conf
 cp orig_mw_full/is300.conf gue_lexus_is_300_jdm.conf
-cp orig_mw_full/is300.conf gue_lexus_is_300_jdm_top.conf
+cp orig_mw_full/is300_top.conf gue_lexus_is_300_jdm_top.conf
