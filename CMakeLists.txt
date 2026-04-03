@@ -14,7 +14,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -masm=intel -s -static")
 
 link_directories(${CMAKE_SOURCE_DIR}/../nya-common/lib64)
 
-add_compile_definitions(NYA_AUDIO_BASS)
+add_compile_definitions(NYA_AUDIO_BASS MWHANDLING_ASSETTO)
 add_library(AssettoCorsaMWPhysics SHARED main.cpp)
 target_include_directories(AssettoCorsaMWPhysics PUBLIC ../nya-common)
 target_include_directories(AssettoCorsaMWPhysics PUBLIC ../nya-common/3rdparty)

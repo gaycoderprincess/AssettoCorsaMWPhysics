@@ -506,6 +506,7 @@ int GetCarTuning(const std::string& model) {
 	return -1;
 }
 
+#ifdef MWHANDLING_ASSETTO
 UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
 	auto acTire = &car->tyres[GetMWWheelID(wheel)];
 	UMath::Vector3 v;
@@ -523,6 +524,7 @@ float GetWheelBaseY(MWCarDataBase::Chassis* tuning, Car* car, int wheel) {
 	v.y += fTireOffset;
 	return v.y;
 }
+#endif
 
 class MWCarDataTuned : public MWCarDataBase, public MWCarDataBase::Brakes, public MWCarDataBase::Chassis, public MWCarDataBase::Engine, public MWCarDataBase::Induction, public MWCarDataBase::Nos, public MWCarDataBase::Tires, public MWCarDataBase::Transmission {
 public:
@@ -617,6 +619,7 @@ public:
 		*this = MWCarDataTuned(aCarTunings[id], brakes, chassis, engine, induction, nos, tires, transmission, junkman);
 	}
 
+#ifdef MWHANDLING_ASSETTO
 	MWCarDataTuned(const std::string& model, Car* pCar) {
 		const char* tuningPath = pCar == pMyPlugin->car ? "plugins/player.tune" : "plugins/ai.tune";
 		if (std::filesystem::exists(tuningPath)) {
@@ -669,13 +672,16 @@ public:
 		TRACK_WIDTH.Front += SECTION_WIDTH.Front * 0.001;
 		TRACK_WIDTH.Rear += SECTION_WIDTH.Rear * 0.001;
 	}
+#endif
 };
 
+#ifdef MWHANDLING_ASSETTO
 Physics::Tunings PlayerCarTunings = {};
 Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 	if (veh == pMyPlugin->car) return &PlayerCarTunings;
 	return nullptr;
 }
+#endif
 
 #undef TUNED_VALUE
 #undef TUNED_AXLEPAIR
