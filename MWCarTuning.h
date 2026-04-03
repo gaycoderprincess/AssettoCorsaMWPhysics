@@ -455,6 +455,8 @@ struct MWCarData : public MWCarDataBase {
 
 	MWCarData(const toml::table& config, const std::string& name) {
 		CollectionName = name;
+		std::transform(CollectionName.begin(), CollectionName.end(), CollectionName.begin(), [](unsigned char c){ return std::tolower(c); });
+
 		TOML_VALUE("pvehicle", brakes_upgrades);
 		TOML_VALUE("pvehicle", chassis_upgrades);
 		TOML_VALUE("pvehicle", engine_upgrades);
@@ -536,6 +538,14 @@ public:
 		bool nos = false;
 		bool tires = false;
 		bool transmission = false;
+
+		bool Get(int part) {
+			return (&brakes)[part];
+		}
+
+		void Set(int part, int i) {
+			(&brakes)[part] = i;
+		}
 
 		void SetAll(bool b) {
 			brakes = b;
