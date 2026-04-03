@@ -90,6 +90,10 @@ private:
 		return true;
 	}
 public:
+	// the ai will pull the handbrake on a race restart for SOME REASON
+	virtual float GetControlHandBrake() {
+		return 0.0;
+	}
 	virtual bool GetControlNOS() {
 		if (!bNitrousEnabled) return false;
 		if (AreControlsBlocked()) return false;

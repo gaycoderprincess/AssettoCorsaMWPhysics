@@ -44,6 +44,7 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 //#include "decomp/interfaces/MWIInductable.cpp"
 #include "decomp/interfaces/MWITransmission.h"
 #include "decomp/interfaces/MWIEngine.h"
+#include "decomp/interfaces/MWIHumanAI.cpp"
 #include "decomp/interfaces/MWIVehicle.cpp"
 #include "decomp/interfaces/MWICollisionBody.cpp"
 #include "decomp/interfaces/MWIRigidBody.cpp"
@@ -51,7 +52,6 @@ double fGlobalDeltaTime = 1.0 / 60.0;
 #include "decomp/interfaces/MWIInput.cpp"
 #include "decomp/interfaces/MWISpikeable.cpp"
 #include "decomp/interfaces/MWICheater.cpp"
-#include "decomp/interfaces/MWIHumanAI.cpp"
 
 #include "decomp/behaviors/MWWheel.h"
 #include "decomp/behaviors/MWChassisBase.h"
@@ -443,6 +443,10 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		vel.x = 0.0;
 		vel.z = 0.0;
 		pCar->body->setVelocity(&vel);
+
+		pCar->body->getAngularVelocity(&vel);
+		vel.y = 0.0;
+		pCar->body->setAngularVelocity(&vel);
 	}
 
 	ivehicle->OnTaskSimulate(dT);
@@ -559,6 +563,8 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		//pCar->fuel *= 0.875;
 		//pCar->fuel += 0.125 * pCar->maxFuel;
 		pCar->fuel = std::max(pCar->fuel, 0.01);
+
+		if (!humanai) pCar->fuel = pCar->maxFuel; // always keep max fuel for the ai so they don't pit
 	}
 	else {
 		auto turboConsumption = pEngine->mInductionBoost + 1.0;
