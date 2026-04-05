@@ -113,9 +113,9 @@ cp orig_mw_full/elise.conf lotus_exige_scura.conf
 cp orig_mw_full/rx8.conf ks_mazda_miata.conf
 cp orig_mw_full/rx7.conf ks_mazda_mx5_cup.conf
 cp orig_mw_full/rx7.conf ks_mazda_mx5_nd.conf
-cp orig_mw_full/corvettec6r.conf ks_mazda_787b.conf
-cp orig_mw_full/corvettec6r.conf ks_mercedes_c9.conf
-cp orig_mw_full/corvettec6r.conf p4-5_2011.conf
+cp orig_cb_full/zonda.conf ks_mazda_787b.conf
+cp orig_cb_full/zonda.conf ks_mercedes_c9.conf
+cp orig_cb_full/zonda.conf p4-5_2011.conf
 cp orig_mw_full/slr.conf ks_mercedes_amg_gt3.conf
 cp orig_cb_full/mustangshlbyo.conf shelby_cobra_427sc.conf
 cp orig_cb_full/zonda.conf pagani_huayra.conf
