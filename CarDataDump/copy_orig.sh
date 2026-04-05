@@ -140,3 +140,6 @@ cp orig_mw_full/rx8.conf ag_mazda_rx8_madmike.conf
 cp orig_mw_full/rx8.conf mazda_rx8_types.conf
 cp orig_cb_full/mazdaspeed3.conf mazda_mazda_speed_3_2009.conf
 cp orig_mw_full/is300.conf gue_lexus_is_300_jdm.conf
+cp orig_mw_full/punto.conf toyota_vitz1.5rs.conf
+cp orig_mw_full/punto.conf toyota_vitz_rs_2007.conf
+cp orig_mw_full/punto.conf vitz_rs_2007_track.conf
