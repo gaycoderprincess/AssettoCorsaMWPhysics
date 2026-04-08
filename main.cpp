@@ -647,16 +647,16 @@ float MWSuspensionGetMass(ISuspension* susp) { return 1.0; }
 void MWSuspensionAddForceAtPos(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* pos, int64_t driven, bool addToSteerTorque) {}
 
 void ReplaceSuspensionVTable(uintptr_t getHubWorldMatrix_addr) {
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x8, &MWSuspensionGetPointVelocity); // getPointVelocity
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x10, &MWSuspensionAddForceAtPos); // addForceAtPos
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x18, &MWSuspensionGetVelocity); // addTorque
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x30, &MWSuspensionGetVelocity); // getHubAngularVelocity
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x38, &MWSuspensionAttach); // attach
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x88, &MWSuspensionGetMass); // getMass
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x90, &MWSuspensionStop); // stop
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0x98, &MWSuspensionGetVelocity); // getVelocity
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xA8, &MWSuspensionStep); // step
-	NyaHookLib::Patch(NyaHookLib::mEXEBase + getHubWorldMatrix_addr+0xB8, &MWSuspensionAddLocalForceAndTorque); // addLocalForceAndTorque
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x8, &MWSuspensionGetPointVelocity); // getPointVelocity
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x10, &MWSuspensionAddForceAtPos); // addForceAtPos
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x18, &MWSuspensionGetVelocity); // addTorque
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x30, &MWSuspensionGetVelocity); // getHubAngularVelocity
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x38, &MWSuspensionAttach); // attach
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x88, &MWSuspensionGetMass); // getMass
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x90, &MWSuspensionStop); // stop
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x98, &MWSuspensionGetVelocity); // getVelocity
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0xA8, &MWSuspensionStep); // step
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0xB8, &MWSuspensionAddLocalForceAndTorque); // addLocalForceAndTorque
 }
 
 UMath::Matrix4* MWSuspensionGetMatrix_DeleteBody(Suspension* susp, UMath::Matrix4* result) {
@@ -696,6 +696,43 @@ UMath::Matrix4* MWSuspensionMLGetMatrix_DeleteBody(SuspensionML* susp, UMath::Ma
 		WriteLog("ISuspension type: SuspensionML");
 	}
 	return MWSuspensionGetMatrix(susp->car, susp, result);
+}
+
+class SuspensionCosmic : public ISuspension {
+public:
+	void* unkCar; // +38 some useless custom garbage, not an actual car pointer
+	IRigidBody* body1; // +40
+	IRigidBody* body2; // +48 car body?
+	uint8_t _50[0x50];
+	int wheelId; // +A0
+};
+static_assert(offsetof(SuspensionCosmic, body1) == 0x40);
+static_assert(offsetof(SuspensionCosmic, body2) == 0x48);
+static_assert(offsetof(SuspensionCosmic, wheelId) == 0xA0);
+
+UMath::Matrix4* MWSuspensionCosmicGetMatrix_DeleteBody(SuspensionCosmic* susp, UMath::Matrix4* result) {
+	Car* car = nullptr;
+	for (auto& mw : aSuspensions) {
+		for (int i = 0; i < mw->pCar->suspensions.size(); i++) {
+			if (mw->pCar->suspensions[i] == susp) {
+				car = mw->pCar;
+				break;
+			}
+		}
+
+		if (car) break;
+	}
+
+	if (susp->body1) {
+		susp->body1->release();
+		susp->body1 = nullptr;
+		WriteLog("ISuspension type: Cosmic");
+	}
+	//if (susp->body2) {
+	//	susp->body2->release();
+	//	susp->body2 = nullptr;
+	//}
+	return MWSuspensionGetMatrix(car, susp, result);
 }
 
 // fixes brakes with keyboard controls, fixes ai brakes
@@ -772,16 +809,16 @@ void OnPluginStartup() {
 		NyaHookLib::Patch<uint8_t>(NyaHookLib::mEXEBase + 0xBC030, 0xC3); // disable fuel warnings
 	}
 
-	ReplaceSuspensionVTable(0x4FF878);
-	ReplaceSuspensionVTable(0x4FFC88);
-	ReplaceSuspensionVTable(0x4FFE98);
-	ReplaceSuspensionVTable(0x5001A8);
+	ReplaceSuspensionVTable(NyaHookLib::mEXEBase + 0x4FF878);
+	ReplaceSuspensionVTable(NyaHookLib::mEXEBase + 0x4FFC88);
+	ReplaceSuspensionVTable(NyaHookLib::mEXEBase + 0x4FFE98);
+	ReplaceSuspensionVTable(NyaHookLib::mEXEBase + 0x5001A8);
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FF878, &MWSuspensionGetMatrix_DeleteBody); // Suspension
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFC88, &MWSuspensionStrutGetMatrix_DeleteBody); // SuspensionStrut
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x4FFE98, &MWSuspensionAxleGetMatrix_DeleteBody); // SuspensionAxle
 	NyaHookLib::Patch(NyaHookLib::mEXEBase + 0x5001A8, &MWSuspensionMLGetMatrix_DeleteBody); // SuspensionML
-	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x27C320, &GetOptimalBrakeHooked);
 
+	NyaHookLib::PatchRelative(NyaHookLib::JMP, NyaHookLib::mEXEBase + 0x27C320, &GetOptimalBrakeHooked);
 	NyaHookLib::PatchRelative(NyaHookLib::CALL, NyaHookLib::mEXEBase + 0x26FE7D, &CarResetHooked);
 
 	// remove fuelTankBody references
@@ -827,6 +864,8 @@ void OnPluginStartup() {
 
 		auto pluginBase = GetSupportedCSPBaseAddress();
 		if (pluginBase && *(uint64_t*)(pluginBase + 0xEC4210) == 0x5518588948C48B48) {
+			ReplaceSuspensionVTable(pluginBase + 0x1D510B0);
+			NyaHookLib::Patch(pluginBase + 0x1D510B0, &MWSuspensionCosmicGetMatrix_DeleteBody); // SuspensionCosmic
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, pluginBase + 0xEC4210, &MWCarUpdate); // CSP Car::step
 			WriteLog("Initialized supported CSP hacks");
 		}
