@@ -643,6 +643,7 @@ void MWSuspensionAddLocalForceAndTorque(ISuspension* susp, const UMath::Vector3*
 void MWSuspensionAttach(ISuspension* susp) {}
 void MWSuspensionStop(ISuspension* susp) {}
 void MWSuspensionStep(ISuspension* susp, float dt) {}
+float MWSuspensionGetDamage(ISuspension* susp) { return 0.0; }
 float MWSuspensionGetMass(ISuspension* susp) { return 1.0; }
 void MWSuspensionAddForceAtPos(ISuspension* susp, const UMath::Vector3* force, const UMath::Vector3* pos, int64_t driven, bool addToSteerTorque) {}
 
@@ -652,6 +653,7 @@ void ReplaceSuspensionVTable(uintptr_t getHubWorldMatrix_addr) {
 	NyaHookLib::Patch(getHubWorldMatrix_addr+0x18, &MWSuspensionGetVelocity); // addTorque
 	NyaHookLib::Patch(getHubWorldMatrix_addr+0x30, &MWSuspensionGetVelocity); // getHubAngularVelocity
 	NyaHookLib::Patch(getHubWorldMatrix_addr+0x38, &MWSuspensionAttach); // attach
+	NyaHookLib::Patch(getHubWorldMatrix_addr+0x80, &MWSuspensionGetDamage); // getDamage
 	NyaHookLib::Patch(getHubWorldMatrix_addr+0x88, &MWSuspensionGetMass); // getMass
 	NyaHookLib::Patch(getHubWorldMatrix_addr+0x90, &MWSuspensionStop); // stop
 	NyaHookLib::Patch(getHubWorldMatrix_addr+0x98, &MWSuspensionGetVelocity); // getVelocity
