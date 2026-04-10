@@ -146,3 +146,4 @@ cp orig_mw_full/punto.conf vitz_rs_2007_track.conf
 cp orig_mw_full/is300.conf ng_is300.conf
 cp orig_mw_full/corvette.conf some1_corvette_c4_zr1_1990.conf
 cp orig_mw_full/corvette.conf some1_corvette_c4_zr1_1990_s1.conf
+cp orig_w_full/scirocco.conf vw_scirocco_gt_2009.conf

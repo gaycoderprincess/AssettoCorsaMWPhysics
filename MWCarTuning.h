@@ -59,11 +59,11 @@ struct MWCarDataBase {
 			TUNED_VALUE(EBRAKE);
 		}
 		Brakes(const std::vector<Brakes>& vec, float f) {
-			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+			if (vec.empty()) __debugbreak();
 
 			if (vec.size() == 1) *this = vec[0];
 			else {
-				*this = Brakes(vec[0], vec[1], f);
+				*this = Brakes(vec[0], vec[vec.size()-1], f);
 			}
 		}
 	};
@@ -133,11 +133,11 @@ struct MWCarDataBase {
 			TUNED_VALUE(WHEEL_BASE);
 		}
 		Chassis(const std::vector<Chassis>& vec, float f) {
-			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+			if (vec.empty()) __debugbreak();
 
 			if (vec.size() == 1) *this = vec[0];
 			else {
-				*this = Chassis(vec[0], vec[1], f);
+				*this = Chassis(vec[0], vec[vec.size()-1], f);
 			}
 		}
 	};
@@ -173,11 +173,11 @@ struct MWCarDataBase {
 			TUNED_VECTOR(a.TORQUE, b.TORQUE, TORQUE, f);
 		}
 		Engine(const std::vector<Engine>& vec, float f) {
-			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+			if (vec.empty()) __debugbreak();
 
 			if (vec.size() == 1) *this = vec[0];
 			else {
-				*this = Engine(vec[0], vec[1], f);
+				*this = Engine(vec[0], vec[vec.size()-1], f);
 			}
 		}
 	};
@@ -233,7 +233,14 @@ struct MWCarDataBase {
 					else if (vec.size() == 2) {
 						*this = Induction(vec[0], vec[1], f);
 					}
-					else __debugbreak();
+					else {
+						if (vec[0].PSI > 0.0) {
+							*this = Induction(vec[0], vec[vec.size()-1], f);
+						}
+						else {
+							*this = Induction(vec[1], vec[vec.size()-1], f);
+						}
+					}
 				}
 			}
 			else {
@@ -297,7 +304,14 @@ struct MWCarDataBase {
 					else if (vec.size() == 2) {
 						*this = Nos(vec[0], vec[1], f);
 					}
-					else __debugbreak();
+					else {
+						if (vec[0].FLOW_RATE > 0.0) {
+							*this = Nos(vec[0], vec[vec.size()-1], f);
+						}
+						else {
+							*this = Nos(vec[1], vec[vec.size()-1], f);
+						}
+					}
 				}
 			}
 			else {
@@ -341,11 +355,11 @@ struct MWCarDataBase {
 			TUNED_VALUE(YAW_SPEED);
 		}
 		Tires(const std::vector<Tires>& vec, float f) {
-			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+			if (vec.empty()) __debugbreak();
 
 			if (vec.size() == 1) *this = vec[0];
 			else {
-				*this = Tires(vec[0], vec[1], f);
+				*this = Tires(vec[0], vec[vec.size()-1], f);
 			}
 		}
 	};
@@ -398,11 +412,11 @@ struct MWCarDataBase {
 			TUNED_VALUE(TORQUE_SPLIT);
 		}
 		Transmission(const std::vector<Transmission>& vec, float f) {
-			if (vec.size() != 1 && vec.size() != 2) __debugbreak();
+			if (vec.empty()) __debugbreak();
 
 			if (vec.size() == 1) *this = vec[0];
 			else {
-				*this = Transmission(vec[0], vec[1], f);
+				*this = Transmission(vec[0], vec[vec.size()-1], f);
 			}
 		}
 	};
@@ -457,26 +471,38 @@ struct MWCarData : public MWCarDataBase {
 		CollectionName = name;
 		std::transform(CollectionName.begin(), CollectionName.end(), CollectionName.begin(), [](unsigned char c){ return std::tolower(c); });
 
+		if (config["pvehicle"]["MASS"].is_value()) {
+			TOML_VALUE("pvehicle", MASS);
+			TOML_ARRAY("pvehicle", TENSOR_SCALE);
+		}
+		else {
+			TOML_VALUE("chassis", MASS);
+			TOML_ARRAY("chassis", TENSOR_SCALE);
+		}
+
 		TOML_VALUE("pvehicle", brakes_upgrades);
 		TOML_VALUE("pvehicle", chassis_upgrades);
 		TOML_VALUE("pvehicle", engine_upgrades);
 		TOML_VALUE("pvehicle", induction_upgrades);
-		TOML_VALUE("pvehicle", MASS);
 		TOML_VALUE("pvehicle", nos_upgrades);
-		TOML_ARRAY("pvehicle", TENSOR_SCALE);
 		TOML_VALUE("pvehicle", tires_upgrades);
 		TOML_VALUE("pvehicle", transmission_upgrades);
 		TOML_ARRAY("pvehicle", HandlingRating);
 
-		TOML_VALUE("frontend", Cost);
+		if (config["frontend"]["Cost"].is_value()) {
+			TOML_VALUE("frontend", Cost);
+		}
+		else {
+			Cost = 0;
+		}
 
-		CreateTunedVector(config, aBrakes, "brakes", 2);
-		CreateTunedVector(config, aChassis, "chassis", 2);
-		CreateTunedVector(config, aEngine, "engine", 2);
-		CreateTunedVector(config, aInduction, "induction", 3);
-		CreateTunedVector(config, aNos, "nos", 3);
-		CreateTunedVector(config, aTires, "tires", 2);
-		CreateTunedVector(config, aTransmission, "transmission", 2);
+		CreateTunedVector(config, aBrakes, "brakes", 4);
+		CreateTunedVector(config, aChassis, "chassis", 4);
+		CreateTunedVector(config, aEngine, "engine", 4);
+		CreateTunedVector(config, aInduction, "induction", 4);
+		CreateTunedVector(config, aNos, "nos", 4);
+		CreateTunedVector(config, aTires, "tires", 4);
+		CreateTunedVector(config, aTransmission, "transmission", 4);
 	}
 };
 std::vector<MWCarData> aCarTunings;
