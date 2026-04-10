@@ -507,15 +507,14 @@ struct MWCarData : public MWCarDataBase {
 };
 std::vector<MWCarData> aCarTunings;
 
-MWCarData* LoadCarTuningFromFile(const std::string& configCarName) {
-	auto carName = configCarName;
+MWCarData* LoadCarTuningFromFile(std::string carName) {
 	if (carName.ends_with(".conf")) {
 		for (int i = 0; i < 5; i++) {
 			carName.pop_back();
 		}
 	}
 
-	auto fileName = std::format("plugins/CarDataDump/{}.conf", configCarName);
+	auto fileName = std::format("plugins/CarDataDump/{}.conf", carName);
 	if (!std::filesystem::exists(fileName)) return nullptr;
 
 	auto config = toml::parse_file(fileName);
