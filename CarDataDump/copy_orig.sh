@@ -19,7 +19,7 @@ cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl.conf
 cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl_s3.conf
 cp orig_mw_full/rx7.conf ks_mazda_rx7_spirit_r.conf
 cp orig_mw_full/rx7.conf ks_mazda_rx7_tuned.conf
-cp orig_cb_full/370z.conf ks_nissan_370z.conf
+cp orig_cb_full/350z.conf ks_nissan_370z.conf
 cp orig_cb_full/350z.conf ks_nissan_gtr.conf
 cp orig_cb_full/350z.conf ks_nissan_gtr_gt3.conf
 cp orig_cb_full/350z.conf hd_ngt_350z.conf
@@ -110,6 +110,7 @@ cp orig_mw_full/elise.conf lotus_exige_240_s3.conf
 cp orig_mw_full/elise.conf lotus_exige_s.conf
 cp orig_mw_full/elise.conf lotus_exige_s_roadster.conf
 cp orig_mw_full/elise.conf lotus_exige_scura.conf
+cp orig_mw_full/elise.conf lotus_exige_v6_cup.conf
 cp orig_mw_full/rx8.conf ks_mazda_miata.conf
 cp orig_mw_full/rx7.conf ks_mazda_mx5_cup.conf
 cp orig_mw_full/rx7.conf ks_mazda_mx5_nd.conf
@@ -161,3 +162,9 @@ cp orig_w_full/z4.conf bmw_z4.conf
 cp orig_w_full/z4.conf bmw_z4_drift.conf
 cp orig_w_full/bmwz4gt3.conf bmw_z4_gt2.conf
 cp orig_w_full/z4.conf bmw_z4_s1.conf
+cp orig_w_full/evora.conf lotus_evora_gtc.conf
+cp orig_w_full/evora.conf lotus_evora_gte.conf
+cp orig_w_full/evora.conf lotus_evora_gte_carbon.conf
+cp orig_w_full/evora.conf lotus_evora_gx.conf
+cp orig_w_full/evora.conf lotus_evora_s.conf
+cp orig_w_full/evora.conf lotus_evora_s_s2.conf
