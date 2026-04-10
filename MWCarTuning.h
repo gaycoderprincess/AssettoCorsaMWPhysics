@@ -153,6 +153,19 @@ struct MWCarDataBase {
 			if (vec.size() == 1) *this = vec[0];
 			else {
 				*this = Chassis(vec[0], vec[vec.size()-1], f);
+
+				// this is how world calculates it
+				//else if (vec.size() == 4) {
+				//	float h = f * 100;
+				//	float a = f * 100;
+				//	float t = f * 100;
+				//
+				//	auto sNode = vec[0];
+				//	auto hNode = vec[1];
+				//	auto aNode = vec[2];
+				//	auto tNode = vec[3];
+				//	ROLL_CENTER = (1.5 * (h*hNode.ROLL_CENTER + a*aNode.ROLL_CENTER + t*tNode.ROLL_CENTER) + sNode.ROLL_CENTER * (150 - 0.5 * (h + a + t))) / (h + a + t + 150);
+				//}
 			}
 		}
 	};
@@ -518,6 +531,18 @@ struct MWCarData : public MWCarDataBase {
 		CreateTunedVector(config, aNos, "nos", 4);
 		CreateTunedVector(config, aTires, "tires", 4);
 		CreateTunedVector(config, aTransmission, "transmission", 4);
+
+		bool validNos = false;
+		for (auto& nos : aNos) {
+			if (nos.FLOW_RATE > 0.0) validNos = true;
+		}
+		if (!validNos) nos_upgrades = 0;
+
+		bool validTurbo = false;
+		for (auto& turbo : aInduction) {
+			if (turbo.PSI > 0.0) validTurbo = true;
+		}
+		if (!validTurbo) induction_upgrades = 0;
 	}
 };
 std::vector<MWCarData> aCarTunings;
