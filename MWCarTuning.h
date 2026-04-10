@@ -1,7 +1,7 @@
 #define TUNED_VALUE(value) value = std::lerp(a.value, b.value, f);
 #define TUNED_AXLEPAIR(value) value.Front = std::lerp(a.value.Front, b.value.Front, f); value.Rear = std::lerp(a.value.Rear, b.value.Rear, f);
 #define TOML_VALUE(category, value) value = config[category][#value].value_or(-0.011f); if (value == 0.011f) { MessageBoxA(nullptr, std::format("Failed to find value for {}", #value).c_str(), "nya?!~", MB_ICONERROR); }
-#define TOML_AXLEPAIR(category, value) value.Front = config[category][#value][0].value_or(-0.011f); value.Rear = config[category][#value][1].value_or(-0.011f);
+#define TOML_AXLEPAIR(category, value) value.Front = config[category][#value][0].value_or(-0.011f); value.Rear = config[category][#value][1].value_or(-0.011f); if (value.Front == 0.011f) { MessageBoxA(nullptr, std::format("Failed to find value for {}", #value).c_str(), "nya?!~", MB_ICONERROR); }
 #define TOML_VECTOR(category, value) ReadTOMLVector(config, value, category, #value);
 #define TOML_ARRAY(category, value) ReadTOMLArray(config, value, category, #value);
 
@@ -36,7 +36,12 @@ struct MWCarDataBase {
 		out.clear();
 		for (int i = 0; i < 1024; i++) {
 			float f = config[category][name][i].value_or(-0.011f);
-			if (f == -0.011f) break;
+			if (f == -0.011f) {
+				if (i == 0 && strcmp(name, "SPEED_LIMITER")) { // speed limiter is optional
+					MessageBoxA(nullptr, std::format("Failed to find value for {}", name).c_str(), "nya?!~", MB_ICONERROR);
+				}
+				break;
+			}
 			out.push_back(f);
 		}
 	}
@@ -110,6 +115,16 @@ struct MWCarDataBase {
 			TOML_AXLEPAIR(category, TRACK_WIDTH);
 			TOML_AXLEPAIR(category, TRAVEL);
 			TOML_VALUE(category, WHEEL_BASE);
+
+			// nasty hack to make World cars not have broken suspensions, this is inaccurate but it'll do for now
+			if (SWAYBAR_STIFFNESS.Front < 100.0 && SWAYBAR_STIFFNESS.Rear < 100.0) {
+				SPRING_PROGRESSION.Front *= 0.1;
+				SPRING_PROGRESSION.Rear *= 0.1;
+				SPRING_STIFFNESS.Front *= 10;
+				SPRING_STIFFNESS.Rear *= 10;
+				SWAYBAR_STIFFNESS.Front *= 10;
+				SWAYBAR_STIFFNESS.Rear *= 10;
+			}
 		}
 		Chassis(const Chassis& a, const Chassis& b, float f) {
 			TUNED_VALUE(AERO_CG);

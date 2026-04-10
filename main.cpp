@@ -390,8 +390,23 @@ std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
 
+	bool gravitySet = false;
+
+	//float gameGravity = -9.8128; // rigidbodyspecs, exact car gravity in MW
+	float gameGravity = 0.0;
+
+	//if (IsSupportedCSPInstalled()) {
+	//	auto f = (void(__fastcall*)(float*))(GetSupportedCSPBaseAddress() + 0xA51E80);
+	//	float gravity[3] = {0.0, gameGravity, 0.0};
+	//	f(gravity);
+	//	gravitySet = true;
+	//	WriteLog(std::format("{:X}", (uintptr_t)f));
+	//}
+	//else if (!IsAnyCSPInstalled()) {
+
 	if (!IsAnyCSPInstalled()) {
-		pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, -9.8128, 0.0); // rigidbodyspecs, exact car gravity in MW
+		pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, gameGravity, 0.0);
+		gravitySet = true;
 	}
 
 	EngineRacer* pEngine = GetCarMWEngine(pCar);
@@ -453,6 +468,9 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	pEngine->OnTaskSimulate(dT);
 	pSuspension->OnTaskSimulate(dT);
 
+	if (gravitySet) {
+		GetPlayerInterface(pCar)->Find<IRigidBodyMW>()->DoGravity();
+	}
 	GetPlayerInterface(pCar)->Find<IRigidBodyMW>()->DoDrag();
 
 	for (int i = 0; i < 4; i++) {

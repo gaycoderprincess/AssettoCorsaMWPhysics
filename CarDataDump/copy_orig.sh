@@ -19,7 +19,7 @@ cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl.conf
 cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl_s3.conf
 cp orig_mw_full/rx7.conf ks_mazda_rx7_spirit_r.conf
 cp orig_mw_full/rx7.conf ks_mazda_rx7_tuned.conf
-cp orig_cb_full/350z.conf ks_nissan_370z.conf
+cp orig_w_full/370z.conf ks_nissan_370z.conf
 cp orig_cb_full/350z.conf ks_nissan_gtr.conf
 cp orig_cb_full/350z.conf ks_nissan_gtr_gt3.conf
 cp orig_cb_full/350z.conf hd_ngt_350z.conf
@@ -148,3 +148,5 @@ cp orig_mw_full/corvette.conf some1_corvette_c4_zr1_1990.conf
 cp orig_mw_full/corvette.conf some1_corvette_c4_zr1_1990_s1.conf
 cp orig_w_full/scirocco.conf vw_scirocco_gt_2009.conf
 cp orig_w_full/scirocco.conf ukg_vw_scirocco_r_2015.conf
+cp orig_w_full/scirocco.conf pb_scirocco_gt_09_nfs.conf
+cp orig_w_full/scirocco.conf htrs_vw_scirocco_sp.conf

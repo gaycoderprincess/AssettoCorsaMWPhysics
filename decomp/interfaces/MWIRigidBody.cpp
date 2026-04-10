@@ -147,6 +147,14 @@ public:
 		pCar->body->setPosition(&pos);
 	}
 
+	virtual void DoGravity() {
+		float gravity = -9.8128; // rigidbodyspecs, exact car gravity in MW
+
+		UMath::Vector3 force = {};
+		force.y = gravity * GetMass();
+		ResolveForce(&force);
+	}
+
 	virtual void DoDrag() {
 		bool bDoLinearDrag = true;
 		bool bDoAngularDrag = true;
