@@ -97,8 +97,6 @@ cp orig_mw_full/carreragt.conf ks_mclaren_570s.conf
 cp orig_mw_full/corvettec6r.conf ks_mclaren_650_gt3.conf
 cp orig_mw_full/carreragt.conf ks_mclaren_p1.conf
 cp orig_mw_full/corvettec6r.conf ks_mclaren_p1_gtr.conf
-cp orig_mw_full/carreragt.conf mclaren_mp412c.conf
-cp orig_mw_full/corvettec6r.conf mclaren_mp412c_gt3.conf
 cp orig_mw_full/clk500.conf bg_mercedes_clk55_amg.conf
 cp orig_mw_full/murcielago.conf ks_lamborghini_aventador_sv.conf
 cp orig_mw_full/murcielago.conf ks_lamborghini_huracan_gt3.conf
@@ -168,3 +166,8 @@ cp orig_w_full/evora.conf lotus_evora_gte_carbon.conf
 cp orig_w_full/evora.conf lotus_evora_gx.conf
 cp orig_w_full/evora.conf lotus_evora_s.conf
 cp orig_w_full/evora.conf lotus_evora_s_s2.conf
+cp orig_w_full/bmw135i08.conf ks_bmw_m235i_racing.conf
+cp orig_w_full/bmwm6.conf ks_bmw_m4.conf
+cp orig_w_full/bmwm6.conf ks_bmw_m4_akrapovic.conf
+cp orig_w_full/mclarenmp4.conf mclaren_mp412c.conf
+cp orig_w_full/mclarenmp4.conf mclaren_mp412c_gt3.conf
