@@ -1,9 +1,9 @@
-cp orig_mw_full/bmwm3gtr.conf bmw_m3_gt2.conf
-cp orig_mw_full/bmwm3gtr.conf pb_m3gtr_nfs.conf
-cp orig_mw_full/bmwm3gtr.conf fiagt_bmw_m3_e46_gtr.conf
+cp orig_mw_full/bmwm3gtre46.conf bmw_m3_gt2.conf
+cp orig_mw_full/bmwm3gtre46.conf pb_m3gtr_nfs.conf
+cp orig_mw_full/bmwm3gtre46.conf fiagt_bmw_m3_e46_gtr.conf
 cp orig_mw_full/a3.conf ks_audi_a1s1.conf
-cp orig_mw_full/tt.conf ks_audi_tt_cup.conf
-cp orig_mw_full/tt.conf ks_audi_tt_vln.conf
+cp orig_mw_full/custom_tt_fwd.conf ks_audi_tt_cup.conf
+cp orig_mw_full/custom_tt_fwd.conf ks_audi_tt_vln.conf
 cp orig_cb_full/darius.conf ks_audi_r8_plus.conf
 cp orig_mw_full/corvette.conf ks_corvette_c7.conf
 cp orig_mw_full/corvette.conf ks_corvette_c7_stingray.conf
@@ -40,8 +40,6 @@ cp orig_mw_full/viper.conf hd_vipersrt10.conf
 cp orig_mw_full/viper.conf mby_viper_gts.conf
 cp orig_mw_full/imprezawrx.conf mby_subaru_impreza_gdb.conf
 cp orig_mw_full/carreragt.conf ad_td_porsche_carrera_gt.conf
-cp orig_mw_full/murcielago.conf ks_lamborghini_countach.conf
-cp orig_mw_full/murcielago.conf ks_lamborghini_countach_s1.conf
 cp orig_mw_full/corvettec6r.conf outlawvettegt1.conf
 cp orig_mw_full/corvettec6r.conf corvette_c6r.conf
 cp orig_mw_full/corvettec6r.conf fiagt_legion_corvette_c6r.conf
@@ -59,9 +57,6 @@ cp orig_mw_full/sl500.conf mercedes_c63_amg_black_series.conf
 cp orig_mw_full/eclipsegt.conf tjl_mitsubishi_eclipse_gs-t.conf
 cp orig_cb_full/charger06.conf dodge_char_srt8.conf
 cp orig_mw_full/gallardo.conf ferrari_360_modena_1999.conf
-cp orig_mw_full/gallardo.conf ferrari_f40.conf
-cp orig_mw_full/gallardo.conf ferrari_f40_s3.conf
-cp orig_mw_full/murcielago.conf ks_ferrari_288_gto.conf
 cp orig_mw_full/corvettec6r.conf ks_ferrari_330_p4.conf
 cp orig_mw_full/corvettec6r.conf ferrari_599xxevo.conf
 cp orig_mw_full/corvettec6r.conf ks_ferrari_812_superfast.conf
@@ -82,8 +77,8 @@ cp orig_mw_full/corvettec6r.conf ks_mclaren_650_gt3.conf
 cp orig_mw_full/carreragt.conf ks_mclaren_p1.conf
 cp orig_mw_full/corvettec6r.conf ks_mclaren_p1_gtr.conf
 cp orig_mw_full/clk500.conf bg_mercedes_clk55_amg.conf
-cp orig_mw_full/murcielago.conf ks_lamborghini_huracan_gt3.conf
-cp orig_mw_full/murcielago.conf ks_lamborghini_huracan_st.conf
+cp orig_mw_full/custom_murcielago_rwd.conf ks_lamborghini_huracan_gt3.conf
+cp orig_mw_full/custom_murcielago_rwd.conf ks_lamborghini_huracan_st.conf
 cp orig_mw_full/murcielago.conf ks_lamborghini_huracan_performante.conf
 cp orig_mw_full/elise.conf lotus_exige_240.conf
 cp orig_mw_full/elise.conf lotus_exige_240_s3.conf
@@ -163,7 +158,7 @@ cp orig_w_full/urquattro.conf ks_audi_sport_quattro_s1.conf
 cp orig_w_full/car1014_r8lms.conf ks_audi_r8_lms.conf
 cp orig_w_full/car1014_r8lms.conf ks_audi_r8_lms_2016.conf
 cp orig_w_full/skyliner35.conf ks_nissan_gtr.conf
-cp orig_w_full/skyliner35v.conf ks_nissan_gtr_gt3.conf
+cp orig_w_full/custom_skyliner35v_rwd.conf ks_nissan_gtr_gt3.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_drift.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_s1.conf
@@ -175,3 +170,8 @@ cp orig_w_full/corolla.conf ks_toyota_ae86_drift.conf
 cp orig_w_full/corolla.conf ks_toyota_ae86_tuned.conf
 cp orig_w_full/370z.conf ks_nissan_370z.conf
 cp orig_w_full/car1008_mclarenf1_elite.conf ks_mclaren_f1_gtr.conf
+cp orig_w_full/countach.conf ks_lamborghini_countach.conf
+cp orig_w_full/countach.conf ks_lamborghini_countach_s1.conf
+cp orig_w_full/diablo.conf ferrari_f40.conf
+cp orig_w_full/diablo.conf ferrari_f40_s3.conf
+cp orig_w_full/countach.conf ks_ferrari_288_gto.conf
