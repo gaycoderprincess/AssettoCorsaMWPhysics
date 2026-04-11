@@ -124,10 +124,6 @@ struct MWCarDataBase {
 				SPRING_STIFFNESS.Rear *= 10;
 				SWAYBAR_STIFFNESS.Front *= 10;
 				SWAYBAR_STIFFNESS.Rear *= 10;
-
-				// hack to make cars like the scirocco not roll over immediately
-				RIDE_HEIGHT.Front *= 0.5;
-				RIDE_HEIGHT.Rear *= 0.5;
 			}
 		}
 		Chassis(const Chassis& a, const Chassis& b, float f) {
@@ -750,6 +746,10 @@ public:
 		// plus wheel size
 		TRACK_WIDTH.Front += SECTION_WIDTH.Front * 0.001;
 		TRACK_WIDTH.Rear += SECTION_WIDTH.Rear * 0.001;
+
+		// todo this is inaccurate but required for some cars not to flip over really easily in AC
+		RIDE_HEIGHT.Front = 0.0;
+		RIDE_HEIGHT.Rear = 0.0;
 	}
 #endif
 };

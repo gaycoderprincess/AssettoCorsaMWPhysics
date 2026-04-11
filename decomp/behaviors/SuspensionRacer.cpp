@@ -535,11 +535,10 @@ UMath::Vector3* SuspensionRacerMW::GetWheelCenterPos(UMath::Vector3* result, uns
 	if (!mRB) {
 		return result;
 	} else {
-		// get max suspension travel
+		// GetPosition is wrong when the wheels are free
 		if (!mTires[i]->IsOnGround()) {
 			auto matrix = lastState.matrix;
 			UMath::Vector3 p(mTires[i]->GetLocalArm());
-			p.y -= INCH2METERS(mMWAttributes->TRAVEL.At(i / 2u));
 			UMath::RotateTranslate(p, matrix, p);
 			*result = p;
 		}
