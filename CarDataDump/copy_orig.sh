@@ -96,7 +96,6 @@ cp orig_mw_full/elise.conf lotus_exige_s.conf
 cp orig_mw_full/elise.conf lotus_exige_s_roadster.conf
 cp orig_mw_full/elise.conf lotus_exige_scura.conf
 cp orig_mw_full/elise.conf lotus_exige_v6_cup.conf
-cp orig_mw_full/rx8.conf ks_mazda_miata.conf
 cp orig_mw_full/rx7.conf ks_mazda_mx5_cup.conf
 cp orig_mw_full/rx7.conf ks_mazda_mx5_nd.conf
 cp orig_cb_full/zonda.conf ks_mazda_787b.conf
@@ -145,7 +144,7 @@ cp orig_w_full/bmwm3e30.conf bmw_m3_e30_gra.conf
 cp orig_w_full/bmwm3e30.conf bmw_m3_e30_s1.conf
 cp orig_w_full/z4.conf bmw_z4.conf
 cp orig_w_full/z4.conf bmw_z4_drift.conf
-cp orig_w_full/bmwz4gt3.conf bmw_z4_gt2.conf
+cp orig_w_full/bmwz4gt3.conf bmw_z4_gt3.conf
 cp orig_w_full/z4.conf bmw_z4_s1.conf
 cp orig_w_full/evora.conf lotus_evora_gtc.conf
 cp orig_w_full/evora.conf lotus_evora_gte.conf
@@ -173,3 +172,5 @@ cp orig_w_full/skyliner35v.conf ks_nissan_gtr_gt3.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_drift.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_s1.conf
+cp orig_w_full/panamera10.conf ks_porsche_panamera.conf
+cp orig_w_full/mx508.conf ks_mazda_miata.conf

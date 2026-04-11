@@ -124,6 +124,10 @@ struct MWCarDataBase {
 				SPRING_STIFFNESS.Rear *= 10;
 				SWAYBAR_STIFFNESS.Front *= 10;
 				SWAYBAR_STIFFNESS.Rear *= 10;
+
+				// hack to make cars like the scirocco not roll over immediately
+				RIDE_HEIGHT.Front *= 0.5;
+				RIDE_HEIGHT.Rear *= 0.5;
 			}
 		}
 		Chassis(const Chassis& a, const Chassis& b, float f) {
