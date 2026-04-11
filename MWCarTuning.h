@@ -532,17 +532,29 @@ struct MWCarData : public MWCarDataBase {
 		CreateTunedVector(config, aTires, "tires", 4);
 		CreateTunedVector(config, aTransmission, "transmission", 4);
 
-		bool validNos = false;
-		for (auto& nos : aNos) {
-			if (nos.FLOW_RATE > 0.0) validNos = true;
-		}
-		if (!validNos) nos_upgrades = 0;
+		if (aBrakes.size() <= 1) brakes_upgrades = 0;
+		if (aChassis.size() <= 1) chassis_upgrades = 0;
+		if (aEngine.size() <= 1) engine_upgrades = 0;
+		if (aInduction.size() <= 1) induction_upgrades = 0;
+		if (aNos.size() <= 1) nos_upgrades = 0;
+		if (aTires.size() <= 1) tires_upgrades = 0;
+		if (aTransmission.size() <= 1) transmission_upgrades = 0;
 
-		bool validTurbo = false;
-		for (auto& turbo : aInduction) {
-			if (turbo.PSI > 0.0) validTurbo = true;
+		if (nos_upgrades > 0) {
+			bool validNos = false;
+			for (auto &nos: aNos) {
+				if (nos.FLOW_RATE > 0.0) validNos = true;
+			}
+			if (!validNos) nos_upgrades = 0;
 		}
-		if (!validTurbo) induction_upgrades = 0;
+
+		if (induction_upgrades > 0) {
+			bool validTurbo = false;
+			for (auto &turbo: aInduction) {
+				if (turbo.PSI > 0.0) validTurbo = true;
+			}
+			if (!validTurbo) induction_upgrades = 0;
+		}
 	}
 };
 std::vector<MWCarData> aCarTunings;
