@@ -86,6 +86,7 @@ You should be able to build the project now in CLion.
 - hd_vipersrt10 - viper (Most Wanted)
 - htrs_vw_scirocco_sp - scirocco (World)
 - kas_vw_golf_gti_mkv_2006 - gti (Most Wanted)
+- ks_alfa_romeo_4c - alfaromeo8c (World)
 - ks_audi_a1s1 - a3 (Most Wanted)
 - ks_audi_r8_lms - car1014_r8lms (World)
 - ks_audi_r8_lms_2016 - car1014_r8lms (World)
