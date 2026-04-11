@@ -99,6 +99,7 @@ void ACCarPrePhysics(Car* pThis, float dT) {
 	pThis->penaltyTime = 0.0;
 	pThis->penaltyTimeAccumulator = 0.0;
 
+	pThis->lastSteerPosition = pThis->finalSteerAngleSignal;
 	pThis->finalSteerAngleSignal = DEG2RAD(GetCarMWSuspension(pThis)->mSteering.Previous);
 
 	UMath::Vector3 worldVel;
@@ -480,13 +481,11 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 		UMath::Matrix4 carMatrix;
 		tire->car->body->getWorldMatrix(&carMatrix, 0.0);
 
+		tire->localWheelRotation.Rotate(NyaVec3(-pSuspension->GetWheelAngularVelocity(mwTireId) * dT, 0, 0));
+
 		UMath::Matrix4 steerAngle;
 		steerAngle.SetIdentity();
 		steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-pSuspension->GetWheelSteer(mwTireId))));
-		tire->worldRotation = carMatrix * steerAngle;
-
-		tire->localWheelRotation.Rotate(NyaVec3(-pSuspension->GetWheelAngularVelocity(mwTireId) * dT, 0, 0));
-
 		tire->worldRotation = carMatrix * steerAngle * tire->localWheelRotation;
 		tire->worldRotation.p = {0,0,0};
 
@@ -633,7 +632,14 @@ UMath::Matrix4* MWSuspensionGetMatrix(Car* car, ISuspension* susp, UMath::Matrix
 	for (int i = 0; i < 4; i++) {
 		if (car->tyres[i].hub == susp) {
 			car->body->getWorldMatrix(result, 0.0);
+
+			UMath::Matrix4 steerAngle;
+			steerAngle.SetIdentity();
+			steerAngle.Rotate(NyaVec3(0, 0, ANGLE2RAD(-mwSusp->GetWheelSteer(GetMWWheelID(i)))));
+			*result = *result * steerAngle;
+
 			mwSusp->GetWheelCenterPos(&result->p, GetMWWheelID(i));
+
 			UMath::Vector3 velocity;
 			car->body->getVelocity(&velocity);
 			if (!IsSupportedCSPInstalled() && !pMyPlugin->sim->physicsAvatar->isPaused) {

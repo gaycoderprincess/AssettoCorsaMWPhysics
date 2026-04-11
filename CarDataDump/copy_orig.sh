@@ -174,3 +174,4 @@ cp orig_w_full/bmwm3e92.conf bmw_m3_e92_drift.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_s1.conf
 cp orig_w_full/panamera10.conf ks_porsche_panamera.conf
 cp orig_w_full/mx508.conf ks_mazda_miata.conf
+cp orig_w_full/alfaromeo8c.conf ks_alfa_romeo_4c.conf
