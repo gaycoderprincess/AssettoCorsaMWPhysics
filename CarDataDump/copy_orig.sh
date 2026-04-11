@@ -77,7 +77,6 @@ cp orig_mw_full/carreragt.conf ks_ferrari_488_gtb.conf
 cp orig_mw_full/cs_clio_trafpizza.conf trafpizza.conf
 cp orig_mw_full/cobaltss.conf pb_cobalt_ss_sc.conf
 cp orig_mw_full/cobaltss.conf pb_cobalt_ss_turbo.conf
-cp orig_mw_full/corvettec6r.conf ks_mclaren_f1_gtr.conf
 cp orig_mw_full/carreragt.conf ks_mclaren_570s.conf
 cp orig_mw_full/corvettec6r.conf ks_mclaren_650_gt3.conf
 cp orig_mw_full/carreragt.conf ks_mclaren_p1.conf
@@ -175,3 +174,4 @@ cp orig_w_full/corolla.conf ks_toyota_ae86.conf
 cp orig_w_full/corolla.conf ks_toyota_ae86_drift.conf
 cp orig_w_full/corolla.conf ks_toyota_ae86_tuned.conf
 cp orig_w_full/370z.conf ks_nissan_370z.conf
+cp orig_w_full/car1008_mclarenf1_elite.conf ks_mclaren_f1_gtr.conf
