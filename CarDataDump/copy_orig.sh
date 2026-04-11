@@ -198,3 +198,10 @@ cp orig_mw_full/is300.conf toyota_altezza_2004.conf
 cp orig_mw_full/is300.conf j8_toyota_altezza_rs200_tuned.conf
 cp orig_cb_full/mr2.conf j8_toyota_mr2_sw20.conf
 cp orig_mw_full/db9.conf j8_aston_martin_db9_coupe_06.conf
+cp orig_mw_full/rx7.conf yk_rx7_fc3s_gt-x.conf
+cp orig_w_full/corolla.conf mby_honda_beat.conf
+cp orig_w_full/z06carbon.conf mby_chevy_c6_z06.conf
+cp orig_w_full/car1062_caterhamr500.conf bo_caterham_165_rhd.conf
+cp orig_w_full/car1062_caterhamr500.conf bo_caterham_academy_rhd.conf
+cp orig_w_full/car1062_caterhamr500.conf bo_caterham_s7_1700_ss_rhd.conf
+cp orig_w_full/car1062_caterhamr500.conf bo_caterham_s7_1700_ss_clamshell.conf
