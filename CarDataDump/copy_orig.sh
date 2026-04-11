@@ -14,7 +14,6 @@ cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl.conf
 cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl_s3.conf
 cp orig_mw_full/rx7.conf ks_mazda_rx7_spirit_r.conf
 cp orig_mw_full/rx7.conf ks_mazda_rx7_tuned.conf
-cp orig_cb_full/350z.conf ks_nissan_370z.conf
 cp orig_cb_full/350z.conf hd_ngt_350z.conf
 cp orig_cb_full/skyline.conf ks_nissan_skyline_r34.conf
 cp orig_mw_full/997s.conf ks_porsche_991_carrera_s.conf
@@ -23,9 +22,6 @@ cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_cup_2017.conf
 cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_r_2016.conf
 cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_rs.conf
 cp orig_mw_full/911gt2.conf ks_porsche_911_r.conf
-cp orig_cb_full/corolla.conf ks_toyota_ae86.conf
-cp orig_cb_full/corolla.conf ks_toyota_ae86_drift.conf
-cp orig_cb_full/corolla.conf ks_toyota_ae86_tuned.conf
 cp orig_mw_full/supra.conf ks_toyota_supra_mkiv.conf
 cp orig_mw_full/supra.conf ks_toyota_supra_mkiv_drift.conf
 cp orig_mw_full/supra.conf ks_toyota_supra_mkiv_tuned.conf
@@ -175,3 +171,7 @@ cp orig_w_full/bmwm3e92.conf bmw_m3_e92_s1.conf
 cp orig_w_full/panamera10.conf ks_porsche_panamera.conf
 cp orig_w_full/mx508.conf ks_mazda_miata.conf
 cp orig_w_full/alfaromeo8c.conf ks_alfa_romeo_4c.conf
+cp orig_w_full/corolla.conf ks_toyota_ae86.conf
+cp orig_w_full/corolla.conf ks_toyota_ae86_drift.conf
+cp orig_w_full/corolla.conf ks_toyota_ae86_tuned.conf
+cp orig_w_full/370z.conf ks_nissan_370z.conf
