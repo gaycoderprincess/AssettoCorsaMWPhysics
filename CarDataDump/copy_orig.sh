@@ -241,7 +241,7 @@ cp orig_w_full/custom_rs1_fwd.conf alfa_romeo_giulietta_qv.conf
 cp orig_w_full/custom_rs1_fwd.conf alfa_romeo_giulietta_qv_le.conf
 cp orig_w_full/custom_eclipsegt_light.conf austin_mini_cooper_s.conf
 cp orig_w_full/custom_eclipsegt_light.conf austin_mini_cooper_s_1000.conf
-cp orig_mw_full/cs_cts_traffictruck.conf auto_union_type_c.conf
+cp orig_mw_full/custom_autounion_typec.conf auto_union_type_c.conf
 cp orig_w_full/911gt2.conf bo_singer.conf
 cp orig_cb_full/custom_brera_fwd.conf citroen_c15_d.conf
 cp orig_w_full/zonda.conf corvette_dp_c.conf
@@ -268,3 +268,18 @@ cp orig_mw_full/caymans.conf some1_honda_nsx_1997_s1.conf
 cp orig_mw_full/caymans.conf some1_honda_nsx_r_1992.conf
 cp orig_mw_full/caymans.conf some1_honda_nsx_r_1994.conf
 cp orig_mw_full/caymans.conf some1_honda_nsx_type_s_zero_1997.conf
+cp orig_w_full/rs4.conf ks_alfa_giulia_qv.conf
+cp orig_w_full/custom_rs1_light_fwd.conf ks_alfa_mito_qv.conf
+cp orig_w_full/custom_bmw3csl_awd.conf ks_alfa_romeo_155_v6.conf
+cp orig_w_full/car1022_cosworth.conf ks_alfa_romeo_gta.conf
+cp orig_w_full/jaguaretype.conf ks_ferrari_250_gto.conf
+cp orig_w_full/custom_ferrari_312_67.conf ks_ferrari_312_67.conf
+cp orig_mw_full/custom_carreragt_light.conf ks_ferrari_f138.conf
+cp orig_mw_full/custom_carreragt_light.conf ks_ferrari_f2004.conf
+cp orig_mw_full/custom_carreragt_light.conf ks_ferrari_sf15t.conf
+cp orig_mw_full/custom_carreragt_light.conf ks_ferrari_sf70h.conf
+cp orig_w_full/car1040_911rsr74.conf ks_ktm_xbow_gt4.conf
+cp orig_w_full/custom_lotus_25.conf ks_lotus_25.conf
+cp orig_mw_full/elise.conf ks_lotus_3_eleven.conf
+cp orig_w_full/car1030_ccx.conf ks_lotus_72d.conf
+cp orig_mw_full/custom_maserati_250f.conf ks_maserati_250f_6cyl.conf
