@@ -315,3 +315,12 @@ cp orig_w_full/is300.conf peugeot_504.conf
 cp orig_w_full/is300.conf peugeot_504_tn.conf
 cp orig_w_full/custom_lada_vesta.conf smp_lada_vesta_ng_touring.conf
 cp orig_mw_full/custom_tatuusfa1.conf tatuusfa1.conf
+cp orig_w_full/alfaromeo8c.conf alfa_romeo_8c.conf
+cp orig_cb_full/custom_brera_rwd.conf oneweek_gmc_p3500.conf
+cp orig_w_full/lexuslfa.conf slang_lexus_lfa.conf
+cp orig_w_full/lexuslfa.conf slang_lexus_lfa_nurb.conf
+cp orig_w_full/mazdaspeed3.conf nix_suzuki_swift_sport_ht81s.conf
+cp orig_w_full/car1032_cavalier.conf "nix_toyota corolla_wagon_bz_touring.conf"
+cp orig_w_full/is300.conf fso_caro_gli.conf
+cp orig_w_full/is300.conf fso_caro_narrow_gli.conf
+cp orig_w_full/is300.conf fso_caro_rover.conf
