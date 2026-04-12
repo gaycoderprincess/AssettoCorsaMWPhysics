@@ -790,7 +790,7 @@ Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 	return nullptr;
 }
 #else
-Physics::Tunings* GetVehicleMWTunings(Car* veh) {
+Physics::Tunings* GetVehicleMWTunings(void* veh) {
 	return nullptr;
 }
 #endif
