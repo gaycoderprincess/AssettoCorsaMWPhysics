@@ -585,6 +585,7 @@ int GetCarTuning(const std::string& model) {
 	return -1;
 }
 
+#ifdef MWHANDLING_GAME_IMPL
 #ifdef MWHANDLING_ASSETTO
 UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
 	auto acTire = &car->tyres[GetMWWheelID(wheel)];
@@ -603,6 +604,22 @@ float GetWheelBaseY(MWCarDataBase::Chassis* tuning, Car* car, int wheel) {
 	v.y += fTireOffset;
 	return v.y;
 }
+#elif MWHANDLING_FLATOUTUC
+UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
+	return car->aTires[GetMWWheelID(wheel)].GetMatrix()->p;
+}
+
+// wheels in fouc are always centered at y 0 offset by center of mass, so it should be 0 + radius
+float GetWheelBaseY(MWCarDataBase::Chassis* tuning, Car* car, int wheel) {
+	float y = 0.0;
+	y -= car->aTires[GetMWWheelID(wheel)].fRadius * 0.5;
+	y -= car->aTires[GetMWWheelID(wheel)].fRadius * 0.1;
+	y -= car->vCenterOfMass[1];
+	y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
+	y += fTireYPhysOffset;
+	return y;
+}
+#endif
 #endif
 
 class MWCarDataTuned : public MWCarDataBase, public MWCarDataBase::Brakes, public MWCarDataBase::Chassis, public MWCarDataBase::Engine, public MWCarDataBase::Induction, public MWCarDataBase::Nos, public MWCarDataBase::Tires, public MWCarDataBase::Transmission {
@@ -706,9 +723,9 @@ public:
 		*this = MWCarDataTuned(aCarTunings[id], brakes, chassis, engine, induction, nos, tires, transmission, junkman);
 	}
 
-#ifdef MWHANDLING_ASSETTO
+#ifdef MWHANDLING_GAME_IMPL
 	MWCarDataTuned(const std::string& model, Car* pCar) {
-		const char* tuningPath = pCar == pMyPlugin->car ? "plugins/player.tune" : "plugins/ai.tune";
+		const char* tuningPath = IsPlayerCar(pCar) ? "plugins/player.tune" : "plugins/ai.tune";
 		if (std::filesystem::exists(tuningPath)) {
 			float brakes = 0.0;
 			float chassis = 0.0;
@@ -733,8 +750,8 @@ public:
 		}
 		else {
 			Junkman junkman;
-			junkman.SetAll(bUpgradeJunkman);
-			float f = fUpgradeLevel;
+			junkman.SetAll(GetCarJunkman(pCar));
+			float f = GetCarUpgradeLevel(pCar);
 			*this = MWCarDataTuned(model, f, f, f, f, f, f, f, junkman);
 		}
 
@@ -770,6 +787,10 @@ public:
 Physics::Tunings PlayerCarTunings = {};
 Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 	if (veh == pMyPlugin->car) return &PlayerCarTunings;
+	return nullptr;
+}
+#else
+Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 	return nullptr;
 }
 #endif

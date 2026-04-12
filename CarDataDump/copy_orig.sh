@@ -32,6 +32,8 @@ cp orig_mw_full/gti.conf golf_mk5_stock.conf
 cp orig_mw_full/gti.conf golf_mk5_tuned.conf
 cp orig_mw_full/gti.conf vw_golf_v_gti.conf
 cp orig_mw_full/gti.conf kas_vw_golf_gti_mkv_2006.conf
+cp orig_mw_full/gti.conf golf_gti_mkvi_2010.conf
+cp orig_mw_full/gti.conf golf_mk6_track.conf
 cp orig_mw_full/viper.conf a3dr_viper_rt10.conf
 cp orig_mw_full/viper.conf ag_dodge_vipercc_08.conf
 cp orig_mw_full/viper.conf ag_viper_gts_13.conf
@@ -195,6 +197,7 @@ cp orig_mw_full/rx8.conf j8_honda_s2000_ap2.conf
 cp orig_mw_full/punto.conf 2017_suzuki_swift.conf
 cp orig_w_full/mx508.conf j8_suzuki_cappuccino_ea11r.conf
 cp orig_mw_full/is300.conf toyota_altezza_2004.conf
+cp orig_mw_full/is300.conf altezza_2004_ta.conf
 cp orig_mw_full/is300.conf j8_toyota_altezza_rs200_tuned.conf
 cp orig_cb_full/mr2.conf j8_toyota_mr2_sw20.conf
 cp orig_mw_full/db9.conf j8_aston_martin_db9_coupe_06.conf
@@ -205,3 +208,5 @@ cp orig_w_full/car1062_caterhamr500.conf bo_caterham_165_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_academy_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_s7_1700_ss_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_s7_1700_ss_clamshell.conf
+cp orig_w_full/car1022_cosworth.conf ks_ford_escort_mk1.conf
+cp orig_w_full/959.conf c13_porsche_959_87.conf

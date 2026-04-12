@@ -102,3 +102,15 @@ bool IsSupportedCSPInstalled() {
 bool IsUnsupportedCSPInstalled() {
 	return IsAnyCSPInstalled() && GetSupportedCSPBaseAddress() == 0;
 }
+
+bool IsPlayerCar(Car* car) {
+	return car == pMyPlugin->car;
+}
+
+float GetCarUpgradeLevel(Car* car) {
+	return fUpgradeLevel;
+}
+
+bool GetCarJunkman(Car* car) {
+	return bUpgradeJunkman;
+}
