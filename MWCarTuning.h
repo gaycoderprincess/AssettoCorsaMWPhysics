@@ -566,8 +566,16 @@ MWCarData* LoadCarTuningFromFile(std::string carName) {
 		}
 	}
 
+#ifdef MWHANDLING_NFS
+	// default to custom setups, then mw, then carbon, then world
+	auto fileName = std::format("CarDataDump/{}.conf", carName);
+	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_mw_full/{}.conf", carName); }
+	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_cb_full/{}.conf", carName); }
+	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_w_full/{}.conf", carName); }
+#else
 	auto fileName = std::format("plugins/CarDataDump/{}.conf", carName);
 	if (!std::filesystem::exists(fileName)) return nullptr;
+#endif
 
 	auto config = toml::parse_file(fileName);
 	aCarTunings.emplace_back(config, carName);
@@ -724,7 +732,11 @@ public:
 	}
 
 #ifdef MWHANDLING_GAME_IMPL
+#ifdef MWHANDLING_NFS
+	MWCarDataTuned(const std::string& model, IVehicle* pCar) {
+#else
 	MWCarDataTuned(const std::string& model, Car* pCar) {
+#endif
 		const char* tuningPath = IsPlayerCar(pCar) ? "plugins/player.tune" : "plugins/ai.tune";
 		if (std::filesystem::exists(tuningPath)) {
 			float brakes = 0.0;
@@ -755,6 +767,7 @@ public:
 			*this = MWCarDataTuned(model, f, f, f, f, f, f, f, junkman);
 		}
 
+#ifndef MWHANDLING_NFS
 		if (bMWWheelPositions) return;
 		if (!pCar) return;
 
@@ -779,6 +792,7 @@ public:
 		// todo this is inaccurate but required for some cars not to flip over really easily in AC
 		RIDE_HEIGHT.Front = 0.0;
 		RIDE_HEIGHT.Rear = 0.0;
+#endif
 	}
 #endif
 };
@@ -788,6 +802,10 @@ Physics::Tunings PlayerCarTunings = {};
 Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 	if (veh == pMyPlugin->car) return &PlayerCarTunings;
 	return nullptr;
+}
+#elif MWHANDLING_NFSMW
+const Physics::Tunings* GetVehicleMWTunings(IVehicle* veh) {
+	return veh->GetTunings();
 }
 #else
 Physics::Tunings* GetVehicleMWTunings(void* veh) {
