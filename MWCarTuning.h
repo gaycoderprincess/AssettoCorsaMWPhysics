@@ -581,7 +581,7 @@ MWCarData* LoadCarTuningFromFile(std::string carName) {
 #else
 	auto fileName = std::format("CarDataDump/{}.conf", carName);
 #endif
-	
+
 	if (!std::filesystem::exists(fileName)) return nullptr;
 
 	auto config = toml::parse_file(fileName);
@@ -628,7 +628,6 @@ UMath::Vector3 GetWheelBaseXZ(Car* car, int wheel) {
 float GetWheelBaseY(MWCarDataBase::Chassis* tuning, Car* car, int wheel) {
 	float y = 0.0;
 	y -= car->aTires[GetMWWheelID(wheel)].fRadius * 0.5;
-	y -= car->aTires[GetMWWheelID(wheel)].fRadius * 0.1;
 	y -= car->vCenterOfMass[1];
 	y += INCH2METERS(tuning->RIDE_HEIGHT.At(wheel / 2u));
 	y += fTireYPhysOffset;
