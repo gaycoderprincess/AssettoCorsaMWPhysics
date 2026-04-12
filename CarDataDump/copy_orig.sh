@@ -311,3 +311,7 @@ cp orig_w_full/custom_eclipsegt_light2_rwd.conf oneweek_hillman_imp.conf
 cp orig_w_full/custom_eclipsegt_light2_rwd.conf oneweek_hillman_imp_a1.conf
 cp orig_w_full/zonda.conf oneweek_nissan_np35.conf
 cp orig_mw_full/custom_yenko_stinger.conf oneweek_yenko_stinger.conf
+cp orig_w_full/is300.conf peugeot_504.conf
+cp orig_w_full/is300.conf peugeot_504_tn.conf
+cp orig_w_full/custom_lada_vesta.conf smp_lada_vesta_ng_touring.conf
+cp orig_mw_full/custom_tatuusfa1.conf tatuusfa1.conf
