@@ -560,6 +560,10 @@ struct MWCarData : public MWCarDataBase {
 std::vector<MWCarData> aCarTunings;
 
 MWCarData* LoadCarTuningFromFile(std::string carName) {
+#ifdef MWHANDLING_NFS
+	DLLDirSetter _setdir;
+#endif
+
 	if (carName.ends_with(".conf")) {
 		for (int i = 0; i < 5; i++) {
 			carName.pop_back();
@@ -572,10 +576,13 @@ MWCarData* LoadCarTuningFromFile(std::string carName) {
 	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_mw_full/{}.conf", carName); }
 	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_cb_full/{}.conf", carName); }
 	if (!std::filesystem::exists(fileName)) { fileName = std::format("CarDataDump/orig_w_full/{}.conf", carName); }
-#else
+#elif MWHANDLING_ASSETTO
 	auto fileName = std::format("plugins/CarDataDump/{}.conf", carName);
-	if (!std::filesystem::exists(fileName)) return nullptr;
+#else
+	auto fileName = std::format("CarDataDump/{}.conf", carName);
 #endif
+	
+	if (!std::filesystem::exists(fileName)) return nullptr;
 
 	auto config = toml::parse_file(fileName);
 	aCarTunings.emplace_back(config, carName);
