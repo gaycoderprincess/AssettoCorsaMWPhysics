@@ -803,6 +803,7 @@ public:
 #endif
 };
 
+#ifdef MWHANDLING_GAME_IMPL
 #ifdef MWHANDLING_ASSETTO
 Physics::Tunings PlayerCarTunings = {};
 Physics::Tunings* GetVehicleMWTunings(Car* veh) {
@@ -813,6 +814,11 @@ Physics::Tunings* GetVehicleMWTunings(Car* veh) {
 const Physics::Tunings* GetVehicleMWTunings(IVehicle* veh) {
 	return veh->GetTunings();
 }
+#else
+Physics::Tunings* GetVehicleMWTunings(void* veh) {
+	return nullptr;
+}
+#endif
 #else
 Physics::Tunings* GetVehicleMWTunings(void* veh) {
 	return nullptr;
