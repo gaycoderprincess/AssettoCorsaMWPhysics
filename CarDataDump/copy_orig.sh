@@ -59,6 +59,7 @@ cp orig_mw_full/sl500.conf mercedes_c63_amg_black_series.conf
 cp orig_mw_full/eclipsegt.conf tjl_mitsubishi_eclipse_gs-t.conf
 cp orig_cb_full/charger06.conf dodge_char_srt8.conf
 cp orig_mw_full/gallardo.conf ferrari_360_modena_1999.conf
+cp orig_mw_full/custom_gallardo_rwd.conf ferrari_360_challenge_stradale.conf
 cp orig_mw_full/corvettec6r.conf ferrari_599xxevo.conf
 cp orig_mw_full/corvettec6r.conf ks_ferrari_812_superfast.conf
 cp orig_mw_full/corvettec6r.conf ks_ferrari_fxx_k.conf
@@ -203,7 +204,7 @@ cp orig_mw_full/is300.conf altezza_2004_ta.conf
 cp orig_mw_full/is300.conf j8_toyota_altezza_rs200_tuned.conf
 cp orig_w_full/mr2.conf j8_toyota_mr2_sw20.conf
 cp orig_mw_full/db9.conf j8_aston_martin_db9_coupe_06.conf
-cp orig_mw_full/rx7.conf yk_rx7_fc3s_gt-x.conf
+cp orig_w_full/car1026_rx7.conf yk_rx7_fc3s_gt-x.conf
 cp orig_w_full/corolla.conf mby_honda_beat.conf
 cp orig_w_full/corolla.conf kl_honda_beat.conf
 cp orig_w_full/z06carbon.conf mby_chevy_c6_z06.conf
@@ -387,3 +388,16 @@ cp orig_w_full/mustangshlbyn.conf lm_ford_mustang_s197_stock.conf
 cp orig_w_full/is350.conf toyota_camry_xse_2019.conf
 cp orig_w_full/vantagev12.conf aston_martin_v12_2010.conf
 cp orig_w_full/rs4.conf bsk_audi_rs4_avant.conf
+cp orig_w_full/mazdaspeed3.conf bsk_mazda3_fastback.conf
+cp orig_w_full/focusrs10.conf bsk_toyota_gr_corolla_rz.conf
+cp orig_w_full/megane.conf ask_honda_jazz.conf
+cp orig_w_full/vantagev12.conf sl_aston_martin_v12_vantage_s.conf
+cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2.conf
+cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_cup.conf
+cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_s1.conf
+cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_super_cup.conf
+cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_ta.conf
+cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_ta_evo.conf
+cp orig_w_full/focusst.conf bm_ford_focus_rs2017.conf
+cp orig_w_full/car1046_delta.conf capri_rs3100.conf
+cp orig_w_full/car1046_delta.conf ag_ford_capri_rs3100.conf
