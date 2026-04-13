@@ -383,3 +383,7 @@ cp orig_mw_full/gto.conf pb_pontiac_gto_05.conf
 cp orig_mw_full/gto.conf pb_pontiac_gto_rmr_05.conf
 cp orig_mw_full/lancerevo8.conf pb_lanevo8_gsr_04.conf
 cp orig_mw_full/lancerevo8.conf pb_lanevo8_gsr_tnr_04.conf
+cp orig_w_full/mustangshlbyn.conf lm_ford_mustang_s197_stock.conf
+cp orig_w_full/is350.conf toyota_camry_xse_2019.conf
+cp orig_w_full/vantagev12.conf aston_martin_v12_2010.conf
+cp orig_w_full/rs4.conf bsk_audi_rs4_avant.conf
