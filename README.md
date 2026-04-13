@@ -5,6 +5,8 @@ Experiment for Assetto Corsa that converts the physics and handling model from N
 This mod was heavily based off of the work done in [Brawltendo's MW vehicles decompilation](https://github.com/Brawltendo/Most-Wanted-Vehicles-Decomp) and the cleanups and extensions of it done in [dbalatoni13's MW reverse engineering project](https://github.com/dbalatoni13/nfsmw).  
 I have recently discovered that the latter project uses AI, so while this mod was based off of their code, I do not endorse dbalatoni13's project.
 
+Recommended to be used with [my port of the game's HUD](https://github.com/gaycoderprincess/AssettoCorsaMWHUD) for a visible perfect launch indicator
+
 ## Installation
 
 - Make sure you have the latest Steam version of the game, as this is the only version this plugin is compatible with. (exe size of 22890776 bytes)
