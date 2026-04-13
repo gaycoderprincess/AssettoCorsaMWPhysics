@@ -8,7 +8,7 @@ cp orig_cb_full/darius.conf ks_audi_r8_plus.conf
 cp orig_mw_full/corvette.conf ks_corvette_c7.conf
 cp orig_mw_full/corvette.conf ks_corvette_c7_stingray.conf
 cp orig_mw_full/corvettec6r.conf ks_corvette_c7r.conf
-cp orig_mw_full/fordgt.conf ks_ford_gt40.conf
+cp orig_w_full/fordgt40.conf ks_ford_gt40.conf
 cp orig_mw_full/mustanggt.conf ks_ford_mustang_2015.conf
 cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl.conf
 cp orig_mw_full/gallardo.conf ks_lamborghini_gallardo_sl_s3.conf
@@ -206,6 +206,7 @@ cp orig_mw_full/rx7.conf yk_rx7_fc3s_gt-x.conf
 cp orig_w_full/corolla.conf mby_honda_beat.conf
 cp orig_w_full/corolla.conf kl_honda_beat.conf
 cp orig_w_full/z06carbon.conf mby_chevy_c6_z06.conf
+cp orig_w_full/z06carbon.conf corvette_z06_track.conf
 cp orig_mw_full/custom_elise_heavy.conf bo_caterham_165_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_academy_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_academy.conf
@@ -282,6 +283,7 @@ cp orig_w_full/car1040_911rsr74.conf ks_ktm_xbow_gt4.conf
 cp orig_w_full/custom_lotus_25.conf ks_lotus_25.conf
 cp orig_mw_full/elise.conf ks_lotus_3_eleven.conf
 cp orig_mw_full/elise.conf lotus_2_eleven.conf
+cp orig_mw_full/elise.conf lotus_2_eleven_gt4.conf
 cp orig_w_full/car1030_ccx.conf ks_lotus_72d.conf
 cp orig_mw_full/custom_maserati_250f.conf ks_maserati_250f_6cyl.conf
 cp orig_mw_full/custom_sl65_light.conf ks_maserati_alfieri.conf
@@ -324,3 +326,11 @@ cp orig_w_full/car1032_cavalier.conf "nix_toyota corolla_wagon_bz_touring.conf"
 cp orig_w_full/is300.conf fso_caro_gli.conf
 cp orig_w_full/is300.conf fso_caro_narrow_gli.conf
 cp orig_w_full/is300.conf fso_caro_rover.conf
+cp orig_w_full/isf.conf 2007_isf_lexus.conf
+cp orig_w_full/isf.conf lexus_is_f_track.conf
+cp orig_mw_full/cobaltss.conf che_cobalt_ss_2010.conf
+cp orig_mw_full/mustanggt.conf mustang_gt_2007.conf
+cp orig_mw_full/fordgt.conf ford_gt_2005.conf
+cp orig_w_full/s5.conf audi_s3_2008.conf
+cp orig_mw_full/tt.conf ms_audi_tt_1.8t.conf
+cp orig_mw_full/tt.conf hsrc_audi_tt32_ss.conf
