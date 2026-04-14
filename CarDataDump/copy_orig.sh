@@ -58,7 +58,7 @@ cp orig_mw_full/slr.conf mercedes_mclaren_slr.conf
 cp orig_mw_full/sl500.conf mercedes_c63_amg_black_series.conf
 cp orig_mw_full/eclipsegt.conf tjl_mitsubishi_eclipse_gs-t.conf
 cp orig_cb_full/charger06.conf dodge_char_srt8.conf
-cp orig_mw_full/gallardo.conf ferrari_360_modena_1999.conf
+cp orig_mw_full/custom_gallardo_rwd.conf ferrari_360_modena_1999.conf
 cp orig_mw_full/custom_gallardo_rwd.conf ferrari_360_challenge_stradale.conf
 cp orig_mw_full/corvettec6r.conf ferrari_599xxevo.conf
 cp orig_mw_full/corvettec6r.conf ks_ferrari_812_superfast.conf
