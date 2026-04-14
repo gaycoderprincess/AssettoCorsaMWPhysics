@@ -431,3 +431,10 @@ cp orig_w_full/custom_skyliner32_rwd.conf j8_er34_25gt_turbo.conf
 cp orig_w_full/skyliner32.conf m7_nissan_r33_1993_gts25t_typem.conf
 cp orig_w_full/skyliner35v.conf m7_nissan_r33_1995_gtr.conf
 cp orig_w_full/skyliner35v.conf m7_nissan_r33_1997_gtr_vspec.conf
+cp orig_w_full/camaro.conf chevrolet_camaro_ss_2002.conf
+cp orig_w_full/camarozl1.conf pb_camaro_con_06.conf
+cp orig_w_full/camarozl1.conf ixa_camaro_zl1.conf
+cp orig_w_full/gtimk1.conf ra_golf1.conf
+cp orig_w_full/gtimk1.conf j8_vw_golf_mk1_gti.conf
+cp orig_w_full/mustangshlbyo.conf j8_shelby_gt500_67.conf
+cp orig_mw_full/carreragt.conf as_porsche_carrera_gt.conf
