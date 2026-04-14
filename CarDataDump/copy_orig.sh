@@ -390,7 +390,7 @@ cp orig_w_full/vantagev12.conf aston_martin_v12_2010.conf
 cp orig_w_full/rs4.conf bsk_audi_rs4_avant.conf
 cp orig_w_full/mazdaspeed3.conf bsk_mazda3_fastback.conf
 cp orig_w_full/focusrs10.conf bsk_toyota_gr_corolla_rz.conf
-cp orig_w_full/megane.conf ask_honda_jazz.conf
+cp orig_w_full/custom_megane_fwd.conf ask_honda_jazz.conf
 cp orig_w_full/vantagev12.conf sl_aston_martin_v12_vantage_s.conf
 cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2.conf
 cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_cup.conf
@@ -401,3 +401,14 @@ cp orig_w_full/focusrs10.conf bfr_focus_rs_mk2_ta_evo.conf
 cp orig_w_full/focusst.conf bm_ford_focus_rs2017.conf
 cp orig_w_full/car1046_delta.conf capri_rs3100.conf
 cp orig_w_full/car1046_delta.conf ag_ford_capri_rs3100.conf
+cp orig_w_full/car1046_delta.conf vac_gt_capri_rs3100.conf
+cp orig_w_full/zonda.conf os_pagani_zonda_f.conf
+cp orig_w_full/car1004_zondacinque.conf pagani_zonda_cinque_r_HT.conf
+cp orig_mw_full/clio.conf renault_clio_v6.conf
+cp orig_mw_full/clio.conf renault__clio_v6_2001.conf
+cp orig_w_full/custom_megane_fwd.conf 2008_megane_rs.conf
+cp orig_w_full/meganers10.conf megane_rs_trophy_2012.conf
+cp orig_w_full/meganers10.conf rd_renault_megane_rs_18.conf
+cp orig_w_full/meganers10.conf rd_renault_trophy_r_18.conf
+cp orig_w_full/custom_cliov6_fwd.conf clio_220_edc_2016.conf
+cp orig_w_full/custom_rs1_light_fwd.conf twingo_rs_2009.conf
