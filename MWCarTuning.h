@@ -765,6 +765,10 @@ public:
 			file.read((char*)&junkman, sizeof(Junkman));
 
 			*this = MWCarDataTuned(model, brakes, chassis, engine, induction, nos, tires, transmission, junkman);
+
+			float weightReduction = 0.0;
+			file.read((char*)&weightReduction, sizeof(weightReduction));
+			MASS *= (1.0 - weightReduction);
 		}
 		else {
 			Junkman junkman;
