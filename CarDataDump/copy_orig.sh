@@ -20,7 +20,7 @@ cp orig_mw_full/997s.conf ks_porsche_991_carrera_s.conf
 cp orig_mw_full/911turbo.conf ks_porsche_991_turbo_s.conf
 cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_cup_2017.conf
 cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_r_2016.conf
-cp orig_mw_full/911gt2.conf ks_porsche_911_gt3_rs.conf
+cp orig_w_full/997gt3rs.conf ks_porsche_911_gt3_rs.conf
 cp orig_mw_full/997s.conf ks_porsche_911_r.conf
 cp orig_mw_full/supra.conf ks_toyota_supra_mkiv.conf
 cp orig_mw_full/supra.conf ks_toyota_supra_mkiv_drift.conf
@@ -72,6 +72,7 @@ cp orig_mw_full/carreragt.conf ks_ferrari_488_gt3.conf
 cp orig_mw_full/carreragt.conf ks_ferrari_488_gt3_2020.conf
 cp orig_mw_full/carreragt.conf ks_ferrari_488_gtb.conf
 cp orig_mw_full/cs_clio_trafpizza.conf trafpizza.conf
+cp orig_mw_full/cs_clio_trafpizza.conf gcp_trafpizza.conf
 cp orig_mw_full/cobaltss.conf pb_cobalt_ss_sc.conf
 cp orig_mw_full/cobaltss.conf pb_cobalt_ss_turbo.conf
 cp orig_mw_full/carreragt.conf ks_mclaren_570s.conf
@@ -160,8 +161,8 @@ cp orig_w_full/bmwm3e92.conf bmw_m3_e92.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_drift.conf
 cp orig_w_full/bmwm3e92.conf bmw_m3_e92_s1.conf
 cp orig_w_full/panamera10.conf ks_porsche_panamera.conf
-cp orig_w_full/panamera10.conf ks_porsche_cayenne.conf
-cp orig_w_full/panamera10.conf ks_porsche_macan.conf
+cp orig_w_full/custom_panamera10_heavy.conf ks_porsche_cayenne.conf
+cp orig_w_full/custom_panamera10_heavy.conf ks_porsche_macan.conf
 cp orig_w_full/mx508.conf ks_mazda_miata.conf
 cp orig_w_full/alfaromeo8c.conf ks_alfa_romeo_4c.conf
 cp orig_w_full/corolla.conf ks_toyota_ae86.conf
@@ -438,3 +439,10 @@ cp orig_w_full/gtimk1.conf ra_golf1.conf
 cp orig_w_full/gtimk1.conf j8_vw_golf_mk1_gti.conf
 cp orig_w_full/mustangshlbyo.conf j8_shelby_gt500_67.conf
 cp orig_mw_full/carreragt.conf as_porsche_carrera_gt.conf
+cp orig_w_full/lancerevox.conf evo_fe_2015.conf
+cp orig_w_full/lancerevo9.conf evo_9_2005.conf
+cp orig_mw_full/fordgt.conf ford_gt_lm_race_spec_ii.conf
+cp orig_mw_full/slr.conf freshka_33Iwry_slr.conf
+cp orig_mw_full/slr.conf tidy_mercedes_mclaren_slr.conf
+cp orig_w_full/r32.conf exmods_vw_beetle_rsi.conf
+cp orig_mw_full/bmwm3gtre46.conf gcp_bmwm3gtre46.conf
