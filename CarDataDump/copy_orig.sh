@@ -208,8 +208,8 @@ cp orig_mw_full/db9.conf j8_aston_martin_db9_coupe_06.conf
 cp orig_w_full/car1026_rx7.conf yk_rx7_fc3s_gt-x.conf
 cp orig_w_full/corolla.conf mby_honda_beat.conf
 cp orig_w_full/corolla.conf kl_honda_beat.conf
-cp orig_w_full/z06carbon.conf mby_chevy_c6_z06.conf
-cp orig_w_full/z06carbon.conf corvette_z06_track.conf
+cp orig_w_full/corvettez06.conf mby_chevy_c6_z06.conf
+cp orig_w_full/corvettez06.conf corvette_z06_track.conf
 cp orig_mw_full/custom_elise_heavy.conf bo_caterham_165_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_academy_rhd.conf
 cp orig_w_full/car1062_caterhamr500.conf bo_caterham_academy.conf
@@ -525,3 +525,8 @@ cp orig_mw_full/trailerlog.conf gcp_trailerlog.conf
 cp orig_mw_full/tt.conf gcp_tt.conf
 cp orig_mw_full/viper.conf gcp_viper.conf
 cp orig_mw_full/wrx_demo.conf gcp_wrx_demo.conf
+cp orig_w_full/custom_sciontc_awd.conf nix_daihatsu_storia_x4.conf
+cp orig_w_full/custom_sciontc_awd.conf nix_daihatsu_storia_x4_98.conf
+cp orig_w_full/custom_sciontc_awd.conf nix_daihatsu_storia_rally_car.conf
+cp orig_w_full/gtimk1.conf nix_daihatsu_mira_cocoa.conf
+cp orig_w_full/gallardo10vb.conf jw_chevrolet_c8_stingray_z51.conf
