@@ -530,3 +530,5 @@ cp orig_w_full/custom_sciontc_awd.conf nix_daihatsu_storia_x4_98.conf
 cp orig_w_full/custom_sciontc_awd.conf nix_daihatsu_storia_rally_car.conf
 cp orig_w_full/gtimk1.conf nix_daihatsu_mira_cocoa.conf
 cp orig_w_full/gallardo10vb.conf jw_chevrolet_c8_stingray_z51.conf
+cp orig_mw_full/is300.conf sub_legacyb4gt_05.conf
+cp orig_mw_full/punto.conf lm_toyota_yaris.conf
