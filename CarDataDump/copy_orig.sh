@@ -532,3 +532,6 @@ cp orig_w_full/gtimk1.conf nix_daihatsu_mira_cocoa.conf
 cp orig_w_full/gallardo10vb.conf jw_chevrolet_c8_stingray_z51.conf
 cp orig_mw_full/is300.conf sub_legacyb4gt_05.conf
 cp orig_mw_full/punto.conf lm_toyota_yaris.conf
+cp orig_w_full/custom_scirocco_rwd.conf daihatsu_midget_dtype.conf
+cp orig_w_full/imprezawrxsti.conf fly_iku_subaru_22b.conf
+cp orig_w_full/gtimk1.conf daihatsu_copen.conf

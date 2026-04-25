@@ -387,6 +387,38 @@ void SpeedbreakerLoop() {
 	}
 }
 
+void ReadAIControls(const std::string& filename, AIDriver* ai) {
+	if (!std::filesystem::exists(filename)) return;
+
+	try {
+		auto config = toml::parse_file(filename);
+	}
+	catch (const toml::parse_error& err) {
+		MessageBoxA(nullptr, std::format("Failed to parse {}: {}", filename, err.what()).c_str(), "nya?!~", MB_ICONERROR);
+		return;
+	}
+
+	auto file = toml::parse_file(filename);
+
+	ai->aeroHint = file["PHYSICS_HINTS"]["AERO_HINT"].value_or(ai->aeroHint);
+	ai->brakeHintBase = file["PEDALS"]["BRAKE_HINT"].value_or(ai->brakeHintBase);
+	ai->changeDnPerc = file["GEARS"]["DOWN"].value_or(ai->changeDnPerc / 0.01) * 0.01;
+	ai->changeUpRPM = file["GEARS"]["UP"].value_or(ai->changeUpRPM);
+	ai->gasBrakeLookahead = file["LOOKAHEAD"]["GAS_BRAKE_LOOKAHEAD"].value_or(ai->gasBrakeLookahead);
+	ai->steerGain = file["STEER"]["STEER_GAIN"].value_or(ai->steerGain);
+	ai->steerMinLookahead = file["LOOKAHEAD"]["BASE"].value_or(ai->steerMinLookahead);
+	ai->tyresHint = file["TYRES"]["HINT"].value_or(ai->tyresHint);
+	ai->ultraGrip = file["ULTRA_GRIP"]["VALUE"].value_or(ai->ultraGrip);
+	ai->understeerHint = file["UNDERSTEER"]["HINT"].value_or(ai->understeerHint);
+	if (ai->brakeHintBase == 0.0) {
+		ai->brakeHintBase = 1.0;
+	}
+	ai->brakeHintLive = ai->brakeHintBase; // todo is this required
+	ai->turbo.active = false;
+
+	ai->oversteerTCMult = file["CUSTOM"]["OVERSTEER_TC_MULT"].value_or(ai->oversteerTCMult);
+}
+
 std::mutex mCarUpdateMutex;
 void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	if (pMyPlugin->sim->physicsAvatar->isPaused) return;
@@ -404,10 +436,21 @@ void __fastcall MWCarUpdate(Car* pCar, float dT) {
 	//	WriteLog(std::format("{:X}", (uintptr_t)f));
 	//}
 	//else if (!IsAnyCSPInstalled()) {
-
 	if (!IsAnyCSPInstalled()) {
 		pMyPlugin->sim->physicsAvatar->engine.core->id->dWorldSetGravity(0.0, gameGravity, 0.0);
 		gravitySet = true;
+	}
+
+	if (!strcmp(pCar->controlsProvider->getName(), "A.I.")) {
+		auto filename = std::format("plugins/MostWantedAI/{}.toml", GetStringNarrow(pMyPlugin->carAvatar->unixName.c_str()));
+
+		static double fTimer = 0;
+		fTimer += dT;
+		if (fTimer >= 0.5) {
+			ReadAIControls("plugins/MostWantedAI/global.toml", (AIDriver*)pCar->controlsProvider);
+			ReadAIControls(filename, (AIDriver*)pCar->controlsProvider);
+			fTimer -= 0.5;
+		}
 	}
 
 	EngineRacer* pEngine = GetCarMWEngine(pCar);
