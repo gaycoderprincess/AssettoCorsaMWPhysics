@@ -2,6 +2,7 @@
 #include <format>
 #include <codecvt>
 #include <filesystem>
+#include <mutex>
 #include "toml++/toml.hpp"
 #include "nya_commonhooklib.h"
 
